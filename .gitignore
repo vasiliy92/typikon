@@ -2,17 +2,28 @@
 __pycache__/
 *.py[cod]
 *$py.class
+*.so
 *.egg-info/
-*.egg
 dist/
 build/
 .eggs/
-*.whl
+*.egg
 
 # Virtual environments
 venv/
 .venv/
 env/
+
+# Node.js
+node_modules/
+.next/
+out/
+.npm
+
+# Environment
+.env
+.env.local
+.env.*.local
 
 # IDE
 .vscode/
@@ -21,31 +32,25 @@ env/
 *.swo
 *~
 
-# Environment
-.env
-.env.local
-.env.production
-
 # OS
 .DS_Store
 Thumbs.db
 
-# Node
-node_modules/
-.next/
-out/
-frontend/.next/
-
 # Docker
-*.log
+pgdata/
 
-# Test
+# Logs
+*.log
+npm-debug.log*
+
+# Testing
 .coverage
 htmlcov/
 .pytest_cache/
 
-# Alembic
-backend/alembic/versions/__pycache__/
+# Alembic (keep versions, ignore temp)
+*.pyc
 
-# Uploads
-uploads/
+# Build artifacts
+frontend/.next/
+frontend/out/
