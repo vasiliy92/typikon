@@ -36,10 +36,10 @@ services:
       retries: 5
 
   backend:
-    image: ${DOCKER_REGISTRY:-typikon}/typikon-backend:${TAG:-latest}
     build:
       context: ./backend
       dockerfile: Dockerfile
+    image: typikon-backend:${TAG:-latest}
     restart: unless-stopped
     environment:
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-typikon}:${POSTGRES_PASSWORD:-typikon_dev}@${POSTGRES_HOST:-postgres}:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-typikon}
@@ -56,10 +56,10 @@ services:
       - typikon-net
 
   frontend:
-    image: ${DOCKER_REGISTRY:-typikon}/typikon-frontend:${TAG:-latest}
     build:
       context: ./frontend
       dockerfile: Dockerfile
+    image: typikon-frontend:${TAG:-latest}
     restart: unless-stopped
     environment:
       NEXT_PUBLIC_API_URL: ""
@@ -67,10 +67,10 @@ services:
       - typikon-net
 
   nginx:
-    image: ${DOCKER_REGISTRY:-typikon}/typikon-nginx:${TAG:-latest}
     build:
       context: ./nginx
       dockerfile: Dockerfile
+    image: typikon-nginx:${TAG:-latest}
     restart: unless-stopped
     depends_on:
       - backend
@@ -80,7 +80,7 @@ services:
       - proxy
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.typikon.rule=Host(`${TRAEFIK_DOMAIN:-typikon.localhost}`)"
+      - "traefik.http.routers.typikon.rule=Host(`${DOMAIN:-typikon.localhost}`)"
       - "traefik.http.routers.typikon.entrypoints=${TRAEFIK_ENTRYPOINT:-web}"
       - "traefik.http.services.typikon.loadbalancer.server.port=80"
 
