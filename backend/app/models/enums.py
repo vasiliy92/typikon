@@ -40,6 +40,7 @@ class Language(StrEnum):
     CSY = "csy"
     FR = "fr"
     EN = "en"
+    RU = "ru"
 
 
 class CalendarMode(StrEnum):
@@ -100,33 +101,33 @@ class SaintCategory(StrEnum):
 # ── Bilingual book metadata ──
 
 BOOK_NAMES: dict[BookCode, dict[str, str]] = {
-    BookCode.GOSPEL: {"csy": "Еѵангелїе", "fr": "Évangile", "en": "Gospel"},
-    BookCode.APOSTOL: {"csy": "А҆пⷭ҇лъ", "fr": "Apôtre", "en": "Apostol"},
-    BookCode.PSALTER: {"csy": "Псалти́рь", "fr": "Psauttier", "en": "Psalter"},
-    BookCode.LITURGICON: {"csy": "Слꙋже́бникъ", "fr": "Liturgicon", "en": "Liturgicon"},
-    BookCode.HOROLOGION: {"csy": "Часослѡ́въ", "fr": "Horologion", "en": "Horologion"},
-    BookCode.OCTOECHOS: {"csy": "Октѡ́ихъ", "fr": "Octoéchos", "en": "Octoechos"},
-    BookCode.MENAION_MONTHLY: {"csy": "Мине́ѧ мѣсѧ́чнаѧ", "fr": "Ménée mensuelle", "en": "Monthly Menaion"},
-    BookCode.MENAION_FESTAL: {"csy": "Мине́ѧ пра́здничнаѧ", "fr": "Ménée festive", "en": "Festal Menaion"},
-    BookCode.MENAION_GENERAL: {"csy": "Мине́ѧ ѡ҆́бщаѧ", "fr": "Ménée générale", "en": "General Menaion"},
-    BookCode.TRIODION: {"csy": "Трїѡ́дь постна́ѧ", "fr": "Triode de Carême", "en": "Lenten Triodion"},
-    BookCode.PENTECOSTARION: {"csy": "Трїѡ́дь цвѣ́тнаѧ", "fr": "Triode fleurie", "en": "Pentecostarion"},
-    BookCode.IRMOLOGION: {"csy": "Ірмологі́й", "fr": "Irmologion", "en": "Irmologion"},
-    BookCode.TYPIKON: {"csy": "Тѵпикѡ́нъ", "fr": "Typikon", "en": "Typikon"},
-    BookCode.EUCHOLOGION: {"csy": "Тре́бникъ", "fr": "Euchologion", "en": "Euchologion"},
-    BookCode.HIERATICON: {"csy": "Архїере́йскїй чино́вникъ", "fr": "Hiératikon", "en": "Hieraticon"},
-    BookCode.PROLOGUE: {"csy": "Проло́гъ", "fr": "Prologue", "en": "Prologue"},
-    BookCode.TROPARION: {"csy": "Тропа́рїонъ", "fr": "Troparion", "en": "Troparion"},
+    BookCode.GOSPEL: {"csy": "Еѵангелїе", "fr": "Évangile", "en": "Gospel", "ru": "Евангелие"},
+    BookCode.APOSTOL: {"csy": "А҆пⷭ҇лъ", "fr": "Apôtre", "en": "Apostol", "ru": "Апостол"},
+    BookCode.PSALTER: {"csy": "Псалти́рь", "fr": "Psauttier", "en": "Psalter", "ru": "Псалтирь"},
+    BookCode.LITURGICON: {"csy": "Слꙋже́бникъ", "fr": "Liturgicon", "en": "Liturgicon", "ru": "Служебник"},
+    BookCode.HOROLOGION: {"csy": "Часослѡ́въ", "fr": "Horologion", "en": "Horologion", "ru": "Часослов"},
+    BookCode.OCTOECHOS: {"csy": "Октѡ́ихъ", "fr": "Octoéchos", "en": "Octoechos", "ru": "Октоих"},
+    BookCode.MENAION_MONTHLY: {"csy": "Мине́ѧ мѣсѧ́чнаѧ", "fr": "Ménée mensuelle", "en": "Monthly Menaion", "ru": "Минея месячная"},
+    BookCode.MENAION_FESTAL: {"csy": "Мине́ѧ пра́здничнаѧ", "fr": "Ménée festive", "en": "Festal Menaion", "ru": "Минея праздничная"},
+    BookCode.MENAION_GENERAL: {"csy": "Мине́ѧ ѡ҆́бщаѧ", "fr": "Ménée générale", "en": "General Menaion", "ru": "Минея общая"},
+    BookCode.TRIODION: {"csy": "Трїѡ́дь постна́ѧ", "fr": "Triode de Carême", "en": "Lenten Triodion", "ru": "Триодь постная"},
+    BookCode.PENTECOSTARION: {"csy": "Трїѡ́дь цвѣ́тнаѧ", "fr": "Triode fleurie", "en": "Pentecostarion", "ru": "Триодь цветная"},
+    BookCode.IRMOLOGION: {"csy": "Ірмологі́й", "fr": "Irmologion", "en": "Irmologion", "ru": "Ирмологий"},
+    BookCode.TYPIKON: {"csy": "Тѵпикѡ́нъ", "fr": "Typikon", "en": "Typikon", "ru": "Типикон"},
+    BookCode.EUCHOLOGION: {"csy": "Тре́бникъ", "fr": "Euchologion", "en": "Euchologion", "ru": "Требник"},
+    BookCode.HIERATICON: {"csy": "Архїере́йскїй чино́вникъ", "fr": "Hiératikon", "en": "Hieraticon", "ru": "Архиерейский чиновник"},
+    BookCode.PROLOGUE: {"csy": "Проло́гъ", "fr": "Prologue", "en": "Prologue", "ru": "Пролог"},
+    BookCode.TROPARION: {"csy": "Тропа́рїонъ", "fr": "Troparion", "en": "Troparion", "ru": "Тропарион"},
 }
 
 SERVICE_NAMES: dict[ServiceType, dict[str, str]] = {
-    ServiceType.VESPERS: {"csy": "Вече́рнѧ", "fr": "Vêpres", "en": "Vespers"},
-    ServiceType.MATINS: {"csy": "Ѹ́тренѧ", "fr": "Matines", "en": "Matins"},
-    ServiceType.VIGIL: {"csy": "Всено́щное бдѣ́нїе", "fr": "Vigile nocturne", "en": "All-Night Vigil"},
-    ServiceType.HOURS: {"csy": "Часы́", "fr": "Heures", "en": "Hours"},
-    ServiceType.LITURGY: {"csy": "Літургі́ѧ", "fr": "Liturgie", "en": "Liturgy"},
-    ServiceType.COMPLINE: {"csy": "Повече́рїе", "fr": "Complies", "en": "Compline"},
-    ServiceType.MIDNIGHT: {"csy": "Полꙋно́щница", "fr": "Office de minuit", "en": "Midnight Office"},
-    ServiceType.TYPICA: {"csy": "Тѵпика́льны", "fr": "Typika", "en": "Typika"},
-    ServiceType.PRESANCTIFIED: {"csy": "Літургі́ѧ преждеосвѧще́нныхъ", "fr": "Liturgie des Saints Dons présanctifiés", "en": "Presanctified Liturgy"},
+    ServiceType.VESPERS: {"csy": "Вече́рнѧ", "fr": "Vêpres", "en": "Vespers", "ru": "Вечерня"},
+    ServiceType.MATINS: {"csy": "Ѹ́тренѧ", "fr": "Matines", "en": "Matins", "ru": "Утреня"},
+    ServiceType.VIGIL: {"csy": "Всено́щное бдѣ́нїе", "fr": "Vigile nocturne", "en": "All-Night Vigil", "ru": "Всенощное бдение"},
+    ServiceType.HOURS: {"csy": "Часы́", "fr": "Heures", "en": "Hours", "ru": "Часы"},
+    ServiceType.LITURGY: {"csy": "Літургі́ѧ", "fr": "Liturgie", "en": "Liturgy", "ru": "Литургия"},
+    ServiceType.COMPLINE: {"csy": "Повече́рїе", "fr": "Complies", "en": "Compline", "ru": "Повечерие"},
+    ServiceType.MIDNIGHT: {"csy": "Полꙋно́щница", "fr": "Office de minuit", "en": "Midnight Office", "ru": "Полунощница"},
+    ServiceType.TYPICA: {"csy": "Тѵпика́льны", "fr": "Typika", "en": "Typica", "ru": "Типика"},
+    ServiceType.PRESANCTIFIED: {"csy": "Літургі́ѧ преждеосвѧще́нныхъ", "fr": "Liturgie des Saints Dons présanctifiés", "en": "Presanctified Liturgy", "ru": "Литургия преждеосвящённых Даров"},
 }
