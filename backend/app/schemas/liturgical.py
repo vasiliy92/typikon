@@ -7,6 +7,8 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict
 
 
+# ── ServiceBlock ──────────────────────────────────────────────────────
+
 class ServiceBlockCreate(BaseModel):
     book_code: str
     location_key: str
@@ -67,6 +69,8 @@ class ServiceBlockResponse(BaseModel):
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 
+
+# ── ServiceTemplate ───────────────────────────────────────────────────
 
 class TemplateBlockCreate(BaseModel):
     block_order: int
@@ -129,6 +133,8 @@ class TemplateResponse(BaseModel):
     updated_at: Optional[datetime] = None
 
 
+# ── Lection ───────────────────────────────────────────────────────────
+
 class LectionCreate(BaseModel):
     book_code: str
     zachalo: int
@@ -158,13 +164,16 @@ class LectionResponse(BaseModel):
     updated_at: Optional[datetime] = None
 
 
-class ImportResult(BaseModel):
-    status: str
-    created: int = 0
-    updated: int = 0
-    skipped: int = 0
-    errors: list[str] = []
+# ── Import ────────────────────────────────────────────────────────────
 
+class ImportResult(BaseModel):
+    status: str = "ok"
+    total_created: int = 0
+    total_errors: int = 0
+    details: dict[str, dict] = {}
+
+
+# ── Book info ─────────────────────────────────────────────────────────
 
 class BookInfo(BaseModel):
     code: str

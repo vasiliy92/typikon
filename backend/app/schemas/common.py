@@ -18,16 +18,16 @@ class PaginatedResponse(BaseModel, Generic[T]):
     items: list[T]
     total: int
     page: int
-    size: int
+    page_size: int
     pages: int
 
     @classmethod
-    def create(cls, items: list[T], total: int, page: int, size: int) -> "PaginatedResponse[T]":
-        return cls(items=items, total=total, page=page, size=size, pages=(total + size - 1) // size)
+    def create(cls, items: list[T], total: int, page: int, page_size: int) -> "PaginatedResponse[T]":
+        return cls(items=items, total=total, page=page, page_size=page_size, pages=(total + page_size - 1) // page_size)
 
 
 class MessageResponse(BaseModel):
-    status: str
+    status: str = "ok"
     message: Optional[str] = None
     id: Optional[int] = None
 

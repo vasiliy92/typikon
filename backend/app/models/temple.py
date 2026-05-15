@@ -18,10 +18,14 @@ class Temple(Base, TimestampMixin):
     dedication_type: Mapped[DedicationType] = mapped_column(String(20))
     patron_feast_month: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, default=None)
     patron_feast_day: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, default=None)
+    patronsaint_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("saints.id", ondelete="SET NULL"),
+        nullable=True, default=None,
+    )
     calendar_mode: Mapped[CalendarMode] = mapped_column(String(20), default=CalendarMode.NEO_JULIAN)
     language: Mapped[Language] = mapped_column(String(5), default=Language.CSY)
 
-    side_chapels: Mapped[list["SideChapel"]] = relationship(back_populates="temple", init=False)
+    side_chapels: Mapped[list["SideChapel"]] = relationship(back_populates="temple")
 
 
 class SideChapel(Base, TimestampMixin):
@@ -34,4 +38,4 @@ class SideChapel(Base, TimestampMixin):
     patron_feast_month: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, default=None)
     patron_feast_day: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, default=None)
 
-    temple: Mapped["Temple"] = relationship(back_populates="side_chapels", init=False)
+    temple: Mapped["Temple"] = relationship(back_populates="side_chapels")
