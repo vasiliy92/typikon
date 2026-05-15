@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useI18n } from '../[locale]/layout';
+import { useI18n } from '@/lib/i18n';
 import { useApi, apiPost, apiPut, apiDelete, refreshApi, PaginatedResponse, ServiceBlockResponse } from '@/lib/api';
 import { Plus, Pencil, Trash2, X, Check } from 'lucide-react';
 
@@ -91,6 +91,7 @@ export default function AdminBlocks() {
           <option value="">{t.admin.filter_language}</option>
           <option value="csy">Церковнославѧ́нскїй</option>
           <option value="fr">Français</option>
+          <option value="ru">Русский</option>
           <option value="en">English</option>
         </select>
         <button onClick={() => setCreating(true)} className="btn-primary inline-flex items-center gap-1 text-sm">
@@ -113,6 +114,7 @@ export default function AdminBlocks() {
             <select name="language" className="input-field">
               <option value="csy">CSY</option>
               <option value="fr">FR</option>
+              <option value="ru">RU</option>
               <option value="en">EN</option>
             </select>
             <input name="tone" placeholder="tone" className="input-field" />

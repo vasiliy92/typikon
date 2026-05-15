@@ -1,7 +1,7 @@
-'use client';
+{'use client';
 
 import { useState } from 'react';
-import { useI18n } from '../[locale]/layout';
+import { useI18n } from '@/lib/i18n';
 import { useApi, apiPost, apiPut, apiDelete, refreshApi, PaginatedResponse, CalendarEntryResponse } from '@/lib/api';
 import { Plus, Pencil, Trash2, X, Check } from 'lucide-react';
 
@@ -102,7 +102,7 @@ export default function AdminCalendar() {
             <input name="tone" type="number" min="1" max="8" placeholder="Tone" className="input-field" />
             <select name="fasting" className="input-field">
               {Object.entries(t.fasting_types).map(([k, v]) => (
-                <option key={k} value={k}>{v}</option>
+                <option key="k" value={k}>{v}</option>
               ))}
             </select>
           </div>

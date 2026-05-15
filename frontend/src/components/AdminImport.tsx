@@ -1,7 +1,7 @@
-'use client';
+{'use client';
 
 import { useState, useRef } from 'react';
-import { useI18n } from '../[locale]/layout';
+import { useI18n } from '@/lib/i18n';
 import { apiPost, refreshApi } from '@/lib/api';
 import { Upload, FileJson, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 

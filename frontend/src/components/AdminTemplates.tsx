@@ -1,7 +1,7 @@
-'use client';
+{'use client';
 
 import { useState } from 'react';
-import { useI18n } from '../[locale]/layout';
+import { useI18n } from '@/lib/i18n';
 import { useApi, apiPost, apiPut, apiDelete, refreshApi, PaginatedResponse, ServiceTemplateResponse } from '@/lib/api';
 import { Plus, Pencil, Trash2, X, Check, ChevronDown, ChevronRight } from 'lucide-react';
 
