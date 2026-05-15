@@ -23,29 +23,35 @@ pipeline {
             parallel {
                 stage('Backend') {
                     steps {
-                        sh "docker build -t ${REGISTRY}/${IMAGE_PREFIX}-backend:${TAG} ./backend"
+                        sh "docker build -t ${IMAGE_PREFIX}/typikon-backend:${TAG} -t ${IMAGE_PREFIX}/typikon-backend:latest ./backend"
                     }
                 }
                 stage('Frontend') {
                     steps {
-                        sh "docker build -t ${REGISTRY}/${IMAGE_PREFIX}-frontend:${TAG} ./frontend"
+                        sh "docker build -t ${IMAGE_PREFIX}/typikon-frontend:${TAG} -t ${IMAGE_PREFIX}/typikon-frontend:latest ./frontend"
                     }
                 }
                 stage('Nginx') {
                     steps {
-                        sh "docker build -t ${REGISTRY}/${IMAGE_PREFIX}-nginx:${TAG} ./nginx"
+                        sh "docker build -t ${IMAGE_PREFIX}/typikon-nginx:${TAG} -t ${IMAGE_PREFIX}/typikon-nginx:latest ./nginx"
                     }
                 }
             }
         }
 
         stage('Push Images') {
+            when {
+                expression { env.REGISTRY != null && env.REGISTRY != '' }
+            }
             steps {
                 withDockerRegistry([credentialsId: 'docker-registry', url: "https://${REGISTRY}"]) {
                     sh '''
-                        docker push ${REGISTRY}/${IMAGE_PREFIX}-backend:${TAG}
-                        docker push ${REGISTRY}/${IMAGE_PREFIX}-frontend:${TAG}
-                        docker push ${REGISTRY}/${IMAGE_PREFIX}-nginx:${TAG}
+                        docker push ${REGISTRY}/${IMAGE_PREFIX}/typikon-backend:${TAG} || true
+                        docker push ${REGISTRY}/${IMAGE_PREFIX}/typikon-backend:latest || true
+                        docker push ${REGISTRY}/${IMAGE_PREFIX}/typikon-frontend:${TAG} || true
+                        docker push ${REGISTRY}/${IMAGE_PREFIX}/typikon-frontend:latest || true
+                        docker push ${REGISTRY}/${IMAGE_PREFIX}/typikon-nginx:${TAG} || true
+                        docker push ${REGISTRY}/${IMAGE_PREFIX}/typikon-nginx:latest || true
                     '''
                 }
             }
@@ -55,9 +61,13 @@ pipeline {
             steps {
                 sh '''
                     cd /opt/typikon
+                    export DOCKER_REGISTRY=${REGISTRY}/${IMAGE_PREFIX}
                     export TAG=${TAG}
-                    docker compose pull
+                    docker compose pull 2>/dev/null || true
                     docker compose up -d --remove-orphans
+                    echo "Waiting for services to become healthy..."
+                    sleep 10
+                    docker compose ps
                 '''
             }
         }

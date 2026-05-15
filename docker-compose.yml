@@ -1,4 +1,4 @@
-version: "3.9"
+name: typikon
 
 networks:
   typikon-net:
@@ -36,6 +36,7 @@ services:
       retries: 5
 
   backend:
+    image: ${DOCKER_REGISTRY:-typikon}/typikon-backend:${TAG:-latest}
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -45,6 +46,7 @@ services:
       REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
       ADMIN_API_KEY: ${ADMIN_API_KEY:-change-me-in-production}
       LOG_LEVEL: ${LOG_LEVEL:-info}
+      CORS_ORIGINS: ${CORS_ORIGINS:-*}
     depends_on:
       postgres:
         condition: service_healthy
@@ -54,14 +56,18 @@ services:
       - typikon-net
 
   frontend:
+    image: ${DOCKER_REGISTRY:-typikon}/typikon-frontend:${TAG:-latest}
     build:
       context: ./frontend
       dockerfile: Dockerfile
     restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_URL: ""
     networks:
       - typikon-net
 
   nginx:
+    image: ${DOCKER_REGISTRY:-typikon}/typikon-nginx:${TAG:-latest}
     build:
       context: ./nginx
       dockerfile: Dockerfile
