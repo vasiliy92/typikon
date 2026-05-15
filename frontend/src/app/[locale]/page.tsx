@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { useI18n } from './layout';
+import { useI18n } from '@/lib/i18n';
 import { apiPost, AssembledServiceResponse, LiturgicalDay, useApi } from '@/lib/api';
 import { Calendar, ChevronDown, BookOpen, Loader2, Cross, Clock, Music } from 'lucide-react';
 import clsx from 'clsx';

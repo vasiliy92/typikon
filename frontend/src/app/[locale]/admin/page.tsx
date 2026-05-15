@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useI18n } from './layout';
+import { useI18n } from '@/lib/i18n';
 import { BookOpen, Calendar, Users, FileText, Upload } from 'lucide-react';
 import clsx from 'clsx';
 import AdminBlocks from '@/components/AdminBlocks';

@@ -1,26 +1,16 @@
 'use client';
 
-import { useState, useEffect, createContext, useContext } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import clsx from 'clsx';
-import { Calendar, BookOpen, Settings, Moon, Sun, Church } from 'lucide-react';
+import { Settings, Moon, Sun, Church } from 'lucide-react';
 import { Locale, localeNames, locales } from '@/i18n/config';
 import fr from '@/i18n/messages/fr.json';
 import csy from '@/i18n/messages/csy.json';
+import { I18nProvider, type Messages } from '@/lib/i18n';
 
-const messages: Record<Locale, typeof fr> = { fr, csy };
-
-type Messages = typeof fr;
-
-const I18nContext = createContext<{ locale: Locale; t: Messages }>({
-  locale: 'fr',
-  t: fr,
-});
-
-export function useI18n() {
-  return useContext(I18nContext);
-}
+const messages: Record<Locale, Messages> = { fr, csy };
 
 export default function LocaleLayout({
   children,
@@ -58,7 +48,7 @@ export default function LocaleLayout({
   ];
 
   return (
-    <I18nContext.Provider value={{ locale: currentLocale, t }}>
+    <I18nProvider value={{ locale: currentLocale, t }}>
       <div className="min-h-screen" style={{ background: 'var(--background)' }}>
         {/* Header */}
         <header className="sticky top-0 z-50 backdrop-blur-md border-b" style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
@@ -152,6 +142,6 @@ export default function LocaleLayout({
           })}
         </nav>
       </div>
-    </I18nContext.Provider>
+    </I18nProvider>
   );
 }
