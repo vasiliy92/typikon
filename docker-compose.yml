@@ -78,11 +78,6 @@ services:
     networks:
       - typikon-net
       - proxy
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.typikon.rule=Host(`${DOMAIN:-typikon.localhost}`)"
-      - "traefik.http.routers.typikon.entrypoints=${TRAEFIK_ENTRYPOINT:-web}"
-      - "traefik.http.services.typikon.loadbalancer.server.port=80"
 
 volumes:
   pgdata:

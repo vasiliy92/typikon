@@ -1,0 +1,15 @@
+http:
+  routers:
+    typikon:
+      rule: "Host(`typikon.krasobas.com`)"
+      entryPoints:
+        - websecure
+      tls:
+        certResolver: letsencrypt
+      service: typikon
+
+  services:
+    typikon:
+      loadBalancer:
+        servers:
+          - url: "http://typikon-nginx-1:80"
