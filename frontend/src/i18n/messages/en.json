@@ -165,7 +165,8 @@
       "password": "Password",
       "role": "Role",
       "is_active": "Active",
-      "saint": "Saint"
+      "saint": "Saint",
+      "template": "Template"
     },
     "date_types": {
       "fixed": "Fixed",
@@ -184,7 +185,8 @@
     "total_saints": "Total Saints",
     "total_templates": "Total Templates",
     "total_calendar": "Calendar Entries",
-    "all_saints": "All saints"
+    "all_saints": "All saints",
+    "all_templates": "All templates"
   },
   "auth": {
     "login": "Login",
