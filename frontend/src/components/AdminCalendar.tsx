@@ -103,7 +103,7 @@ export function AdminCalendar() {
             onClick={() => setPage(Math.max(1, page - 1))}
             disabled={page <= 1}
             className="px-3 py-1 rounded text-sm disabled:opacity-30"
-            style={{ background: 'var(--muted)', color: 'var(--foreground)' }}
+            style={{ background: 'var(--muted-bg)', color: 'var(--foreground)' }}
           >
             ←
           </button>
@@ -114,7 +114,7 @@ export function AdminCalendar() {
             onClick={() => setPage(Math.min(pages, page + 1))}
             disabled={page >= pages}
             className="px-3 py-1 rounded text-sm disabled:opacity-30"
-            style={{ background: 'var(--muted)', color: 'var(--foreground)' }}
+            style={{ background: 'var(--muted-bg)', color: 'var(--foreground)' }}
           >
             →
           </button>

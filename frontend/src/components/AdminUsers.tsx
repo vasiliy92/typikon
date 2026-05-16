@@ -86,14 +86,14 @@ export function AdminUsers() {
             onClick={loadUsers}
             disabled={loading}
             className="px-3 py-1.5 text-sm rounded-lg transition-colors"
-            style={{ background: 'var(--muted)', color: 'var(--muted-foreground)' }}
+            style={{ background: 'var(--muted-bg)', color: 'var(--muted-foreground)' }}
           >
             {loading ? t.common.loading : t.admin.search}
           </button>
           <button
             onClick={() => setShowCreate(true)}
-            className="px-3 py-1.5 text-sm rounded-lg text-white transition-colors"
-            style={{ background: 'var(--primary)' }}
+            className="px-3 py-1.5 text-sm rounded-lg transition-colors"
+            style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}
           >
             {t.admin.create_user}
           </button>
@@ -101,7 +101,7 @@ export function AdminUsers() {
       </div>
 
       {showCreate && (
-        <div className="mb-4 p-4 rounded-lg" style={{ background: 'var(--muted)' }}>
+        <div className="mb-4 p-4 rounded-lg" style={{ background: 'var(--muted-bg)' }}>
           {error && (
             <div className="mb-3 text-sm" style={{ color: 'var(--destructive)' }}>{error}</div>
           )}
@@ -142,15 +142,15 @@ export function AdminUsers() {
               </select>
               <button
                 onClick={createUser}
-                className="px-3 py-2 text-white text-sm rounded-lg"
-                style={{ background: 'var(--primary)' }}
+                className="px-3 py-2 text-sm rounded-lg"
+                style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}
               >
                 {t.admin.save}
               </button>
               <button
                 onClick={() => { setShowCreate(false); setError(''); }}
                 className="px-3 py-2 text-sm rounded-lg"
-                style={{ background: 'var(--muted)', color: 'var(--muted-foreground)' }}
+                style={{ background: 'var(--muted-bg)', color: 'var(--muted-foreground)' }}
               >
                 {t.admin.cancel}
               </button>
@@ -178,7 +178,7 @@ export function AdminUsers() {
                   <span
                     className="px-2 py-0.5 rounded text-xs font-medium"
                     style={{
-                      background: u.role === 'superadmin' ? 'var(--primary)/15' : 'var(--muted)',
+                      background: u.role === 'superadmin' ? 'rgba(155,59,46,0.12)' : 'var(--muted-bg)',
                       color: u.role === 'superadmin' ? 'var(--primary)' : 'var(--muted-foreground)',
                     }}
                   >

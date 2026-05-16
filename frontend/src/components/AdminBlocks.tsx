@@ -116,9 +116,9 @@ export function AdminBlocks() {
 
       {pages > 1 && (
         <div className="flex items-center justify-center gap-2 mt-4">
-          <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page <= 1} className="px-3 py-1 rounded text-sm disabled:opacity-30" style={{ background: 'var(--muted)', color: 'var(--foreground)' }}>←</button>
+          <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page <= 1} className="px-3 py-1 rounded text-sm disabled:opacity-30" style={{ background: 'var(--muted-bg)', color: 'var(--foreground)' }}>←</button>
           <span className="text-sm" style={{ color: 'var(--muted-foreground)' }}>{t.admin.page} {page} {t.admin.of} {pages}</span>
-          <button onClick={() => setPage(Math.min(pages, page + 1))} disabled={page >= pages} className="px-3 py-1 rounded text-sm disabled:opacity-30" style={{ background: 'var(--muted)', color: 'var(--foreground)' }}>→</button>
+          <button onClick={() => setPage(Math.min(pages, page + 1))} disabled={page >= pages} className="px-3 py-1 rounded text-sm disabled:opacity-30" style={{ background: 'var(--muted-bg)', color: 'var(--foreground)' }}>→</button>
         </div>
       )}
     </div>

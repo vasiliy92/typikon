@@ -15,6 +15,7 @@
   --rule-light: rgba(28, 25, 23, 0.06);
   --pill-bg: rgba(28, 25, 23, 0.04);
   --pill-active: rgba(155, 59, 46, 0.08);
+  --muted-bg: rgba(28, 25, 23, 0.06);
 
   /* Typography — display and ui set by next/font/google via body class */
   --font-heading: var(--font-display);
@@ -81,6 +82,12 @@ body {
   text-decoration: none;
 }
 
+.topbar-logo em {
+  font-style: normal;
+  color: var(--accent);
+  font-weight: 400;
+}
+
 .topbar-sep {
   color: var(--ornament);
   font-size: 1rem;
@@ -88,10 +95,10 @@ body {
 }
 
 .topbar-title {
-  font-family: var(--font-ui), sans-serif;
-  font-size: 0.8125rem;
-  color: var(--muted);
-  font-weight: 400;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1rem;
+  color: var(--fg-soft);
+  font-weight: 500;
 }
 
 .topbar-actions {
@@ -231,9 +238,9 @@ body {
 }
 
 .pill.active {
-  background: #fff;
+  background: var(--bg);
   color: var(--fg);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
 }
 
 /* --- Service Picker --- */
@@ -321,7 +328,7 @@ body {
 }
 
 .service-picker-item.active::before {
-  content: "•";
+  content: "\u2022";
   margin-right: 6px;
   color: var(--accent);
 }
@@ -329,20 +336,21 @@ body {
 /* --- Assemble Button --- */
 .btn-assemble {
   font-family: var(--font-ui), sans-serif;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  padding: 6px 16px;
-  background: var(--accent);
-  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 6px 18px;
+  background: var(--fg);
+  color: var(--bg);
   border: none;
-  border-radius: 6px;
+  border-radius: 100px;
   cursor: pointer;
-  transition: opacity var(--transition-fast);
+  transition: background var(--transition-fast);
   margin-left: auto;
+  letter-spacing: 0.02em;
 }
 
 .btn-assemble:hover {
-  opacity: 0.9;
+  background: var(--accent);
 }
 
 .btn-assemble:disabled {

@@ -14,6 +14,7 @@
     --secondary: #c4b89a;
     --secondary-foreground: #1a1714;
     --muted-foreground: #8a8278;
+    --muted-bg: rgba(28, 25, 23, 0.06);
     --accent: #9b3b2e;
     --accent-foreground: #faf7f0;
     --border: rgba(28, 25, 23, 0.12);
@@ -32,6 +33,7 @@
     --secondary: oklch(0.72 0.12 85);
     --secondary-foreground: oklch(0.15 0.03 270);
     --muted-foreground: oklch(0.65 0.03 80);
+    --muted-bg: oklch(0.22 0.03 270);
     --accent: oklch(0.45 0.1 165);
     --accent-foreground: oklch(0.95 0.01 80);
     --border: oklch(0.28 0.03 270);
@@ -71,7 +73,7 @@
   }
 
   .admin-table tr:hover td {
-    background: var(--muted);
+    background: var(--muted-bg);
   }
 
   /* Legacy button styles (kept for admin pages) */
@@ -99,7 +101,7 @@
   }
 
   .btn-outline:hover {
-    background: var(--muted);
+    background: var(--muted-bg);
   }
 
   .input-field {
