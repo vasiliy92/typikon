@@ -7,11 +7,23 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        display: ['Space Grotesk', 'serif'],
-        body: ['DM Sans', 'sans-serif'],
+        display: ['var(--font-display)', 'Georgia', 'serif'],
+        heading: ['var(--font-heading)', 'Georgia', 'serif'],
+        body: ['var(--font-ui)', 'sans-serif'],
         slavonic: ['Ponomar Unicode', 'Monomakh', 'serif'],
       },
       colors: {
+        bookish: {
+          bg: 'var(--bg)',
+          fg: 'var(--fg)',
+          'fg-soft': 'var(--fg-soft)',
+          muted: 'var(--muted)',
+          accent: 'var(--accent)',
+          ornament: 'var(--ornament)',
+          rule: 'var(--rule)',
+          'pill-bg': 'var(--pill-bg)',
+          'pill-active': 'var(--pill-active)',
+        },
         liturgy: {
           gold: '#c9a84c',
           burgundy: '#7a1b2d',
