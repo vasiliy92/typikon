@@ -59,8 +59,16 @@ function BookIcon({ size = 14 }: { size?: number }) {
   );
 }
 
-function ListIcon({ size = 20 }: { size?: number }) {
-  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" /><line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" /></svg>;
+function ChevronUpIcon() {
+  return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="18 15 12 9 6 15" /></svg>;
+}
+
+function ChevronDownIcon() {
+  return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9" /></svg>;
+}
+
+function ListIcon() {
+  return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" /><line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" /></svg>;
 }
 
 /* ─── Shared Content Renderer ─── */
@@ -94,10 +102,6 @@ function ServiceContent({ assembled, dayInfo, error, serviceType, t, locale }: {
     );
   }
 
-  const blocks = assembled.blocks ?? [];
-  const lections = assembled.lections ?? {};
-  const patronTroparia = assembled.patron_troparia ?? { has_patron: false };
-
   return (
     <>
       {/* Title Block */}
@@ -124,27 +128,27 @@ function ServiceContent({ assembled, dayInfo, error, serviceType, t, locale }: {
       <div className="divider">✦ ✦ ✦</div>
 
       {/* Patron Troparia */}
-      {patronTroparia.has_patron && (
+      {assembled.patron_troparia?.has_patron && (
         <div id="section-patron" data-nav-title={t.service.patron_troparia} className="section">
           <span className="block-marker">TROPARIA</span>
           <h2 className="section-title">{t.service.patron_troparia}</h2>
           <div className="rubric">
-            {patronTroparia.saint_name}
-            {patronTroparia.dedication_type && ` (${patronTroparia.dedication_type})`}
+            {assembled.patron_troparia.saint_name}
+            {assembled.patron_troparia.dedication_type && ` (${assembled.patron_troparia.dedication_type})`}
           </div>
-          {patronTroparia.troparion && (
+          {assembled.patron_troparia.troparion && (
             <div className="lit-text">
               <p className="red-init">
-                {t.service.troparion_tone} {patronTroparia.troparion.tone}.{' '}
-                {patronTroparia.troparion.text}
+                {t.service.troparion_tone} {assembled.patron_troparia.troparion.tone}.{' '}
+                {assembled.patron_troparia.troparion.text}
               </p>
             </div>
           )}
-          {patronTroparia.kontakion && (
+          {assembled.patron_troparia.kontakion && (
             <div className="lit-text">
               <p>
-                {t.service.kontakion_tone} {patronTroparia.kontakion.tone}.{' '}
-                {patronTroparia.kontakion.text}
+                {t.service.kontakion_tone} {assembled.patron_troparia.kontakion.tone}.{' '}
+                {assembled.patron_troparia.kontakion.text}
               </p>
             </div>
           )}
@@ -152,46 +156,73 @@ function ServiceContent({ assembled, dayInfo, error, serviceType, t, locale }: {
         </div>
       )}
 
-      {/* Blocks */}
-      {blocks.map((block, i) => (
-        <div key={i} id={`section-${i}`} data-nav-title={block.title || block.slot_key} className="section">
-          <span className="block-marker">{block.block_type}</span>
-          <h2 className="section-title">{block.title || block.slot_key}</h2>
+      {/* Service Blocks — continuous flow */}
+      {assembled.blocks.map((block, i) => (
+        <div
+          key={`${block.slot_key}-${i}`}
+          id={`section-${i}`}
+          data-nav-title={block.title || block.slot_key}
+          className="section"
+        >
+          <span className="block-marker">{block.block_type.toUpperCase()}</span>
+          {block.title && <h2 className="section-title">{block.title}</h2>}
           {block.rubric && <div className="rubric">{block.rubric}</div>}
-
-          {/* Lection */}
-          {block.block_type === 'LECTION' && lections[block.slot_key] && (
-            lections[block.slot_key].map((lec, li) => (
-              <div key={`lec-${block.slot_key}-${li}`} className="lection">
-                <div className="lection-ref">
-                  {(t.books as Record<string, string>)[block.slot_key] || block.slot_key}
-                  {' · '}
-                  {lec.short_ref}
-                  <span className="zachalo">Zachalo {lec.zachalo}</span>
-                  {lec.is_paremia && <span className="paremia-label">Paremia</span>}
-                </div>
-                <div className="lit-text">
-                  {lec.content ? (
-                    <p className={li === 0 ? 'red-init' : ''}>
-                      <strong className="incipit">{lec.title}</strong>{' '}
-                      {lec.content}
-                    </p>
-                  ) : (
-                    <p><strong className="incipit">{lec.title}</strong></p>
-                  )}
-                </div>
-              </div>
-            ))
-          )}
-
-          {/* Generic content */}
           {block.content && (
-            <div className="lit-text" dangerouslySetInnerHTML={{ __html: block.content }} />
+            <div className="lit-text">
+              <p className={i === 0 && !assembled.patron_troparia?.has_patron ? 'red-init' : ''}>{block.content}</p>
+            </div>
           )}
-
+          {block.content_translated && (
+            <div className="lit-text" style={{ color: 'var(--muted)', fontSize: '0.9em', marginTop: '4px' }}>
+              <p>{block.content_translated}</p>
+            </div>
+          )}
           <div className="divider-line"><span>✦</span></div>
         </div>
       ))}
+
+      {/* Lections — continuous flow */}
+      {assembled.lections && Object.keys(assembled.lections).length > 0 && (
+        <>
+          {Object.entries(assembled.lections).map(([book, lections]) => (
+            <div key={book}>
+              {lections.map((lec, li) => {
+                const sectionId = `lection-${book}-${li}`;
+                return (
+                  <div
+                    key={sectionId}
+                    id={sectionId}
+                    data-nav-title={lec.short_ref}
+                    className="section"
+                  >
+                    <span className="block-marker">LECTION</span>
+                    <div className="lection">
+                      <div className="lection-ref">
+                        {(t.books as Record<string, string>)[book] || book}
+                        {' · '}
+                        {lec.short_ref}
+                        <span className="zachalo">Zachalo {lec.zachalo}</span>
+                        {lec.is_paremia && <span className="paremia-label">Paremia</span>}
+                      </div>
+                      <div className="lit-text">
+                        {lec.content ? (
+                          <p className={li === 0 ? 'red-init' : ''}>
+                            <strong className="incipit">{lec.title}</strong>{' '}
+                            {lec.content}
+                          </p>
+                        ) : (
+                          <p><strong className="incipit">{lec.title}</strong></p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="divider-line"><span>✦</span></div>
+                  </div>
+                );
+              })}
+            </div>
+          ))}
+        </>
+      )}
     </>
   );
 }
@@ -205,174 +236,198 @@ export default function ServicePage() {
   const [calendarStyle, setCalendarStyle] = useState<'new' | 'old'>('new');
   const [mode, setMode] = useState<'full' | 'ustav'>('full');
   const [templeId] = useState(1);
-  const [fontScale, setFontScale] = useFontScale();
   const [assembled, setAssembled] = useState<AssembledServiceResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  /* Update topbar breadcrumb with service name */
+  useEffect(() => {
+    if (assembled) {
+      const serviceName = (t.service_types as Record<string, string>)[serviceType] || serviceType;
+      setTopbarTitle(serviceName);
+    } else {
+      setTopbarTitle('');
+    }
+  }, [assembled, serviceType, t, setTopbarTitle]);
+
+  const [fontScale, setFontScale] = useFontScale();
+  const [showFontMenu, setShowFontMenu] = useState(false);
+  const [showServicePicker, setShowServicePicker] = useState(false);
+  const [activeSection, setActiveSection] = useState<string | null>(null);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [showBackToTop, setShowBackToTop] = useState(false);
+  const [showRunningHeader, setShowRunningHeader] = useState(false);
+
   // Mobile
   const [showTocSheet, setShowTocSheet] = useState(false);
   const [showServiceSheet, setShowServiceSheet] = useState(false);
+  const [showMobileCalendar, setShowMobileCalendar] = useState(false);
+  const [showMobileMode, setShowMobileMode] = useState(false);
   const [showMobileSettings, setShowMobileSettings] = useState(false);
+
+  /* Wire settings toggle button (in layout) to this component's state */
+  useEffect(() => {
+    const btn = document.getElementById('mobileSettingsToggle');
+    if (!btn) return;
+    const toggle = () => setShowMobileSettings(prev => !prev);
+    btn.addEventListener('click', toggle);
+    return () => btn.removeEventListener('click', toggle);
+  }, []);
+
+  /* Sync toggle button active state */
+  useEffect(() => {
+    const btn = document.getElementById('mobileSettingsToggle');
+    if (btn) btn.classList.toggle('active', showMobileSettings);
+  }, [showMobileSettings]);
 
   const contentRef = useRef<HTMLDivElement>(null);
 
   const { data: litDay } = useApi<LiturgicalDay>(
-    `/api/liturgical-day/${date}?calendar=${calendarStyle}`
+    `/calendar/date/${date}?style=${calendarStyle}`
   );
 
-  const dayInfo = litDay ?? null;
-
-  /* ─── Assemble ─── */
   const assemble = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await apiPost<AssembledServiceResponse>('/api/assemble', {
-        date,
-        service_type: serviceType,
-        calendar_style: calendarStyle,
-        temple_id: templeId,
-        mode,
-      });
-      setAssembled(res);
-    } catch (e: any) {
-      setError(e.message || 'Assembly failed');
+      // UI locale → service language (backend only supports fr/ru for now)
+      const lang = locale === 'ru' ? 'ru' : 'fr';
+      const result = await apiPost<AssembledServiceResponse>(
+        `/service/assemble?target_date=${date}&service_type=${serviceType}&temple_id=${templeId}&language=${lang}&calendar_style=${calendarStyle}&mode=${mode}`,
+        {}
+      );
+      setAssembled(result);
+    } catch (err: any) {
+      setError(err.message || t.app.error);
     } finally {
       setLoading(false);
     }
-  }, [date, serviceType, calendarStyle, templeId, mode]);
+  }, [date, serviceType, templeId, locale, calendarStyle, mode, t]);
 
-  /* ─── Set topbar title ─── */
-  useEffect(() => {
-    const serviceName = (t.service_types as Record<string, string>)[serviceType] || serviceType;
-    setTopbarTitle(assembled ? serviceName : '');
-  }, [assembled, serviceType, t, setTopbarTitle]);
-
-  /* ─── Scroll spy ─── */
-  const [activeSection, setActiveSection] = useState('');
-  const [showRunningHeader, setShowRunningHeader] = useState(false);
-  const [showBackToTop, setShowBackToTop] = useState(false);
-
+  /* ─── Scroll Observer ─── */
   useEffect(() => {
     const handleScroll = () => {
-      setShowRunningHeader(window.scrollY > 200);
-      setShowBackToTop(window.scrollY > 600);
+      const scrollY = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      setScrollProgress(docHeight > 0 ? scrollY / docHeight : 0);
+      setShowRunningHeader(scrollY > 400);
+      setShowBackToTop(scrollY > 600);
 
       const sections = document.querySelectorAll('[data-nav-title]');
-      let current = '';
-      sections.forEach((sec) => {
-        const el = sec as HTMLElement;
-        if (el.getBoundingClientRect().top <= 120) {
-          current = el.getAttribute('data-nav-title') || '';
+      for (let i = sections.length - 1; i >= 0; i--) {
+        if ((sections[i] as HTMLElement).offsetTop - 120 <= scrollY) {
+          setActiveSection(sections[i].id);
+          break;
         }
-      });
-      setActiveSection(current);
+      }
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  /* Close dropdowns on outside click */
-  const stopProp = (e: React.MouseEvent) => e.stopPropagation();
-  const [showFontMenu, setShowFontMenu] = useState(false);
-  const [showServicePicker, setShowServicePicker] = useState(false);
-
+  /* ─── Close dropdowns on outside click ─── */
   useEffect(() => {
     const handleClick = () => {
       setShowFontMenu(false);
       setShowServicePicker(false);
+      setShowMobileCalendar(false);
+      setShowMobileMode(false);
     };
-    if (showFontMenu || showServicePicker) {
+    if (showFontMenu || showServicePicker || showMobileCalendar || showMobileMode) {
       document.addEventListener('click', handleClick);
       return () => document.removeEventListener('click', handleClick);
     }
-  }, [showFontMenu, showServicePicker]);
+  }, [showFontMenu, showServicePicker, showMobileCalendar, showMobileMode]);
 
   /* ─── Derived: section list for TOC ─── */
   const sections = assembled?.blocks?.map((block, i) => ({
     id: `section-${i}`,
     title: block.title || block.slot_key,
-  })) ?? [];
+    type: block.block_type,
+  })) || [];
 
-  /* ─── Scroll to section ─── */
-  const scrollToSection = useCallback((id: string) => {
-    const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, []);
+  const dayInfo = litDay || assembled?.liturgical_day;
+
+  const scrollToSection = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const stopProp = (e: React.MouseEvent) => e.stopPropagation();
 
   return (
     <>
+      {/* ─── Progress Bar ─── */}
+      <div className="progress-bar" style={{ width: `${scrollProgress * 100}%` }} />
+
       {/* ═══════════════════════════════════════
-          DESKTOP: Sidebar + Content
+          DESKTOP: Sidebar
           ═══════════════════════════════════════ */}
-      <div className="desktop-layout">
-        {/* Sidebar */}
-        <div className="sidebar">
-          <div className="sidebar-label">{t.service.service_order}</div>
-          {sections.map((sec) => (
-            <div
-              key={sec.id}
-              className={`sidebar-item ${activeSection === sec.title ? 'active' : ''}`}
-              onClick={() => scrollToSection(sec.id)}
-            >
-              {sec.title}
+      <aside className="sidebar">
+        {assembled && sections.length > 0 ? (
+          <>
+            <div className="sidebar-label">{t.service.service_order}</div>
+            {sections.map((sec, i) => (
+              <a
+                key={sec.id}
+                className={`sidebar-item ${activeSection === sec.id ? 'active' : ''}`}
+                onClick={() => scrollToSection(sec.id)}
+              >
+                <span className="sidebar-item-num">{i + 1}</span>
+                <span className="sidebar-item-text">{sec.title}</span>
+              </a>
+            ))}
+            <div className="sidebar-divider" />
+            <div className="sidebar-stats">
+              <span className="sidebar-stat">📄 {sections.length} {t.service.sections}</span>
             </div>
-          ))}
-          {sections.length === 0 && (
-            <div style={{ color: 'var(--muted)', fontSize: '0.75rem', padding: '12px 24px' }}>
-              {t.service.assemble_prompt}
-            </div>
-          )}
-
-          {/* Sidebar Stats */}
-          <div className="sidebar-stats">
-            {assembled && (
-              <>
-                <span className="sidebar-stat">📄 {sections.length} {t.service.sections}</span>
-              </>
-            )}
+          </>
+        ) : (
+          <div style={{ padding: '0 20px', color: 'var(--muted)', fontFamily: 'var(--font-ui)', fontSize: '0.75rem' }}>
+            {t.service.assemble_prompt}
           </div>
-        </div>
+        )}
+      </aside>
 
-        {/* Controls Strip */}
-        <div className="controls-strip">
+      {/* ═══════════════════════════════════════
+          DESKTOP: Content Area
+          ═══════════════════════════════════════ */}
+      <div className="content-area">
+        {/* Controls Bar */}
+        <div className="controls-bar">
           {/* Service Picker */}
-          <div className="chip-wrapper" onClick={stopProp}>
+          <div className="service-picker" onClick={stopProp}>
             <button
-              className="chip"
+              className={`service-picker-trigger ${showServicePicker ? 'open' : ''}`}
               onClick={() => setShowServicePicker(!showServicePicker)}
             >
-              <BookIcon size={12} />
               {(t.service_types as Record<string, string>)[serviceType] || serviceType}
+              <span className="arrow">▾</span>
             </button>
             {showServicePicker && (
-              <div className="chip-dropdown open">
+              <div className="service-picker-dropdown open">
+                <div className="service-picker-group-label">{t.service.daily_cycle}</div>
                 {SERVICE_TYPES.map((st) => (
-                  <button
+                  <div
                     key={st}
-                    className={`chip-dropdown-item ${st === serviceType ? 'active' : ''}`}
+                    className={`service-picker-item ${st === serviceType ? 'active' : ''}`}
                     onClick={() => { setServiceType(st); setShowServicePicker(false); }}
                   >
                     {(t.service_types as Record<string, string>)[st] || st}
-                  </button>
+                  </div>
                 ))}
               </div>
             )}
           </div>
 
-          {/* Calendar */}
-          <div className="chip-wrapper" onClick={stopProp}>
-            <button
-              className={`chip ${showFontMenu ? '' : ''}`}
-              onClick={() => {}}
-            >
-              <CalendarIcon size={12} />
-              {calendarStyle === 'new' ? t.service.new_calendar : t.service.old_calendar}
-            </button>
-          </div>
+          {/* Date Input */}
+          <input
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            className="date-input"
+          />
 
-          {/* Calendar Toggle */}
+          {/* Calendar Pill Group */}
           <div className="pill-group">
             <button
               className={`pill ${calendarStyle === 'new' ? 'active' : ''}`}
@@ -388,7 +443,7 @@ export default function ServicePage() {
             </button>
           </div>
 
-          {/* Mode Toggle */}
+          {/* Mode Pill Group */}
           <div className="pill-group">
             <button
               className={`pill ${mode === 'full' ? 'active' : ''}`}
@@ -435,8 +490,85 @@ export default function ServicePage() {
       </div>
 
       {/* ═══════════════════════════════════════
-          MOBILE: Content + Bottom Bar + Sheets
+          MOBILE: Controls Strip (collapsible) + Content + Bottom Bar
           ═══════════════════════════════════════ */}
+      <div className={`controls-strip ${showMobileSettings ? 'expanded' : 'collapsed'}`}>
+        <div className="controls-inner">
+          {/* Calendar Chip */}
+          <div className="chip-wrapper" onClick={stopProp}>
+            <button
+              className="chip"
+              onClick={() => setShowMobileCalendar(!showMobileCalendar)}
+            >
+              <CalendarIcon size={12} />
+              {calendarStyle === 'new' ? t.service.new_calendar : t.service.old_calendar}
+            </button>
+            {showMobileCalendar && (
+              <div className="chip-dropdown open">
+                <button
+                  className={`chip-dropdown-item ${calendarStyle === 'new' ? 'active' : ''}`}
+                  onClick={() => { setCalendarStyle('new'); setShowMobileCalendar(false); }}
+                >
+                  {t.service.new_calendar}
+                </button>
+                <button
+                  className={`chip-dropdown-item ${calendarStyle === 'old' ? 'active' : ''}`}
+                  onClick={() => { setCalendarStyle('old'); setShowMobileCalendar(false); }}
+                >
+                  {t.service.old_calendar}
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Mode Chip */}
+          <div className="chip-wrapper" onClick={stopProp}>
+            <button
+              className="chip"
+              onClick={() => setShowMobileMode(!showMobileMode)}
+            >
+              <BookIcon size={12} />
+              {mode === 'full' ? t.service.mode_full : t.service.mode_ustav}
+            </button>
+            {showMobileMode && (
+              <div className="chip-dropdown open">
+                <button
+                  className={`chip-dropdown-item ${mode === 'full' ? 'active' : ''}`}
+                  onClick={() => { setMode('full'); setShowMobileMode(false); }}
+                >
+                  {t.service.mode_full}
+                </button>
+                <button
+                  className={`chip-dropdown-item ${mode === 'ustav' ? 'active' : ''}`}
+                  onClick={() => { setMode('ustav'); setShowMobileMode(false); }}
+                >
+                  {t.service.mode_ustav}
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Date Input */}
+          <input
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            className="date-input"
+            style={{ fontSize: '0.6875rem', padding: '4px 6px' }}
+          />
+
+          {/* Assemble */}
+          <button
+            className="btn-assemble"
+            onClick={assemble}
+            disabled={loading}
+            style={{ marginLeft: 'auto', fontSize: '0.6875rem', padding: '4px 12px' }}
+          >
+            {loading ? '…' : t.service.assemble}
+          </button>
+        </div>
+      </div>
+
       <div className="mobile-content">
         {/* Mobile Text Column */}
         <div className="mobile-text-column">
@@ -451,20 +583,23 @@ export default function ServicePage() {
         </div>
       </div>
 
-      {/* Mobile Bottom Bar: Book | ✦ | List */}
+      {/* Mobile Bottom Bar */}
       <div className="bottom-bar">
-        <button className="bottom-action" onClick={() => setShowServiceSheet(true)} title={t.nav.service}>
-          <BookIcon size={22} />
+        <button className="bottom-action" onClick={() => setShowTocSheet(true)}>
+          <ListIcon />
+          {t.service.toc}
         </button>
-        <button
-          className={`bottom-action-center ${showMobileSettings ? 'active' : ''}`}
-          onClick={() => setShowMobileSettings(!showMobileSettings)}
-          title="Réglages"
-        >
-          ✦
+        <button className="bottom-action" onClick={() => setShowServiceSheet(true)}>
+          <BookIcon size={20} />
+          {t.nav.service}
         </button>
-        <button className="bottom-action" onClick={() => setShowTocSheet(true)} title={t.service.toc}>
-          <ListIcon size={22} />
+        <button className="bottom-action" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+          <ChevronUpIcon />
+          {t.service.top}
+        </button>
+        <button className="bottom-action" onClick={() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' })}>
+          <ChevronDownIcon />
+          {t.service.bottom}
         </button>
       </div>
 
@@ -473,17 +608,19 @@ export default function ServicePage() {
       <div className={`bottom-sheet ${showTocSheet ? 'open' : ''}`}>
         <div className="bottom-sheet-handle" />
         <div className="bottom-sheet-title">{t.service.toc}</div>
-        {sections.map((sec) => (
+        {sections.map((sec, i) => (
           <div
             key={sec.id}
-            className={`sheet-item ${activeSection === sec.id ? 'active' : ''}`}
+            className={`sidebar-item ${activeSection === sec.id ? 'active' : ''}`}
             onClick={() => { scrollToSection(sec.id); setShowTocSheet(false); }}
+            style={{ padding: '8px 0' }}
           >
-            <span className="sheet-item-text">{sec.title}</span>
+            <span className="sidebar-item-num">{i + 1}</span>
+            <span className="sidebar-item-text">{sec.title}</span>
           </div>
         ))}
         {sections.length === 0 && (
-          <div style={{ color: 'var(--muted)', fontFamily: 'var(--font-ui)', fontSize: '0.8125rem', padding: '12px 0', textAlign: 'center' }}>
+          <div style={{ color: 'var(--muted)', fontFamily: 'var(--font-ui)', fontSize: '0.8125rem', padding: '12px 0' }}>
             {t.service.assemble_prompt}
           </div>
         )}
@@ -497,95 +634,13 @@ export default function ServicePage() {
         {SERVICE_TYPES.map((st) => (
           <div
             key={st}
-            className={`sheet-item ${st === serviceType ? 'active' : ''}`}
+            className={`sidebar-item ${st === serviceType ? 'active' : ''}`}
             onClick={() => { setServiceType(st); setShowServiceSheet(false); }}
+            style={{ padding: '8px 0' }}
           >
-            <span className="sheet-item-text">{(t.service_types as Record<string, string>)[st] || st}</span>
+            <span className="sidebar-item-text">{(t.service_types as Record<string, string>)[st] || st}</span>
           </div>
         ))}
-      </div>
-
-      {/* Mobile Settings Sheet */}
-      <div className={`bottom-sheet-overlay ${showMobileSettings ? 'open' : ''}`} onClick={() => setShowMobileSettings(false)} />
-      <div className={`bottom-sheet ${showMobileSettings ? 'open' : ''}`}>
-        <div className="bottom-sheet-handle" />
-        <div className="bottom-sheet-title">Réglages</div>
-
-        {/* Calendar */}
-        <div className="settings-group">
-          <div className="settings-label">{t.service.new_calendar}/{t.service.old_calendar}</div>
-          <div className="pill-group">
-            <button
-              className={`pill ${calendarStyle === 'new' ? 'active' : ''}`}
-              onClick={() => setCalendarStyle('new')}
-            >
-              {t.service.new_calendar}
-            </button>
-            <button
-              className={`pill ${calendarStyle === 'old' ? 'active' : ''}`}
-              onClick={() => setCalendarStyle('old')}
-            >
-              {t.service.old_calendar}
-            </button>
-          </div>
-        </div>
-
-        {/* Mode */}
-        <div className="settings-group">
-          <div className="settings-label">{t.service.mode_full}/{t.service.mode_ustav}</div>
-          <div className="pill-group">
-            <button
-              className={`pill ${mode === 'full' ? 'active' : ''}`}
-              onClick={() => setMode('full')}
-            >
-              {t.service.mode_full}
-            </button>
-            <button
-              className={`pill ${mode === 'ustav' ? 'active' : ''}`}
-              onClick={() => setMode('ustav')}
-            >
-              {t.service.mode_ustav}
-            </button>
-          </div>
-        </div>
-
-        {/* Date */}
-        <div className="settings-group">
-          <div className="settings-label">Date</div>
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className="date-input"
-            style={{ fontSize: '0.8125rem', padding: '6px 10px' }}
-          />
-        </div>
-
-        {/* Font Scale */}
-        <div className="settings-group">
-          <div className="settings-label">Aa</div>
-          <div className="pill-group">
-            {FONT_SCALES.map((s) => (
-              <button
-                key={s.value}
-                className={`pill ${fontScale === s.value ? 'active' : ''}`}
-                onClick={() => setFontScale(s.value)}
-              >
-                {s.labelKey === 'small' ? 'A' : s.labelKey === 'normal' ? 'Aa' : s.labelKey === 'large' ? 'Aa+' : s.labelKey === 'very_large' ? 'AA' : 'AAA'}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Assemble */}
-        <button
-          className="btn-assemble"
-          onClick={assemble}
-          disabled={loading}
-          style={{ width: '100%', marginTop: '8px' }}
-        >
-          {loading ? '…' : t.service.assemble}
-        </button>
       </div>
 
       {/* Back to Top */}
