@@ -1,59 +1,106 @@
-"use client";
+'use client';
 
-import React from "react";
-import { I18nProvider } from "@/lib/i18n";
-import { AuthProvider } from "@/lib/auth";
-import "@/app/globals.css";
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import clsx from 'clsx';
+import { Moon, Sun, Church } from 'lucide-react';
+import { Locale, localeNames, locales } from '@/i18n/config';
+import fr from '@/i18n/messages/fr.json';
+import csy from '@/i18n/messages/csy.json';
+import ru from '@/i18n/messages/ru.json';
+import { I18nProvider, type Messages } from '@/lib/i18n';
+import { AuthProvider } from '@/lib/auth';
 
-function Header() {
-  return (
-    <header className="sticky top-0 z-50 border-b border-foreground/10 bg-surface/80 backdrop-blur-md">
-      <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
-        <a href="/" className="text-lg font-bold tracking-tight">
-          Typikon
-        </a>
-        <nav className="flex items-center gap-4 text-sm">
-          <a href="/fr" className="text-muted hover:text-foreground transition-colors">FR</a>
-          <a href="/csy" className="text-muted hover:text-foreground transition-colors">CSY</a>
-          <a href="/ru" className="text-muted hover:text-foreground transition-colors">RU</a>
-        </nav>
-      </div>
-    </header>
-  );
-}
-
-function Footer() {
-  return (
-    <footer className="border-t border-foreground/10 py-6 text-center text-xs text-muted">
-      © {new Date().getFullYear()} Typikon — Orthodox Liturgical Service Generator
-    </footer>
-  );
-}
+const messages: Record<Locale, Messages> = { fr, csy, ru };
 
 export default function LocaleLayout({
   children,
-  params,
+  params: { locale },
 }: {
   children: React.ReactNode;
   params: { locale: string };
 }) {
-  const locale = params.locale;
+  const [dark, setDark] = useState(false);
+  const currentLocale = (locales.includes(locale as Locale) ? locale : 'fr') as Locale;
+  const t = messages[currentLocale];
+
+  useEffect(() => {
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const saved = localStorage.getItem('typikon-theme');
+    if (saved === 'dark' || (!saved && prefersDark)) {
+      setDark(true);
+      document.documentElement.classList.add('dark');
+    }
+  }, []);
+
+  const toggleDark = () => {
+    setDark((d) => {
+      const next = !d;
+      document.documentElement.classList.toggle('dark', next);
+      localStorage.setItem('typikon-theme', next ? 'dark' : 'light');
+      return next;
+    });
+  };
+
+  const pathname = usePathname();
 
   return (
-    <html lang={locale}>
-      <body className="min-h-screen bg-background text-foreground antialiased">
-        <AuthProvider>
-          <I18nProvider locale={locale}>
-            <div className="flex min-h-screen flex-col">
-              <Header />
-              <main className="flex-1 mx-auto w-full max-w-5xl px-4 py-6">
-                {children}
-              </main>
-              <Footer />
+    <I18nProvider value={{ locale: currentLocale, t }}>
+      <AuthProvider>
+        <div className="min-h-screen" style={{ background: 'var(--background)' }}>
+          {/* Header */}
+          <header className="sticky top-0 z-50 backdrop-blur-md border-b" style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
+            <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
+              <div className="flex items-center gap-6">
+                <Link href={`/${currentLocale}`} className="flex items-center gap-2 group">
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'var(--primary)' }}>
+                    <span className="text-white font-display font-bold text-sm">T</span>
+                  </div>
+                  <span className="font-display font-semibold text-lg" style={{ color: 'var(--foreground)' }}>
+                    {t.app.title}
+                  </span>
+                </Link>
+              </div>
+
+              <div className="flex items-center gap-2">
+                {/* Language switcher */}
+                <div className="flex items-center rounded-lg overflow-hidden border" style={{ borderColor: 'var(--border)' }}>
+                  {locales.map((loc) => (
+                    <Link
+                      key={loc}
+                      href={pathname.replace(`/${currentLocale}`, `/${loc}`)}
+                      className={clsx(
+                        'px-2.5 py-1 text-xs font-medium transition-all',
+                        loc === currentLocale
+                          ? 'text-white'
+                          : 'text-[var(--muted-foreground)] hover:text-[var(--foreground)]',
+                      )}
+                      style={loc === currentLocale ? { background: 'var(--primary)' } : {}}
+                    >
+                      {localeNames[loc]}
+                    </Link>
+                  ))}
+                </div>
+
+                {/* Dark mode toggle */}
+                <button
+                  onClick={toggleDark}
+                  className="p-2 rounded-lg transition-all hover:bg-[var(--muted)]"
+                  style={{ color: 'var(--muted-foreground)' }}
+                >
+                  {dark ? <Sun size={18} /> : <Moon size={18} />}
+                </button>
+              </div>
             </div>
-          </I18nProvider>
-        </AuthProvider>
-      </body>
-    </html>
+          </header>
+
+          {/* Main content */}
+          <main className="max-w-6xl mx-auto px-4 py-6">
+            {children}
+          </main>
+        </div>
+      </AuthProvider>
+    </I18nProvider>
   );
 }
