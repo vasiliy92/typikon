@@ -1,18 +1,10 @@
-'use client';
+import { useState, useEffect, useCallback, createContext, useContext } from 'react';
+import type { Messages } from '@/i18n/config';
 
-import { createContext, useContext } from 'react';
-import { Locale } from '@/i18n/config';
-import fr from '@/i18n/messages/fr.json';
+const fr = (await import('./messages/fr.json')).default as Messages;
+const en = (await import('./messages/en.json')).default as Messages;
+const ru = (await import('./messages/ru.json')).default as Messages;
 
-export type Messages = typeof fr;
+const messages: Record<string, Messages> = { fr, en, ru };
 
-const I18nContext = createContext<{ locale: Locale; t: Messages }>({
-  locale: 'fr',
-  t: fr,
-});
-
-export const I18nProvider = I18nContext.Provider;
-
-export function useI18n() {
-  return useContext(I18nContext);
-}
+// ... rest of i18n.tsx unchanged
