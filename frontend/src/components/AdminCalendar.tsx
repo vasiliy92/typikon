@@ -29,14 +29,11 @@ export function AdminCalendar() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
-        <span className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
-          {t.admin.total}: {total}
-        </span>
+      <div className="admin-section-header">
+        <span className="admin-section-meta">{t.admin.total}: {total}</span>
         <button
           onClick={() => { setCreating(true); setEditing(null); }}
-          className="px-3 py-1.5 rounded-lg text-sm font-medium"
-          style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}
+          className="admin-btn admin-btn-primary"
         >
           {t.admin.add}
         </button>
@@ -60,37 +57,29 @@ export function AdminCalendar() {
       )}
 
       {items.length === 0 ? (
-        <p className="text-sm py-4" style={{ color: 'var(--muted-foreground)' }}>
+        <p className="admin-section-meta" style={{ padding: '16px 0' }}>
           {t.app.no_results}
         </p>
       ) : (
-        <div className="space-y-2">
+        <div>
           {items.map((e) => (
-            <div
-              key={e.id}
-              className="flex items-center justify-between rounded-lg border px-4 py-3"
-              style={{ borderColor: 'var(--border)' }}
-            >
-              <div className="flex-1 min-w-0">
-                <div className="font-medium text-sm truncate" style={{ color: 'var(--foreground)' }}>
-                  {e.title_ru}
-                </div>
-                <div className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>
+            <div key={e.id} className="admin-row">
+              <div className="admin-row-main">
+                <div className="admin-row-title">{e.title_ru}</div>
+                <div className="admin-row-sub">
                   {enumLabel(t.admin.date_types as Record<string, string>, e.date_type)} · {enumLabel(t.feast_ranks as Record<string, string>, e.rank)} · {enumLabel(t.fasting_types as Record<string, string>, e.fasting)}
                 </div>
               </div>
-              <div className="flex gap-2 ml-2">
+              <div className="admin-row-actions">
                 <button
                   onClick={() => { setEditing(e); setCreating(false); }}
-                  className="text-xs px-2 py-1 rounded"
-                  style={{ color: 'var(--primary)' }}
+                  className="admin-btn admin-btn-ghost"
                 >
                   {t.admin.edit}
                 </button>
                 <button
                   onClick={() => handleDelete(e.id)}
-                  className="text-xs px-2 py-1 rounded"
-                  style={{ color: 'var(--destructive)' }}
+                  className="admin-btn admin-btn-danger"
                 >
                   {t.admin.delete}
                 </button>
@@ -101,23 +90,19 @@ export function AdminCalendar() {
       )}
 
       {pages > 1 && (
-        <div className="flex items-center justify-center gap-2 mt-4">
+        <div className="admin-pagination">
           <button
             onClick={() => setPage(Math.max(1, page - 1))}
             disabled={page <= 1}
-            className="px-3 py-1 rounded text-sm disabled:opacity-30"
-            style={{ background: 'var(--muted)', color: 'var(--foreground)' }}
+            className="admin-pagination-btn"
           >
             ←
           </button>
-          <span className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
-            {t.admin.page} {page} {t.admin.of} {pages}
-          </span>
+          <span>{t.admin.page} {page} {t.admin.of} {pages}</span>
           <button
             onClick={() => setPage(Math.min(pages, page + 1))}
             disabled={page >= pages}
-            className="px-3 py-1 rounded text-sm disabled:opacity-30"
-            style={{ background: 'var(--muted)', color: 'var(--foreground)' }}
+            className="admin-pagination-btn"
           >
             →
           </button>
@@ -170,64 +155,64 @@ function CalendarForm({
   const rankOptions = Object.entries(t.feast_ranks).map(([value, label]) => ({ value, label }));
   const fastingOptions = Object.entries(t.fasting_types).map(([value, label]) => ({ value, label }));
 
+  const update = (key: string, value: string) => setForm({ ...form, [key]: value });
+
   return (
-    <form onSubmit={handleSubmit} className="rounded-lg border p-4 mb-4 space-y-3" style={{ borderColor: 'var(--border)' }}>
-      <div className="grid grid-cols-2 gap-3">
-        <Field label="date_type" displayLabel={f.date_type} form={form} setForm={setForm} options={dateTypeOptions} />
-        <Field label="rank" displayLabel={f.rank} form={form} setForm={setForm} options={rankOptions} />
-        <Field label="month" displayLabel={f.month} form={form} setForm={setForm} type="number" />
-        <Field label="day" displayLabel={f.day} form={form} setForm={setForm} type="number" />
-        <Field label="pascha_offset" displayLabel={f.pascha_offset} form={form} setForm={setForm} type="number" />
-        <Field label="fasting" displayLabel={f.fasting} form={form} setForm={setForm} options={fastingOptions} />
+    <form onSubmit={handleSubmit} className="admin-form">
+      <div className="admin-form-grid admin-form-grid-2">
+        <div className="admin-field">
+          <label>{f.date_type}</label>
+          <select value={form.date_type} onChange={(e) => update('date_type', e.target.value)}>
+            {dateTypeOptions.map((opt) => (<option key={opt.value} value={opt.value}>{opt.label}</option>))}
+          </select>
+        </div>
+        <div className="admin-field">
+          <label>{f.rank}</label>
+          <select value={form.rank} onChange={(e) => update('rank', e.target.value)}>
+            {rankOptions.map((opt) => (<option key={opt.value} value={opt.value}>{opt.label}</option>))}
+          </select>
+        </div>
+        <div className="admin-field">
+          <label>{f.month}</label>
+          <input type="number" value={form.month} onChange={(e) => update('month', e.target.value)} />
+        </div>
+        <div className="admin-field">
+          <label>{f.day}</label>
+          <input type="number" value={form.day} onChange={(e) => update('day', e.target.value)} />
+        </div>
+        <div className="admin-field">
+          <label>{f.pascha_offset}</label>
+          <input type="number" value={form.pascha_offset} onChange={(e) => update('pascha_offset', e.target.value)} />
+        </div>
+        <div className="admin-field">
+          <label>{f.fasting}</label>
+          <select value={form.fasting} onChange={(e) => update('fasting', e.target.value)}>
+            {fastingOptions.map((opt) => (<option key={opt.value} value={opt.value}>{opt.label}</option>))}
+          </select>
+        </div>
       </div>
-      <Field label="title_ru" displayLabel={f.title_ru} form={form} setForm={setForm} />
-      <Field label="title_fr" displayLabel={f.title_fr} form={form} setForm={setForm} />
-      <Field label="rubric" displayLabel={f.rubric} form={form} setForm={setForm} />
-      <div className="flex gap-2 justify-end">
-        <button type="button" onClick={onCancel} className="px-3 py-1.5 rounded-lg text-sm" style={{ color: 'var(--muted-foreground)' }}>
+      <div style={{ display: 'grid', gap: 12, marginTop: 12 }}>
+        <div className="admin-field">
+          <label>{f.title_ru}</label>
+          <input value={form.title_ru} onChange={(e) => update('title_ru', e.target.value)} />
+        </div>
+        <div className="admin-field">
+          <label>{f.title_fr}</label>
+          <input value={form.title_fr} onChange={(e) => update('title_fr', e.target.value)} />
+        </div>
+        <div className="admin-field">
+          <label>{f.rubric}</label>
+          <input value={form.rubric} onChange={(e) => update('rubric', e.target.value)} />
+        </div>
+      </div>
+      <div className="admin-form-actions">
+        <button type="button" onClick={onCancel} className="admin-btn admin-btn-secondary">
           {t.admin.cancel}
         </button>
-        <button type="submit" disabled={saving} className="px-3 py-1.5 rounded-lg text-sm font-medium" style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}>
+        <button type="submit" disabled={saving} className="admin-btn admin-btn-primary">
           {t.admin.save}
         </button>
       </div>
     </form>
-  );
-}
-
-function Field({ label, displayLabel, form, setForm, type = 'text', options }: {
-  label: string;
-  displayLabel: string;
-  form: Record<string, string>;
-  setForm: (f: Record<string, string>) => void;
-  type?: string;
-  options?: { value: string; label: string }[];
-}) {
-  return (
-    <div>
-      <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>
-        {displayLabel}
-      </label>
-      {options ? (
-        <select
-          value={form[label] ?? ''}
-          onChange={(e) => setForm({ ...form, [label]: e.target.value })}
-          className="w-full rounded border px-2 py-1 text-sm"
-          style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }}
-        >
-          {options.map((opt) => (
-            <option key={opt.value} value={opt.value}>{opt.label}</option>
-          ))}
-        </select>
-      ) : (
-        <input
-          type={type}
-          value={form[label] ?? ''}
-          onChange={(e) => setForm({ ...form, [label]: e.target.value })}
-          className="w-full rounded border px-2 py-1 text-sm"
-          style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }}
-        />
-      )}
-    </div>
   );
 }
