@@ -268,5 +268,19 @@
     "large": "Grand",
     "very_large": "Très grand",
     "maximum": "Maximum"
-  }
+  },
+  "months": [
+    "Janvier",
+    "Février",
+    "Mars",
+    "Avril",
+    "Mai",
+    "Juin",
+    "Juillet",
+    "Août",
+    "Septembre",
+    "Octobre",
+    "Novembre",
+    "Décembre"
+  ]
 }
