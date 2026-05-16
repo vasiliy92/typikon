@@ -24,6 +24,8 @@ export function AdminCalendar() {
     mutate();
   };
 
+  const f = t.admin.fields;
+
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
@@ -73,7 +75,7 @@ export function AdminCalendar() {
                   {e.title_ru}
                 </div>
                 <div className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>
-                  {e.date_type} · {e.rank} · {e.fasting}
+                  {t.admin.date_types[e.date_type as keyof typeof t.admin.date_types] ?? e.date_type} · {f.rank} {e.rank} · {t.fasting_types[e.fasting as keyof typeof t.fasting_types] ?? e.fasting}
                 </div>
               </div>
               <div className="flex gap-2 ml-2">
@@ -134,6 +136,7 @@ function CalendarForm({
   onCancel: () => void;
 }) {
   const { t } = useI18n();
+  const f = t.admin.fields;
   const [form, setForm] = useState<Record<string, string>>({
     date_type: entry?.date_type ?? 'fixed',
     month: String(entry?.month ?? ''),
@@ -162,19 +165,59 @@ function CalendarForm({
     setSaving(false);
   };
 
+  const update = (key: string, value: string) => setForm({ ...form, [key]: value });
+
   return (
     <form onSubmit={handleSubmit} className="rounded-lg border p-4 mb-4 space-y-3" style={{ borderColor: 'var(--border)' }}>
       <div className="grid grid-cols-2 gap-3">
-        <Field label="date_type" form={form} setForm={setForm} />
-        <Field label="rank" form={form} setForm={setForm} />
-        <Field label="month" form={form} setForm={setForm} />
-        <Field label="day" form={form} setForm={setForm} />
-        <Field label="pascha_offset" form={form} setForm={setForm} />
-        <Field label="fasting" form={form} setForm={setForm} />
+        <div>
+          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>{f.date_type}</label>
+          <select value={form.date_type} onChange={(e) => update('date_type', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }}>
+            <option value="fixed">{t.admin.date_types.fixed}</option>
+            <option value="movable">{t.admin.date_types.movable}</option>
+          </select>
+        </div>
+        <div>
+          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>{f.rank}</label>
+          <select value={form.rank} onChange={(e) => update('rank', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }}>
+            {[1, 2, 3, 4, 5, 6].map((r) => (
+              <option key={r} value={String(r)}>{r} — {t.feast_ranks[String(r) as keyof typeof t.feast_ranks] ?? String(r)}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>{f.month}</label>
+          <input type="number" min="1" max="12" value={form.month} onChange={(e) => update('month', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
+        </div>
+        <div>
+          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>{f.day}</label>
+          <input type="number" min="1" max="31" value={form.day} onChange={(e) => update('day', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
+        </div>
+        <div>
+          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>{f.pascha_offset}</label>
+          <input type="number" value={form.pascha_offset} onChange={(e) => update('pascha_offset', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
+        </div>
+        <div>
+          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>{f.fasting}</label>
+          <select value={form.fasting} onChange={(e) => update('fasting', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }}>
+            {(['none', 'strict', 'wednesday_friday', 'great_lent', 'nativity_fast', 'apostles_fast', 'dormition_fast', 'cheesefare'] as const).map((ft) => (
+              <option key={ft} value={ft}>{t.fasting_types[ft]}</option>
+            ))}
+          </select>
+        </div>
       </div>
-      <Field label="title_ru" form={form} setForm={setForm} />
-      <Field label="title_fr" form={form} setForm={setForm} />
-      <Field label="rubric" form={form} setForm={setForm} />
+      <div>
+        <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>{f.title_ru}</label>
+        <input value={form.title_ru} onChange={(e) => update('title_ru', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
+      </div>
+      <div>
+        <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>{f.title_fr}</label>
+        <input value={form.title_fr} onChange={(e) => update('title_fr', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
+      </div>
+      <div>
+        <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>{f.rubric}</label>
+        <input value={form.rubric} onChange={(e) => update('rubric', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
+      </div>
       <div className="flex gap-2 justify-end">
         <button type="button" onClick={onCancel} className="px-3 py-1.5 rounded-lg text-sm" style={{ color: 'var(--muted-foreground)' }}>
           {t.admin.cancel}
@@ -184,19 +227,5 @@ function CalendarForm({
         </button>
       </div>
     </form>
-  );
-}
-
-function Field({ label, form, setForm }: { label: string; form: Record<string, string>; setForm: (f: Record<string, string>) => void }) {
-  return (
-    <div>
-      <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>{label}</label>
-      <input
-        value={form[label] ?? ''}
-        onChange={(e) => setForm({ ...form, [label]: e.target.value })}
-        className="w-full rounded border px-2 py-1 text-sm"
-        style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }}
-      />
-    </div>
   );
 }

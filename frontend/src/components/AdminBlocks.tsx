@@ -5,6 +5,15 @@ import { useI18n } from '@/lib/i18n';
 import { useApi, apiPost, apiPut, apiDelete } from '@/lib/api';
 import type { ServiceBlockResponse, PaginatedResponse } from '@/lib/api';
 
+const BOOKS = [
+  'gospel', 'apostol', 'psalter', 'liturgicon', 'horologion', 'octoechos',
+  'menaion_monthly', 'menaion_festal', 'menaion_general', 'triodion',
+  'pentecostarion', 'irmologion', 'typikon', 'euchologion', 'hieraticon',
+  'prologue', 'troparion',
+] as const;
+
+const LANGUAGES = ['fr', 'ru'] as const;
+
 export function AdminBlocks() {
   const { t } = useI18n();
   const [page, setPage] = useState(1);
@@ -39,8 +48,8 @@ export function AdminBlocks() {
             style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }}
           >
             <option value="">{t.admin.filter_book}</option>
-            {['gospel', 'apostol', 'psalter', 'liturgicon', 'horologion', 'octoechos', 'menaion_monthly', 'menaion_festal', 'menaion_general', 'triodion', 'pentecostarion', 'irmologion', 'typikon', 'euchologion', 'hieraticon', 'prologue', 'troparion'].map((b) => (
-              <option key={b} value={b}>{b}</option>
+            {BOOKS.map((b) => (
+              <option key={b} value={b}>{t.books[b as keyof typeof t.books]}</option>
             ))}
           </select>
           <select
@@ -50,8 +59,8 @@ export function AdminBlocks() {
             style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }}
           >
             <option value="">{t.admin.filter_language}</option>
-            {['fr', 'ru'].map((l) => (
-              <option key={l} value={l}>{l}</option>
+            {LANGUAGES.map((l) => (
+              <option key={l} value={l}>{t.languages[l as keyof typeof t.languages]}</option>
             ))}
           </select>
           <button
@@ -98,7 +107,7 @@ export function AdminBlocks() {
                   {b.title ?? b.location_key}
                 </div>
                 <div className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>
-                  {b.book_code} · {b.language} · {b.slot} · tone {b.tone ?? '-'}
+                  {t.books[b.book_code as keyof typeof t.books] ?? b.book_code} · {t.languages[b.language as keyof typeof t.languages] ?? b.language} · {b.slot} · {t.admin.fields.tone} {b.tone ?? '—'}
                 </div>
               </div>
               <div className="flex gap-2 ml-2">
@@ -135,6 +144,8 @@ function BlockForm({
   onCancel: () => void;
 }) {
   const { t } = useI18n();
+  const f = t.admin.fields;
+
   const [form, setForm] = useState<Record<string, string>>({
     book_code: block?.book_code ?? 'octoechos',
     location_key: block?.location_key ?? '',
@@ -177,51 +188,57 @@ function BlockForm({
     <form onSubmit={handleSubmit} className="rounded-lg border p-4 mb-4 space-y-3" style={{ borderColor: 'var(--border)' }}>
       <div className="grid grid-cols-3 gap-3">
         <div>
-          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>book_code</label>
+          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>{f.book_code}</label>
           <select value={form.book_code} onChange={(e) => update('book_code', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }}>
-            {['gospel', 'apostol', 'psalter', 'liturgicon', 'horologion', 'octoechos', 'menaion_monthly', 'menaion_festal', 'menaion_general', 'triodion', 'pentecostarion', 'irmologion', 'typikon', 'euchologion', 'hieraticon', 'prologue', 'troparion'].map((b) => (
-              <option key={b} value={b}>{b}</option>
+            {BOOKS.map((b) => (
+              <option key={b} value={b}>{t.books[b as keyof typeof t.books]}</option>
             ))}
           </select>
         </div>
         <div>
-          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>language</label>
+          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>{f.language}</label>
           <select value={form.language} onChange={(e) => update('language', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }}>
-            {['fr', 'ru'].map((l) => (<option key={l} value={l}>{l}</option>))}
+            {LANGUAGES.map((l) => (
+              <option key={l} value={l}>{t.languages[l as keyof typeof t.languages]}</option>
+            ))}
           </select>
         </div>
         <div>
-          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>tone</label>
+          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>{f.tone}</label>
           <input value={form.tone} onChange={(e) => update('tone', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
         </div>
         <div>
-          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>location_key</label>
+          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>{f.location_key}</label>
           <input value={form.location_key} onChange={(e) => update('location_key', e.target.value)} required className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
         </div>
         <div>
-          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>slot</label>
+          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>{f.slot}</label>
           <input value={form.slot} onChange={(e) => update('slot', e.target.value)} required className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
         </div>
         <div>
-          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>slot_order</label>
+          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>{f.slot_order}</label>
           <input type="number" value={form.slot_order} onChange={(e) => update('slot_order', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
         </div>
       </div>
       <div>
-        <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>title</label>
+        <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>{f.title}</label>
         <input value={form.title} onChange={(e) => update('title', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
       </div>
       <div>
-        <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>content</label>
+        <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>{f.content}</label>
         <textarea value={form.content} onChange={(e) => update('content', e.target.value)} rows={5} className="w-full rounded border px-2 py-1 text-sm font-mono" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
       </div>
       <div className="grid grid-cols-4 gap-3">
-        {['is_doxastikon', 'is_theotokion', 'is_irmos', 'is_katabasia'].map((flag) => (
+        {(['is_doxastikon', 'is_theotokion', 'is_irmos', 'is_katabasia'] as const).map((flag) => (
           <label key={flag} className="flex items-center gap-2 text-xs" style={{ color: 'var(--muted-foreground)' }}>
             <input type="checkbox" checked={form[flag] === 'true'} onChange={(e) => update(flag, String(e.target.checked))} />
-            {flag.replace('is_', '')}
+            {f[flag as keyof typeof f]}
           </label>
         ))}
+      </div>
+      <div>
+        <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>{f.source_ref}</label>
+        <input value={form.source_ref} onChange={(e) => update('source_ref', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
       </div>
       <div className="flex gap-2 justify-end">
         <button type="button" onClick={onCancel} className="px-3 py-1.5 rounded-lg text-sm" style={{ color: 'var(--muted-foreground)' }}>{t.admin.cancel}</button>

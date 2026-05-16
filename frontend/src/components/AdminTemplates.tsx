@@ -51,7 +51,7 @@ export function AdminTemplates() {
               <div className="flex-1 min-w-0">
                 <div className="font-medium text-sm truncate" style={{ color: 'var(--foreground)' }}>{tpl.name}</div>
                 <div className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>
-                  {tpl.service_type} · {tpl.is_special ? t.admin.special : t.admin.regular} · {tpl.blocks?.length ?? 0} {t.admin.blocks_count}
+                  {t.service_types[tpl.service_type as keyof typeof t.service_types] ?? tpl.service_type} · {tpl.is_special ? t.admin.special : t.admin.regular} · {tpl.blocks?.length ?? 0} {t.admin.blocks_count}
                 </div>
               </div>
               <div className="flex gap-2 ml-2">
@@ -112,7 +112,7 @@ function TemplateForm({ template, onSave, onCancel }: { template: TemplateRespon
         <div>
           <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>{f.service_type}</label>
           <select value={form.service_type} onChange={(e) => update('service_type', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }}>
-            {SERVICE_TYPES.map((st) => (<option key={st} value={st}>{st}</option>))}
+            {SERVICE_TYPES.map((st) => (<option key={st} value={st}>{t.service_types[st as keyof typeof t.service_types]}</option>))}
           </select>
         </div>
         <div>
