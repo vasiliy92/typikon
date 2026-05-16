@@ -808,22 +808,24 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     border: none;
     background: var(--pill-bg);
     color: var(--accent);
-    font-size: 0.9375rem;
+    font-size: 1.125rem;
     padding: 0;
     cursor: pointer;
     transition: background var(--transition-fast);
     line-height: 1;
+    font-weight: 400;
   }
 
   .bottom-action-center:hover,
   .bottom-action-center.active {
     background: var(--pill-active);
+    color: var(--accent);
   }
 
   /* --- Bottom Sheet (Mobile) --- */
