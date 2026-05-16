@@ -7,11 +7,11 @@ import { useTopbarTitle } from '@/app/[locale]/layout';
 
 /* ─── Font Scale ─── */
 const FONT_SCALES = [
-  { label: 'Petit', value: 0.85 },
-  { label: 'Normal', value: 1.0 },
-  { label: 'Grand', value: 1.25 },
-  { label: 'Très grand', value: 1.5 },
-  { label: 'Maximum', value: 1.85 },
+  { labelKey: 'small', value: 0.85 },
+  { labelKey: 'normal', value: 1.0 },
+  { labelKey: 'large', value: 1.25 },
+  { labelKey: 'very_large', value: 1.5 },
+  { labelKey: 'maximum', value: 1.85 },
 ];
 const DEFAULT_SCALE = 1.5;
 const FONT_SCALE_KEY = 'typikon-font-scale';
@@ -118,7 +118,7 @@ function ServiceContent({ assembled, dayInfo, error, serviceType, t, locale }: {
           {dayInfo && (
             <>
               {dayInfo.gregorian_date}
-              {dayInfo.tone && ` · Ton ${dayInfo.tone}`}
+              {dayInfo.tone && ` · ${t.service.tone_label} ${dayInfo.tone}`}
               {dayInfo.fasting && ` · ${(t.fasting_types as Record<string, string>)[dayInfo.fasting] || dayInfo.fasting}`}
             </>
           )}
@@ -139,7 +139,7 @@ function ServiceContent({ assembled, dayInfo, error, serviceType, t, locale }: {
           {assembled.patron_troparia.troparion && (
             <div className="lit-text">
               <p className="red-init">
-                Troparion, ton {assembled.patron_troparia.troparion.tone}.{' '}
+                {t.service.troparion_tone} {assembled.patron_troparia.troparion.tone}.{' '}
                 {assembled.patron_troparia.troparion.text}
               </p>
             </div>
@@ -147,7 +147,7 @@ function ServiceContent({ assembled, dayInfo, error, serviceType, t, locale }: {
           {assembled.patron_troparia.kontakion && (
             <div className="lit-text">
               <p>
-                Kontakion, ton {assembled.patron_troparia.kontakion.tone}.{' '}
+                {t.service.kontakion_tone} {assembled.patron_troparia.kontakion.tone}.{' '}
                 {assembled.patron_troparia.kontakion.text}
               </p>
             </div>
@@ -274,6 +274,7 @@ export default function ServicePage() {
     setLoading(true);
     setError(null);
     try {
+      // UI locale → service language (backend only supports fr/ru for now)
       const lang = locale === 'ru' ? 'ru' : 'fr';
       const result = await apiPost<AssembledServiceResponse>(
         `/service/assemble?target_date=${date}&service_type=${serviceType}&temple_id=${templeId}&language=${lang}&calendar_style=${calendarStyle}&mode=${mode}`,
@@ -348,7 +349,7 @@ export default function ServicePage() {
       <aside className="sidebar">
         {assembled && sections.length > 0 ? (
           <>
-            <div className="sidebar-label">Ordre du service</div>
+            <div className="sidebar-label">{t.service.service_order}</div>
             {sections.map((sec, i) => (
               <a
                 key={sec.id}
@@ -361,12 +362,12 @@ export default function ServicePage() {
             ))}
             <div className="sidebar-divider" />
             <div className="sidebar-stats">
-              <span className="sidebar-stat">📄 {sections.length} sections</span>
+              <span className="sidebar-stat">📄 {sections.length} {t.service.sections}</span>
             </div>
           </>
         ) : (
           <div style={{ padding: '0 20px', color: 'var(--muted)', fontFamily: 'var(--font-ui)', fontSize: '0.75rem' }}>
-            Assemblez un service pour voir le sommaire
+            {t.service.assemble_prompt}
           </div>
         )}
       </aside>
@@ -388,7 +389,7 @@ export default function ServicePage() {
             </button>
             {showServicePicker && (
               <div className="service-picker-dropdown open">
-                <div className="service-picker-group-label">Cycle quotidien</div>
+                <div className="service-picker-group-label">{t.service.daily_cycle}</div>
                 {SERVICE_TYPES.map((st) => (
                   <div
                     key={st}
@@ -569,19 +570,19 @@ export default function ServicePage() {
       <div className="bottom-bar">
         <button className="bottom-action" onClick={() => setShowTocSheet(true)}>
           <ListIcon />
-          Sommaire
+          {t.service.toc}
         </button>
         <button className="bottom-action" onClick={() => setShowServiceSheet(true)}>
           <BookIcon size={20} />
-          Service
+          {t.nav.service}
         </button>
         <button className="bottom-action" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
           <ChevronUpIcon />
-          Haut
+          {t.service.top}
         </button>
         <button className="bottom-action" onClick={() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' })}>
           <ChevronDownIcon />
-          Bas
+          {t.service.bottom}
         </button>
       </div>
 
@@ -589,7 +590,7 @@ export default function ServicePage() {
       <div className={`bottom-sheet-overlay ${showTocSheet ? 'open' : ''}`} onClick={() => setShowTocSheet(false)} />
       <div className={`bottom-sheet ${showTocSheet ? 'open' : ''}`}>
         <div className="bottom-sheet-handle" />
-        <div className="bottom-sheet-title">Sommaire</div>
+        <div className="bottom-sheet-title">{t.service.toc}</div>
         {sections.map((sec, i) => (
           <div
             key={sec.id}
@@ -603,7 +604,7 @@ export default function ServicePage() {
         ))}
         {sections.length === 0 && (
           <div style={{ color: 'var(--muted)', fontFamily: 'var(--font-ui)', fontSize: '0.8125rem', padding: '12px 0' }}>
-            Assemblez un service pour voir le sommaire
+            {t.service.assemble_prompt}
           </div>
         )}
       </div>
@@ -612,7 +613,7 @@ export default function ServicePage() {
       <div className={`bottom-sheet-overlay ${showServiceSheet ? 'open' : ''}`} onClick={() => setShowServiceSheet(false)} />
       <div className={`bottom-sheet ${showServiceSheet ? 'open' : ''}`}>
         <div className="bottom-sheet-handle" />
-        <div className="bottom-sheet-title">Service</div>
+        <div className="bottom-sheet-title">{t.nav.service}</div>
         {SERVICE_TYPES.map((st) => (
           <div
             key={st}

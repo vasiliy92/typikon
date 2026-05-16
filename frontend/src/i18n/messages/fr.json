@@ -40,7 +40,8 @@
   },
   "languages": {
     "fr": "Français",
-    "ru": "Русский"
+    "ru": "Русский",
+    "en": "English"
   },
   "home": {
     "title": "Typikon",
@@ -71,7 +72,17 @@
     "ninthHour": "Heure neuvième",
     "compline": "Complies",
     "midnight": "Office de minuit",
-    "feast_rank": "Rang de fête"
+    "feast_rank": "Rang de fête",
+    "service_order": "Ordre du service",
+    "sections": "sections",
+    "assemble_prompt": "Assemblez un service pour voir le sommaire",
+    "daily_cycle": "Cycle quotidien",
+    "toc": "Sommaire",
+    "top": "Haut",
+    "bottom": "Bas",
+    "tone_label": "Ton",
+    "troparion_tone": "Tropaire, ton",
+    "kontakion_tone": "Kondakion, ton"
   },
   "admin": {
     "title": "Panneau d'administration",
@@ -243,5 +254,12 @@
     "hieraticon": "Hiératikon",
     "prologue": "Prologue",
     "troparion": "Tropaire"
+  },
+  "font_scale": {
+    "small": "Petit",
+    "normal": "Normal",
+    "large": "Grand",
+    "very_large": "Très grand",
+    "maximum": "Maximum"
   }
 }

@@ -6,10 +6,11 @@ import { usePathname } from 'next/navigation';
 import { Locale, localeNames, locales } from '@/i18n/config';
 import fr from '@/i18n/messages/fr.json';
 import ru from '@/i18n/messages/ru.json';
+import en from '@/i18n/messages/en.json';
 import { I18nProvider, type Messages } from '@/lib/i18n';
 import { AuthProvider } from '@/lib/auth';
 
-const messages: Record<Locale, Messages> = { fr, ru };
+const messages: Record<Locale, Messages> = { fr, ru, en };
 
 /* ─── Topbar Title Context ─── */
 const TopbarTitleContext = createContext<{
@@ -32,6 +33,11 @@ export default function LocaleLayout({
   const t = messages[currentLocale];
   const pathname = usePathname();
   const [topbarTitle, setTopbarTitle] = useState('');
+
+  // Sync <html lang> with current locale
+  useEffect(() => {
+    document.documentElement.lang = currentLocale;
+  }, [currentLocale]);
 
   return (
     <I18nProvider value={{ locale: currentLocale, t }}>

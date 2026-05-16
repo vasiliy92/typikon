@@ -40,7 +40,8 @@
   },
   "languages": {
     "fr": "Français",
-    "ru": "Русский"
+    "ru": "Русский",
+    "en": "English"
   },
   "home": {
     "title": "Типико́н",
@@ -71,7 +72,17 @@
     "ninthHour": "Девятый час",
     "compline": "Повечерие",
     "midnight": "Полунощница",
-    "feast_rank": "Ранг праздника"
+    "feast_rank": "Ранг праздника",
+    "service_order": "Порядок службы",
+    "sections": "разделов",
+    "assemble_prompt": "Составьте службу для просмотра оглавления",
+    "daily_cycle": "Суточный круг",
+    "toc": "Оглавление",
+    "top": "Вверх",
+    "bottom": "Вниз",
+    "tone_label": "Глас",
+    "troparion_tone": "Тропарь, глас",
+    "kontakion_tone": "Кондак, глас"
   },
   "admin": {
     "title": "Управление",
@@ -243,5 +254,12 @@
     "hieraticon": "Иератикон",
     "prologue": "Пролог",
     "troparion": "Тропарь"
+  },
+  "font_scale": {
+    "small": "Мелкий",
+    "normal": "Обычный",
+    "large": "Крупный",
+    "very_large": "Очень крупный",
+    "maximum": "Максимальный"
   }
 }

@@ -27,7 +27,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="fr" suppressHydrationWarning>
+    <html suppressHydrationWarning>
       <body className={`${cormorantGaramond.variable} ${dmSans.variable}`}>
         {children}
       </body>
