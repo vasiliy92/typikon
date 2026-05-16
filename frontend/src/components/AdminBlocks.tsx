@@ -2,207 +2,130 @@
 
 import { useState } from 'react';
 import { useI18n } from '@/lib/i18n';
-import { useApi, apiPost, apiPut, apiDelete, refreshApi, PaginatedResponse, ServiceBlockResponse } from '@/lib/api';
-import { Plus, Pencil, Trash2, X, Check } from 'lucide-react';
+import { useApi, apiPost, apiPut, apiDelete } from '@/lib/api';
+import type { BlockResponse, PaginatedResponse } from '@/lib/api';
 
-export default function AdminBlocks() {
+export function AdminBlocks() {
   const { t } = useI18n();
   const [page, setPage] = useState(1);
-  const [bookFilter, setBookFilter] = useState('');
-  const [langFilter, setLangFilter] = useState('');
-  const [editing, setEditing] = useState<ServiceBlockResponse | null>(null);
+  const [filterBook, setFilterBook] = useState('');
+  const [filterLang, setFilterLang] = useState('');
+  const qs = [`page=${page}`, `page_size=20`];
+  if (filterBook) qs.push(`book=${filterBook}`);
+  if (filterLang) qs.push(`language=${filterLang}`);
+  const { data, mutate } = useApi<PaginatedResponse<BlockResponse>>(
+    `/admin/blocks?${qs.join('&')}`
+  );
+  const [editing, setEditing] = useState<BlockResponse | null>(null);
   const [creating, setCreating] = useState(false);
 
-  const queryParams = new URLSearchParams({
-    page: String(page),
-    page_size: '25',
-    ...(bookFilter && { book_code: bookFilter }),
-    ...(langFilter && { language: langFilter }),
-  }).toString();
-
-  const { data, error, isLoading } = useApi<PaginatedResponse<ServiceBlockResponse>>(
-    `/api/v1/admin/blocks?${queryParams}`
-  );
-
-  const handleCreate = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const form = e.currentTarget;
-    const fd = new FormData(form);
-    try {
-      await apiPost('/api/v1/admin/blocks', {
-        book_code: fd.get('book_code'),
-        location_key: fd.get('location_key'),
-        slot: fd.get('slot'),
-        slot_order: Number(fd.get('slot_order')) || 1,
-        language: fd.get('language') || 'csy',
-        content: fd.get('content'),
-        title: fd.get('title') || null,
-        tone: fd.get('tone') || null,
-      });
-      setCreating(false);
-      refreshApi(`/api/v1/admin/blocks?${queryParams}`);
-    } catch (err: any) {
-      alert(err.message);
-    }
-  };
-
-  const handleUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!editing) return;
-    const form = e.currentTarget;
-    const fd = new FormData(form);
-    try {
-      await apiPut(`/api/v1/admin/blocks/${editing.id}`, {
-        content: fd.get('content'),
-        title: fd.get('title') || null,
-        tone: fd.get('tone') || null,
-      });
-      setEditing(null);
-      refreshApi(`/api/v1/admin/blocks?${queryParams}`);
-    } catch (err: any) {
-      alert(err.message);
-    }
-  };
+  const items = data?.items ?? [];
+  const total = data?.total ?? 0;
+  const pages = Math.ceil(total / 20);
 
   const handleDelete = async (id: number) => {
     if (!confirm(t.app.confirm_delete)) return;
-    try {
-      await apiDelete(`/api/v1/admin/blocks/${id}`);
-      refreshApi(`/api/v1/admin/blocks?${queryParams}`);
-    } catch (err: any) {
-      alert(err.message);
-    }
+    await apiDelete(`/admin/blocks/${id}`);
+    mutate();
   };
 
-  if (isLoading) return <div className="text-sm" style={{ color: 'var(--muted-foreground)' }}>{t.app.loading}</div>;
-  if (error) return <div className="text-sm" style={{ color: 'oklch(0.6 0.2 25)' }}>{error.message}</div>;
-
   return (
-    <div className="space-y-4">
-      {/* Filters */}
-      <div className="flex flex-wrap gap-2 items-center">
-        <select value={bookFilter} onChange={(e) => { setBookFilter(e.target.value); setPage(1); }} className="input-field w-auto">
-          <option value="">{t.admin.filter_book}</option>
-          {Object.entries(t.books).map(([code, name]) => (
-            <option key={code} value={code}>{name}</option>
+    <div>
+      <div className="flex items-center justify-between mb-4">
+        <span className="text-sm" style={{ color: 'var(--muted-foreground)' }}>{t.admin.total}: {total}</span>
+        <button onClick={() => { setCreating(true); setEditing(null); }} className="px-3 py-1.5 rounded-lg text-sm font-medium" style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}>{t.admin.add}</button>
+      </div>
+
+      <div className="flex gap-3 mb-4">
+        <div className="flex items-center gap-1.5">
+          <label className="text-xs" style={{ color: 'var(--muted-foreground)' }}>{t.admin.filter_book}:</label>
+          <select value={filterBook} onChange={(e) => { setFilterBook(e.target.value); setPage(1); }} className="rounded border px-2 py-1 text-xs" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }}>
+            <option value="">All</option>
+            {['gospel', 'apostol', 'psalter', 'liturgicon', 'horologion', 'octoechos', 'menaion_monthly', 'menaion_festal', 'menaion_general', 'triodion', 'pentecostarion', 'irmologion', 'typikon', 'euchologion', 'hieraticon', 'prologue', 'troparion'].map((b) => (<option key={b} value={b}>{b}</option>))}
+          </select>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <label className="text-xs" style={{ color: 'var(--muted-foreground)' }}>{t.admin.filter_language}:</label>
+          <select value={filterLang} onChange={(e) => { setFilterLang(e.target.value); setPage(1); }} className="rounded border px-2 py-1 text-xs" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }}>
+            <option value="">All</option>
+            {['csy', 'fr', 'en', 'ru'].map((l) => (<option key={l} value={l}>{l}</option>))}
+          </select>
+        </div>
+      </div>
+
+      {(creating || editing) && (
+        <BlockForm block={editing} onSave={async (payload) => { if (editing) { await apiPut(`/admin/blocks/${editing.id}`, payload); } else { await apiPost('/admin/blocks', payload); } setCreating(false); setEditing(null); mutate(); }} onCancel={() => { setCreating(false); setEditing(null); }} />
+      )}
+
+      {items.length === 0 ? (
+        <p className="text-sm py-4" style={{ color: 'var(--muted-foreground)' }}>{t.app.no_results}</p>
+      ) : (
+        <div className="space-y-2">
+          {items.map((b) => (
+            <div key={b.id} className="flex items-center justify-between rounded-lg border px-4 py-3" style={{ borderColor: 'var(--border)' }}>
+              <div className="flex-1 min-w-0">
+                <div className="font-medium text-sm truncate" style={{ color: 'var(--foreground)' }}>{b.title}</div>
+                <div className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>{b.book} · {b.language} · {b.block_type}</div>
+              </div>
+              <div className="flex gap-2 ml-2">
+                <button onClick={() => { setEditing(b); setCreating(false); }} className="text-xs px-2 py-1 rounded" style={{ color: 'var(--primary)' }}>{t.admin.edit}</button>
+                <button onClick={() => handleDelete(b.id)} className="text-xs px-2 py-1 rounded" style={{ color: 'var(--destructive)' }}>{t.admin.delete}</button>
+              </div>
+            </div>
           ))}
-        </select>
-        <select value={langFilter} onChange={(e) => { setLangFilter(e.target.value); setPage(1); }} className="input-field w-auto">
-          <option value="">{t.admin.filter_language}</option>
-          <option value="csy">Церковнославѧ́нскїй</option>
-          <option value="fr">Français</option>
-          <option value="ru">Русский</option>
-          <option value="en">English</option>
-        </select>
-        <button onClick={() => setCreating(true)} className="btn-primary inline-flex items-center gap-1 text-sm">
-          <Plus size={14} /> {t.app.create}
-        </button>
-      </div>
-
-      {/* Create form */}
-      {creating && (
-        <form onSubmit={handleCreate} className="service-block space-y-3">
-          <div className="flex justify-between items-center">
-            <h3 className="font-display font-semibold">{t.app.create}</h3>
-            <button type="button" onClick={() => setCreating(false)}><X size={18} /></button>
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            <input name="book_code" placeholder="book_code" className="input-field" required />
-            <input name="location_key" placeholder="location_key" className="input-field" required />
-            <input name="slot" placeholder="slot" className="input-field" required />
-            <input name="slot_order" type="number" placeholder="slot_order" defaultValue="1" className="input-field" />
-            <select name="language" className="input-field">
-              <option value="csy">CSY</option>
-              <option value="fr">FR</option>
-              <option value="ru">RU</option>
-              <option value="en">EN</option>
-            </select>
-            <input name="tone" placeholder="tone" className="input-field" />
-          </div>
-          <input name="title" placeholder="title" className="input-field" />
-          <textarea name="content" placeholder="content" className="input-field min-h-[100px]" required />
-          <button type="submit" className="btn-primary text-sm inline-flex items-center gap-1">
-            <Check size={14} /> {t.app.save}
-          </button>
-        </form>
+        </div>
       )}
 
-      {/* Edit form */}
-      {editing && (
-        <form onSubmit={handleUpdate} className="service-block space-y-3 border-l-4" style={{ borderLeftColor: 'var(--secondary)' }}>
-          <div className="flex justify-between items-center">
-            <h3 className="font-display font-semibold">{t.app.edit} #{editing.id}</h3>
-            <button type="button" onClick={() => setEditing(null)}><X size={18} /></button>
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            <div className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
-              {editing.book_code} / {editing.location_key} / {editing.slot}
-            </div>
-            <div className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
-              {editing.language} / order {editing.slot_order}
-            </div>
-          </div>
-          <input name="title" defaultValue={editing.title || ''} placeholder="title" className="input-field" />
-          <input name="tone" defaultValue={editing.tone || ''} placeholder="tone" className="input-field" />
-          <textarea name="content" defaultValue={editing.content} className="input-field min-h-[150px]" required />
-          <button type="submit" className="btn-primary text-sm inline-flex items-center gap-1">
-            <Check size={14} /> {t.app.save}
-          </button>
-        </form>
-      )}
-
-      {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Book</th>
-              <th>Location</th>
-              <th>Slot</th>
-              <th>Lang</th>
-              <th>Title</th>
-              <th>Tone</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {data?.items.map((block) => (
-              <tr key={block.id}>
-                <td className="font-mono text-xs">{block.id}</td>
-                <td className="text-xs">{block.book_code}</td>
-                <td className="text-xs font-mono">{block.location_key}</td>
-                <td className="text-xs">{block.slot}</td>
-                <td className="text-xs">{block.language}</td>
-                <td className="text-sm max-w-[200px] truncate">{block.title || '—'}</td>
-                <td>{block.tone ? <span className="tone-badge text-xs">{block.tone}</span> : '—'}</td>
-                <td className="flex gap-1">
-                  <button onClick={() => setEditing(block)} className="p-1 rounded hover:bg-[var(--muted)]">
-                    <Pencil size={14} />
-                  </button>
-                  <button onClick={() => handleDelete(block.id)} className="p-1 rounded hover:bg-[var(--muted)]" style={{ color: 'oklch(0.6 0.2 25)' }}>
-                    <Trash2 size={14} />
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Pagination */}
-      {data && data.pages > 1 && (
-        <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--muted-foreground)' }}>
-          <button disabled={page <= 1} onClick={() => setPage(page - 1)} className="btn-outline text-xs">
-            ←
-          </button>
-          <span>{t.admin.page} {data.page} {t.admin.of} {data.pages}</span>
-          <button disabled={page >= data.pages} onClick={() => setPage(page + 1)} className="btn-outline text-xs">
-            →
-          </button>
-          <span>({data.total} {t.admin.total})</span>
+      {pages > 1 && (
+        <div className="flex items-center justify-center gap-2 mt-4">
+          <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page <= 1} className="px-3 py-1 rounded text-sm disabled:opacity-30" style={{ background: 'var(--muted)', color: 'var(--foreground)' }}>←</button>
+          <span className="text-sm" style={{ color: 'var(--muted-foreground)' }}>{t.admin.page} {page} {t.admin.of} {pages}</span>
+          <button onClick={() => setPage(Math.min(pages, page + 1))} disabled={page >= pages} className="px-3 py-1 rounded text-sm disabled:opacity-30" style={{ background: 'var(--muted)', color: 'var(--foreground)' }}>→</button>
         </div>
       )}
     </div>
+  );
+}
+
+function BlockForm({ block, onSave, onCancel }: { block: BlockResponse | null; onSave: (payload: Record<string, unknown>) => Promise<void>; onCancel: () => void }) {
+  const { t } = useI18n();
+  const [form, setForm] = useState<Record<string, string>>({
+    title: block?.title ?? '', book: block?.book ?? 'gospel', language: block?.language ?? 'csy',
+    block_type: block?.block_type ?? 'prayer', tone: block?.tone ?? '',
+    text_content: block?.text_content ?? '', heading: block?.heading ?? '',
+    template_id: block?.template_id ?? '', sort_order: String(block?.sort_order ?? 0),
+  });
+  const [saving, setSaving] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault(); setSaving(true);
+    const payload: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(form)) {
+      if (['template_id', 'sort_order', 'tone'].includes(k)) { payload[k] = v ? Number(v) : null; }
+      else { payload[k] = v || null; }
+    }
+    await onSave(payload); setSaving(false);
+  };
+
+  const update = (key: string, value: string) => setForm({ ...form, [key]: value });
+
+  return (
+    <form onSubmit={handleSubmit} className="rounded-lg border p-4 mb-4 space-y-3" style={{ borderColor: 'var(--border)' }}>
+      <div className="grid grid-cols-2 gap-3">
+        <div><label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>title</label><input value={form.title} onChange={(e) => update('title', e.target.value)} required className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} /></div>
+        <div><label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>book</label><select value={form.book} onChange={(e) => update('book', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }}>{['gospel', 'apostol', 'psalter', 'liturgicon', 'horologion', 'octoechos', 'menaion_monthly', 'menaion_festal', 'menaion_general', 'triodion', 'pentecostarion', 'irmologion', 'typikon', 'euchologion', 'hieraticon', 'prologue', 'troparion'].map((b) => (<option key={b} value={b}>{b}</option>))}</select></div>
+        <div><label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>language</label><select value={form.language} onChange={(e) => update('language', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }}>{['csy', 'fr', 'en', 'ru'].map((l) => (<option key={l} value={l}>{l}</option>))}</select></div>
+        <div><label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>block_type</label><select value={form.block_type} onChange={(e) => update('block_type', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }}>{['prayer', 'reading', 'hymn', 'rubric', 'ektenia', 'exclamation', 'antiphon', 'kathisma', 'canon', 'stichera', 'troparion', 'kontakion', 'prokeimenon', 'alleluia', 'communion_verse'].map((bt) => (<option key={bt} value={bt}>{bt}</option>))}</select></div>
+        <div><label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>tone</label><input type="number" min="1" max="8" value={form.tone} onChange={(e) => update('tone', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} /></div>
+        <div><label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>sort_order</label><input type="number" value={form.sort_order} onChange={(e) => update('sort_order', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} /></div>
+      </div>
+      <div><label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>heading</label><input value={form.heading} onChange={(e) => update('heading', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} /></div>
+      <div><label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>text_content</label><textarea value={form.text_content} onChange={(e) => update('text_content', e.target.value)} rows={6} className="w-full rounded border px-2 py-1 text-sm font-mono" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} /></div>
+      <div><label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>template_id</label><input type="number" value={form.template_id} onChange={(e) => update('template_id', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} /></div>
+      <div className="flex gap-2 justify-end">
+        <button type="button" onClick={onCancel} className="px-3 py-1.5 rounded-lg text-sm" style={{ color: 'var(--muted-foreground)' }}>{t.admin.cancel}</button>
+        <button type="submit" disabled={saving} className="px-3 py-1.5 rounded-lg text-sm font-medium" style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}>{t.admin.save}</button>
+      </div>
+    </form>
   );
 }
