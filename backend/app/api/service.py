@@ -11,7 +11,7 @@ from app.services.db import AsyncSession, get_session
 router = APIRouter(prefix="/service", tags=["service"])
 
 
-@router.get("/assemble")
+@router.post("/assemble")
 async def assemble_service(
     target_date: date = Query(..., description="Date for the service (YYYY-MM-DD)"),
     service_type: str = Query(..., description="Service type: liturgy, vespers, matins, vigil, hours"),

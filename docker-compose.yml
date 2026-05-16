@@ -47,6 +47,7 @@ services:
       ADMIN_API_KEY: ${ADMIN_API_KEY:-change-me-in-production}
       SUPERADMIN_EMAIL: ${SUPERADMIN_EMAIL:-}
       SUPERADMIN_PASSWORD: ${SUPERADMIN_PASSWORD:-}
+      SEED_DATA: ${SEED_DATA:-false}
       LOG_LEVEL: ${LOG_LEVEL:-info}
       CORS_ORIGINS: ${CORS_ORIGINS:-*}
     depends_on:
@@ -56,6 +57,12 @@ services:
         condition: service_healthy
     networks:
       - typikon-net
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
 
   frontend:
     build:
@@ -63,8 +70,6 @@ services:
       dockerfile: Dockerfile
     image: typikon-frontend:${TAG:-latest}
     restart: unless-stopped
-    environment:
-      NEXT_PUBLIC_API_URL: ""
     networks:
       - typikon-net
 
@@ -75,11 +80,19 @@ services:
     image: typikon-nginx:${TAG:-latest}
     restart: unless-stopped
     depends_on:
-      - backend
-      - frontend
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_started
     networks:
       - typikon-net
       - proxy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O- http://127.0.0.1:80/nginx-health > /dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
 
 volumes:
   pgdata:

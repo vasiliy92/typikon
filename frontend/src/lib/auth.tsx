@@ -7,7 +7,8 @@ interface User {
   id: string;
   email: string;
   role: 'superadmin' | 'admin';
-  created_at: string;
+  display_name?: string;
+  created_at?: string;
 }
 
 interface AuthContextType {
@@ -28,16 +29,43 @@ const AuthContext = createContext<AuthContextType>({
   isSuperadmin: false,
 });
 
+const SESSION_CACHE_KEY = 'typikon-user';
+
+function getCachedUser(): User | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = sessionStorage.getItem(SESSION_CACHE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function setCachedUser(user: User | null) {
+  if (typeof window === 'undefined') return;
+  try {
+    if (user) {
+      sessionStorage.setItem(SESSION_CACHE_KEY, JSON.stringify(user));
+    } else {
+      sessionStorage.removeItem(SESSION_CACHE_KEY);
+    }
+  } catch {
+    // ignore
+  }
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(getCachedUser);
   const [loading, setLoading] = useState(true);
 
   const fetchUser = useCallback(async () => {
     try {
       const data = await apiGet<{ user: User }>('/auth/me');
       setUser(data.user);
+      setCachedUser(data.user);
     } catch {
       setUser(null);
+      setCachedUser(null);
     } finally {
       setLoading(false);
     }
@@ -50,6 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string) => {
     const data = await apiPost<{ user: User }>('/auth/login', { email, password });
     setUser(data.user);
+    setCachedUser(data.user);
   };
 
   const logout = async () => {
@@ -57,6 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await apiPost('/auth/logout', {});
     } finally {
       setUser(null);
+      setCachedUser(null);
     }
   };
 

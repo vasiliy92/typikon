@@ -36,7 +36,7 @@ class ServiceBlock(Base, TimestampMixin):
     slot_order: Mapped[int] = mapped_column(Integer, default=1)
     language: Mapped[Language] = mapped_column(String(5))
 
-    # Translation group — links CSY/FR/EN versions of the same text
+    # Translation group — links FR/RU versions of the same text
     translation_group_id: Mapped[Optional[str]] = mapped_column(
         String(36), nullable=True, default=None, index=True,
     )

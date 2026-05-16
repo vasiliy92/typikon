@@ -27,13 +27,18 @@ def _get_pwd_context() -> Any:
 
 
 def hash_password(password: str) -> str:
-    """Hash a plaintext password."""
-    return _get_pwd_context().hash(password)
+    """Hash a plaintext password. Truncates to 72 bytes (bcrypt limit)."""
+    # bcrypt silently truncates at 72 bytes but raises an error if the
+    # input *after* UTF-8 encoding exceeds 72 bytes in some versions.
+    # Truncate explicitly to avoid bootstrap failures with long credentials.
+    raw = password.encode("utf-8")[:72]
+    return _get_pwd_context().hash(raw.decode("utf-8", errors="ignore"))
 
 
 def verify_password(plain: str, hashed: str) -> bool:
-    """Verify a plaintext password against its hash."""
-    return _get_pwd_context().verify(plain, hashed)
+    """Verify a plaintext password against its hash. Truncates to 72 bytes."""
+    raw = plain.encode("utf-8")[:72]
+    return _get_pwd_context().verify(raw.decode("utf-8", errors="ignore"), hashed)
 
 
 # ── Session management (Redis) ──

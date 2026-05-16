@@ -4,12 +4,25 @@ import { useI18n } from '@/lib/i18n';
 import { useAuth } from '@/lib/auth';
 import { LoginForm } from '@/components/LoginForm';
 import { AdminUsers } from '@/components/AdminUsers';
+import { AdminCalendar } from '@/components/AdminCalendar';
+import { AdminSaints } from '@/components/AdminSaints';
+import { AdminTemplates } from '@/components/AdminTemplates';
+import { AdminBlocks } from '@/components/AdminBlocks';
+import { AdminImport } from '@/components/AdminImport';
 import { useState } from 'react';
 
 export default function AdminPage() {
   const { t } = useI18n();
-  const { user, logout, isAuthenticated, isSuperadmin } = useAuth();
+  const { user, logout, isAuthenticated, isSuperadmin, loading } = useAuth();
   const [activeTab, setActiveTab] = useState('calendar');
+
+  if (loading) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <span className="text-sm" style={{ color: 'var(--muted-foreground)' }}>{t.common.loading}</span>
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return <LoginForm />;
@@ -67,31 +80,11 @@ export default function AdminPage() {
       </div>
 
       <div className="rounded-xl border p-6" style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
-        {activeTab === 'calendar' && (
-          <p style={{ color: 'var(--muted-foreground)' }}>
-            {t.admin.calendarDesc}
-          </p>
-        )}
-        {activeTab === 'saints' && (
-          <p style={{ color: 'var(--muted-foreground)' }}>
-            {t.admin.saintsDesc}
-          </p>
-        )}
-        {activeTab === 'templates' && (
-          <p style={{ color: 'var(--muted-foreground)' }}>
-            {t.admin.templatesDesc}
-          </p>
-        )}
-        {activeTab === 'blocks' && (
-          <p style={{ color: 'var(--muted-foreground)' }}>
-            {t.admin.blocksDesc}
-          </p>
-        )}
-        {activeTab === 'import' && (
-          <p style={{ color: 'var(--muted-foreground)' }}>
-            {t.admin.importDesc}
-          </p>
-        )}
+        {activeTab === 'calendar' && <AdminCalendar />}
+        {activeTab === 'saints' && <AdminSaints />}
+        {activeTab === 'templates' && <AdminTemplates />}
+        {activeTab === 'blocks' && <AdminBlocks />}
+        {activeTab === 'import' && <AdminImport />}
         {activeTab === 'users' && isSuperadmin && <AdminUsers />}
       </div>
     </div>

@@ -23,7 +23,7 @@ class Temple(Base, TimestampMixin):
         nullable=True, default=None,
     )
     calendar_mode: Mapped[CalendarMode] = mapped_column(String(20), default=CalendarMode.NEO_JULIAN)
-    language: Mapped[Language] = mapped_column(String(5), default=Language.CSY)
+    language: Mapped[Language] = mapped_column(String(5), default=Language.RU)
 
     side_chapels: Mapped[list["SideChapel"]] = relationship(back_populates="temple")
 

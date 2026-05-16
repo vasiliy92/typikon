@@ -8,13 +8,12 @@ from pydantic import BaseModel, ConfigDict, field_validator
 
 
 class CalendarEntryCreate(BaseModel):
-    date_type: str
+    date_type: str  # fixed | movable
     month: Optional[int] = None
     day: Optional[int] = None
     pascha_offset: Optional[int] = None
-    title_csy: str
+    title_ru: str
     title_fr: Optional[str] = None
-    title_en: Optional[str] = None
     saint_id: Optional[int] = None
     rank: str = "1"
     tone: Optional[int] = None
@@ -37,9 +36,8 @@ class CalendarEntryUpdate(BaseModel):
     month: Optional[int] = None
     day: Optional[int] = None
     pascha_offset: Optional[int] = None
-    title_csy: Optional[str] = None
+    title_ru: Optional[str] = None
     title_fr: Optional[str] = None
-    title_en: Optional[str] = None
     saint_id: Optional[int] = None
     rank: Optional[str] = None
     tone: Optional[int] = None
@@ -58,15 +56,14 @@ class CalendarEntryResponse(BaseModel):
     month: Optional[int] = None
     day: Optional[int] = None
     pascha_offset: Optional[int] = None
-    title_csy: str
+    title_ru: str
     title_fr: Optional[str] = None
-    title_en: Optional[str] = None
     saint_id: Optional[int] = None
-    rank: str
+    rank: str = "1"
     tone: Optional[int] = None
-    fasting: str
-    forefeast_days: int
-    afterfeast_days: int
+    fasting: str = "none"
+    forefeast_days: int = 0
+    afterfeast_days: int = 0
     service_template_id: Optional[int] = None
     rubric: Optional[str] = None
     created_at: Optional[datetime] = None

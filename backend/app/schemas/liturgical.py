@@ -14,7 +14,7 @@ class ServiceBlockCreate(BaseModel):
     location_key: str
     slot: str
     slot_order: int = 1
-    language: str = "csy"
+    language: str = "ru"
     translation_group_id: Optional[str] = None
     title: Optional[str] = None
     content: str
@@ -138,7 +138,7 @@ class TemplateResponse(BaseModel):
 class LectionCreate(BaseModel):
     book_code: str
     zachalo: int
-    language: str = "csy"
+    language: str = "ru"
     title: str
     content: str
     short_ref: str
@@ -177,8 +177,7 @@ class ImportResult(BaseModel):
 
 class BookInfo(BaseModel):
     code: str
-    name_csy: str
+    name_ru: str
     name_fr: str
-    name_en: str
     block_count: int = 0
     languages: list[str] = []

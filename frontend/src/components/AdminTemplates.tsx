@@ -2,190 +2,95 @@
 
 import { useState } from 'react';
 import { useI18n } from '@/lib/i18n';
-import { useApi, apiPost, apiPut, apiDelete, refreshApi, PaginatedResponse, ServiceTemplateResponse } from '@/lib/api';
-import { Plus, Pencil, Trash2, X, Check, ChevronDown, ChevronRight } from 'lucide-react';
+import { useApi, apiPost, apiPut, apiDelete } from '@/lib/api';
+import type { TemplateResponse, PaginatedResponse } from '@/lib/api';
 
-export default function AdminTemplates() {
-  const { t, locale } = useI18n();
+export function AdminTemplates() {
+  const { t } = useI18n();
   const [page, setPage] = useState(1);
-  const [editing, setEditing] = useState<ServiceTemplateResponse | null>(null);
-  const [creating, setCreating] = useState(false);
-  const [expandedId, setExpandedId] = useState<number | null>(null);
-
-  const { data, isLoading, error } = useApi<PaginatedResponse<ServiceTemplateResponse>>(
-    `/api/v1/admin/templates?page=${page}&page_size=25`
+  const { data, mutate } = useApi<PaginatedResponse<TemplateResponse>>(
+    `/admin/templates?page=${page}&page_size=20`
   );
+  const [editing, setEditing] = useState<TemplateResponse | null>(null);
+  const [creating, setCreating] = useState(false);
 
-  const handleCreate = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const fd = new FormData(e.currentTarget);
-    try {
-      await apiPost('/api/v1/admin/templates', {
-        name: fd.get('name'),
-        service_type: fd.get('service_type'),
-        description: fd.get('description') || null,
-      });
-      setCreating(false);
-      refreshApi(`/api/v1/admin/templates?page=${page}&page_size=25`);
-    } catch (err: any) {
-      alert(err.message);
-    }
-  };
-
-  const handleUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!editing) return;
-    const fd = new FormData(e.currentTarget);
-    try {
-      await apiPut(`/api/v1/admin/templates/${editing.id}`, {
-        name: fd.get('name'),
-        service_type: fd.get('service_type'),
-        description: fd.get('description') || null,
-      });
-      setEditing(null);
-      refreshApi(`/api/v1/admin/templates?page=${page}&page_size=25`);
-    } catch (err: any) {
-      alert(err.message);
-    }
-  };
+  const items = data?.items ?? [];
+  const total = data?.total ?? 0;
+  const pages = Math.ceil(total / 20);
 
   const handleDelete = async (id: number) => {
     if (!confirm(t.app.confirm_delete)) return;
-    try {
-      await apiDelete(`/api/v1/admin/templates/${id}`);
-      refreshApi(`/api/v1/admin/templates?page=${page}&page_size=25`);
-    } catch (err: any) {
-      alert(err.message);
-    }
+    await apiDelete(`/admin/templates/${id}`);
+    mutate();
   };
 
-  const SERVICE_TYPES = [
-    'vespers', 'matins', 'liturgy', 'hours', 'all_night_vigil',
-    'great_compline', 'small_compline', 'midnight_office',
-    'typika', 'moleben', 'panikhida', 'akathist',
-  ];
-
-  if (isLoading) return <div className="text-sm" style={{ color: 'var(--muted-foreground)' }}>{t.app.loading}</div>;
-  if (error) return <div className="text-sm" style={{ color: 'oklch(0.6 0.2 25)' }}>{error.message}</div>;
-
   return (
-    <div className="space-y-4">
-      <div className="flex gap-2 items-center">
-        <button onClick={() => setCreating(true)} className="btn-primary inline-flex items-center gap-1 text-sm">
-          <Plus size={14} /> {t.app.create}
-        </button>
+    <div>
+      <div className="flex items-center justify-between mb-4">
+        <span className="text-sm" style={{ color: 'var(--muted-foreground)' }}>{t.admin.total}: {total}</span>
+        <button onClick={() => { setCreating(true); setEditing(null); }} className="px-3 py-1.5 rounded-lg text-sm font-medium" style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}>{t.admin.add}</button>
       </div>
 
-      {creating && (
-        <form onSubmit={handleCreate} className="service-block space-y-3">
-          <div className="flex justify-between items-center">
-            <h3 className="font-display font-semibold">{t.app.create}</h3>
-            <button type="button" onClick={() => setCreating(false)}><X size={18} /></button>
-          </div>
-          <input name="name" placeholder="Template name" className="input-field" required />
-          <select name="service_type" className="input-field" required>
-            <option value="">Select service type...</option>
-            {SERVICE_TYPES.map(st => (
-              <option key={st} value={st}>{st}</option>
-            ))}
-          </select>
-          <textarea name="description" placeholder="Description" rows={2} className="input-field" />
-          <button type="submit" className="btn-primary text-sm inline-flex items-center gap-1">
-            <Check size={14} /> {t.app.save}
-          </button>
-        </form>
+      {(creating || editing) && (
+        <TemplateForm template={editing} onSave={async (payload) => { if (editing) { await apiPut(`/admin/templates/${editing.id}`, payload); } else { await apiPost('/admin/templates', payload); } setCreating(false); setEditing(null); mutate(); }} onCancel={() => { setCreating(false); setEditing(null); }} />
       )}
 
-      {editing && (
-        <form onSubmit={handleUpdate} className="service-block space-y-3 border-l-4" style={{ borderLeftColor: 'var(--secondary)' }}>
-          <div className="flex justify-between items-center">
-            <h3 className="font-display font-semibold">{t.app.edit} #{editing.id}</h3>
-            <button type="button" onClick={() => setEditing(null)}><X size={18} /></button>
-          </div>
-          <input name="name" defaultValue={editing.name} className="input-field" required />
-          <select name="service_type" defaultValue={editing.service_type} className="input-field" required>
-            {SERVICE_TYPES.map(st => (
-              <option key={st} value={st}>{st}</option>
-            ))}
-          </select>
-          <textarea name="description" defaultValue={editing.description || ''} rows={2} className="input-field" />
-          <button type="submit" className="btn-primary text-sm inline-flex items-center gap-1">
-            <Check size={14} /> {t.app.save}
-          </button>
-        </form>
+      {items.length === 0 ? (
+        <p className="text-sm py-4" style={{ color: 'var(--muted-foreground)' }}>{t.app.no_results}</p>
+      ) : (
+        <div className="space-y-2">
+          {items.map((tpl) => (
+            <div key={tpl.id} className="flex items-center justify-between rounded-lg border px-4 py-3" style={{ borderColor: 'var(--border)' }}>
+              <div className="flex-1 min-w-0">
+                <div className="font-medium text-sm truncate" style={{ color: 'var(--foreground)' }}>{tpl.name}</div>
+                <div className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>{tpl.service_type} · {tpl.is_special ? '★ special' : 'regular'} · {tpl.blocks?.length ?? 0} blocks</div>
+              </div>
+              <div className="flex gap-2 ml-2">
+                <button onClick={() => { setEditing(tpl); setCreating(false); }} className="text-xs px-2 py-1 rounded" style={{ color: 'var(--primary)' }}>{t.admin.edit}</button>
+                <button onClick={() => handleDelete(tpl.id)} className="text-xs px-2 py-1 rounded" style={{ color: 'var(--destructive)' }}>{t.admin.delete}</button>
+              </div>
+            </div>
+          ))}
+        </div>
       )}
 
-      <div className="overflow-x-auto">
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Service Type</th>
-              <th>Blocks</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {data?.items.map((tmpl) => (
-              <>
-                <tr key={tmpl.id}>
-                  <td className="font-mono text-xs">{tmpl.id}</td>
-                  <td className="text-sm font-display">{tmpl.name}</td>
-                  <td className="text-xs" style={{ color: 'var(--secondary)' }}>{tmpl.service_type}</td>
-                  <td className="text-xs">{tmpl.blocks?.length || 0}</td>
-                  <td className="flex gap-1">
-                    <button
-                      onClick={() => setExpandedId(expandedId === tmpl.id ? null : tmpl.id)}
-                      className="p-1 rounded hover:bg-[var(--muted)]"
-                    >
-                      {expandedId === tmpl.id ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-                    </button>
-                    <button onClick={() => setEditing(tmpl)} className="p-1 rounded hover:bg-[var(--muted)]">
-                      <Pencil size={14} />
-                    </button>
-                    <button onClick={() => handleDelete(tmpl.id)} className="p-1 rounded hover:bg-[var(--muted)]" style={{ color: 'oklch(0.6 0.2 25)' }}>
-                      <Trash2 size={14} />
-                    </button>
-                  </td>
-                </tr>
-                {expandedId === tmpl.id && tmpl.blocks && tmpl.blocks.length > 0 && (
-                  <tr key={`${tmpl.id}-blocks`}>
-                    <td colSpan={5} className="p-0">
-                      <div className="p-3 space-y-1" style={{ background: 'var(--muted)' }}>
-                        <div className="text-xs font-display font-semibold mb-2" style={{ color: 'var(--secondary)' }}>
-                          Template Blocks
-                        </div>
-                        {tmpl.blocks
-                          .sort((a, b) => a.block_order - b.block_order)
-                          .map((block, idx) => (
-                            <div key={idx} className="flex gap-2 text-xs items-center py-1 px-2 rounded" style={{ background: 'var(--background)' }}>
-                              <span className="font-mono" style={{ color: 'var(--muted-foreground)' }}>#{block.block_order}</span>
-                              <span className="font-display">{block.block_name}</span>
-                              {block.is_optional && <span className="text-xs px-1 rounded" style={{ background: 'var(--accent)', color: 'var(--accent-foreground)' }}>opt</span>}
-                              {block.conditions && Object.keys(block.conditions).length > 0 && (
-                                <span className="text-xs px-1 rounded" style={{ background: 'var(--secondary)', color: 'var(--secondary-foreground)' }}>cond</span>
-                              )}
-                            </div>
-                          ))}
-                      </div>
-                    </td>
-                  </tr>
-                )}
-              </>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {data && data.pages > 1 && (
-        <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--muted-foreground)' }}>
-          <button disabled={page <= 1} onClick={() => setPage(page - 1)} className="btn-outline text-xs">←</button>
-          <span>{t.admin.page} {data.page} {t.admin.of} {data.pages}</span>
-          <button disabled={page >= data.pages} onClick={() => setPage(page + 1)} className="btn-outline text-xs">→</button>
-          <span>({data.total} {t.admin.total})</span>
+      {pages > 1 && (
+        <div className="flex items-center justify-center gap-2 mt-4">
+          <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page <= 1} className="px-3 py-1 rounded text-sm disabled:opacity-30" style={{ background: 'var(--muted)', color: 'var(--foreground)' }}>←</button>
+          <span className="text-sm" style={{ color: 'var(--muted-foreground)' }}>{t.admin.page} {page} {t.admin.of} {pages}</span>
+          <button onClick={() => setPage(Math.min(pages, page + 1))} disabled={page >= pages} className="px-3 py-1 rounded text-sm disabled:opacity-30" style={{ background: 'var(--muted)', color: 'var(--foreground)' }}>→</button>
         </div>
       )}
     </div>
+  );
+}
+
+function TemplateForm({ template, onSave, onCancel }: { template: TemplateResponse | null; onSave: (payload: Record<string, unknown>) => Promise<void>; onCancel: () => void }) {
+  const { t } = useI18n();
+  const [form, setForm] = useState<Record<string, string>>({ name: template?.name ?? '', service_type: template?.service_type ?? 'liturgy', sub_type: template?.sub_type ?? '', is_special: String(template?.is_special ?? false), description: template?.description ?? '' });
+  const [saving, setSaving] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault(); setSaving(true);
+    await onSave({ name: form.name, service_type: form.service_type, sub_type: form.sub_type || null, is_special: form.is_special === 'true', description: form.description || null });
+    setSaving(false);
+  };
+
+  const update = (key: string, value: string) => setForm({ ...form, [key]: value });
+
+  return (
+    <form onSubmit={handleSubmit} className="rounded-lg border p-4 mb-4 space-y-3" style={{ borderColor: 'var(--border)' }}>
+      <div className="grid grid-cols-2 gap-3">
+        <div><label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>name</label><input value={form.name} onChange={(e) => update('name', e.target.value)} required className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} /></div>
+        <div><label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>service_type</label><select value={form.service_type} onChange={(e) => update('service_type', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }}>{['liturgy', 'vespers', 'matins', 'vigil', 'hours', 'compline', 'midnight_office', 'typica', 'presanctified'].map((st) => (<option key={st} value={st}>{st}</option>))}</select></div>
+        <div><label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>sub_type</label><input value={form.sub_type} onChange={(e) => update('sub_type', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} /></div>
+        <div><label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>is_special</label><select value={form.is_special} onChange={(e) => update('is_special', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }}><option value="false">No</option><option value="true">Yes</option></select></div>
+      </div>
+      <div><label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>description</label><textarea value={form.description} onChange={(e) => update('description', e.target.value)} rows={2} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} /></div>
+      <div className="flex gap-2 justify-end">
+        <button type="button" onClick={onCancel} className="px-3 py-1.5 rounded-lg text-sm" style={{ color: 'var(--muted-foreground)' }}>{t.admin.cancel}</button>
+        <button type="submit" disabled={saving} className="px-3 py-1.5 rounded-lg text-sm font-medium" style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}>{t.admin.save}</button>
+      </div>
+    </form>
   );
 }

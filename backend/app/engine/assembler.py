@@ -108,10 +108,13 @@ class ServiceAssembler:
         await self._save_assembled_service(result)
         return result
 
+    # ── Data loading ──────────────────────────────────────────────────
+
     async def _load_data(self) -> None:
         julian = self.cal.julian_date
         month, day = julian.month, julian.day
 
+        # Fixed entries match on Julian month/day
         stmt_fixed = select(CalendarEntry).where(
             CalendarEntry.date_type == "fixed",
             CalendarEntry.month == month,
@@ -121,6 +124,7 @@ class ServiceAssembler:
             (await self.db.execute(stmt_fixed)).scalars().all()
         )
 
+        # Movable entries match on pascha_offset (= days_from_pascha)
         days_from = self.cal.days_from_pascha
         stmt_movable = select(CalendarEntry).where(
             CalendarEntry.date_type == "movable",
@@ -130,9 +134,11 @@ class ServiceAssembler:
             (await self.db.execute(stmt_movable)).scalars().all()
         )
 
+        # Load temple
         stmt_temple = select(Temple).where(Temple.id == self.temple_id)
         self._temple = (await self.db.execute(stmt_temple)).scalar_one_or_none()
 
+        # Load all Markov rules for this service type, filter in Python
         stmt_markov = select(MarkovRule)
         all_markov = list(
             (await self.db.execute(stmt_markov)).scalars().all()
@@ -141,7 +147,14 @@ class ServiceAssembler:
             m for m in all_markov if self._markov_matches(m, julian)
         ]
 
+    # ── Markov rule matching ──────────────────────────────────────────
+
     def _markov_matches(self, rule: MarkovRule, julian_date: date) -> bool:
+        """Check if a MarkovRule's conditions match the current day.
+
+        MarkovRule stores conditions as a JSON string in the `conditions` field.
+        Expected JSON keys: month, day, days_from_pascha, day_of_week, service_type.
+        """
         try:
             conditions = json.loads(rule.conditions) if rule.conditions else {}
         except (json.JSONDecodeError, TypeError):
@@ -149,6 +162,7 @@ class ServiceAssembler:
 
         if conditions.get("service_type") and conditions["service_type"] != self.service_type:
             return False
+
         if "month" in conditions and julian_date.month != conditions["month"]:
             return False
         if "day" in conditions and julian_date.day != conditions["day"]:
@@ -157,12 +171,20 @@ class ServiceAssembler:
             if self.cal.days_from_pascha != conditions["days_from_pascha"]:
                 return False
         if "day_of_week" in conditions:
+            # day_of_week in conditions is 0=Sunday..6=Saturday (Python weekday+1 mod 7)
             dow = (self.cal.gregorian_date.weekday() + 1) % 7
             if dow != conditions["day_of_week"]:
                 return False
+
         return True
 
+    # ── Feast rank ────────────────────────────────────────────────────
+
     def _determine_feast_rank(self) -> int:
+        """Determine the highest feast rank from fixed and movable entries.
+
+        FeastRank values: DAILY="1", MINOR_SAINT="2", POLYELEOS="3", VIGIL="4", LORD_THEOTOKOS="5"
+        """
         max_rank = 1
         for entry in self._fixed_entries + self._movable_entries:
             try:
@@ -173,16 +195,22 @@ class ServiceAssembler:
                 pass
         return max_rank
 
+    # ── Template selection ────────────────────────────────────────────
+
     async def _select_template(self, template_type: str) -> ServiceTemplate | None:
+        """Select a service template matching the service type and sub_type."""
         stmt = select(ServiceTemplate).where(
             ServiceTemplate.service_type == self.service_type,
             ServiceTemplate.sub_type == template_type,
         ).limit(1)
         return (await self.db.execute(stmt)).scalar_one_or_none()
 
+    # ── Block ordering ────────────────────────────────────────────────
+
     async def _order_blocks(
         self, template: ServiceTemplate, feast_rank: int,
     ) -> list[dict[str, Any]]:
+        """Load template blocks in order and apply Markov overrides."""
         stmt = (
             select(ServiceTemplateBlock)
             .where(ServiceTemplateBlock.template_id == template.id)
@@ -206,6 +234,7 @@ class ServiceAssembler:
             }
             result.append(block_dict)
 
+        # Apply Markov overrides
         for override in self._markov_overrides:
             result = self._apply_markov(result, override)
 
@@ -214,6 +243,12 @@ class ServiceAssembler:
     def _apply_markov(
         self, blocks: list[dict], rule: MarkovRule,
     ) -> list[dict]:
+        """Apply a Markov rule override to the block list.
+
+        MarkovRule stores overrides as JSON in the `overrides` field.
+        Expected JSON keys: action ("insert"|"remove"|"replace"),
+        after_slot_key, slot_key, replacement_slot_key, content, rubric.
+        """
         try:
             overrides = json.loads(rule.overrides) if rule.overrides else {}
         except (json.JSONDecodeError, TypeError):
@@ -256,15 +291,20 @@ class ServiceAssembler:
 
         return blocks
 
+    # ── Block text resolution ─────────────────────────────────────────
+
     async def _resolve_block_texts(
         self, blocks: list[dict[str, Any]],
     ) -> list[dict[str, Any]]:
+        """Fill in actual text content for blocks that have fixed_content_key."""
+        # Collect all content keys that need resolution
         content_keys = [
             b["fixed_content_key"] for b in blocks if b.get("fixed_content_key")
         ]
         if not content_keys:
             return blocks
 
+        # Look up ServiceBlocks by location_key
         stmt = select(ServiceBlock).where(
             ServiceBlock.location_key.in_(content_keys),
             ServiceBlock.language == self.language,
@@ -273,13 +313,14 @@ class ServiceAssembler:
             b.location_key: b for b in (await self.db.execute(stmt)).scalars().all()
         }
 
-        if not block_map and self.language != "csy":
-            stmt_csy = select(ServiceBlock).where(
+        # Fallback to RU if requested language not found
+        if not block_map and self.language != "ru":
+            stmt_ru = select(ServiceBlock).where(
                 ServiceBlock.location_key.in_(content_keys),
-                ServiceBlock.language == "csy",
+                ServiceBlock.language == "ru",
             )
             block_map = {
-                b.location_key: b for b in (await self.db.execute(stmt_csy)).scalars().all()
+                b.location_key: b for b in (await self.db.execute(stmt_ru)).scalars().all()
             }
 
         for b in blocks:
@@ -291,6 +332,7 @@ class ServiceAssembler:
                 b["book_code"] = sb.book_code
                 b["tone"] = sb.tone
 
+                # Try to find translation if language differs
                 if self.language != sb.language and sb.translation_group_id:
                     translated = await self._find_translation(
                         sb.translation_group_id, self.language,
@@ -310,10 +352,22 @@ class ServiceAssembler:
         ).limit(1)
         return (await self.db.execute(stmt)).scalar_one_or_none()
 
+    # ── Lection loading ───────────────────────────────────────────────
+
     async def _load_lections(self) -> dict[str, list[dict]]:
+        """Load scripture readings for the current day.
+
+        LectionAssignment uses:
+        - fixed_month + fixed_day for fixed-date assignments
+        - moveable_key for movable assignments (e.g. "pascha+1", "lent-3")
+        - lection_book for the book type (gospel, apostol, etc.)
+        - zachalo for the reading number
+        """
         result: dict[str, list[dict]] = {}
+
         julian = self.cal.julian_date
 
+        # Fixed assignments
         stmt_fixed = (
             select(LectionAssignment, Lection)
             .join(Lection, LectionAssignment.zachalo == Lection.zachalo)
@@ -331,6 +385,8 @@ class ServiceAssembler:
                 self._lection_dict(lection, assignment)
             )
 
+        # Movable assignments — match by moveable_key
+        # Build the moveable_key from the pascha offset
         moveable_key = self._build_moveable_key()
         if moveable_key:
             stmt_movable = (
@@ -352,11 +408,16 @@ class ServiceAssembler:
         return result
 
     def _build_moveable_key(self) -> str | None:
+        """Build a moveable_key string from the current liturgical position.
+
+        Examples: "pascha", "pascha+1", "lent-3", "pentecost+7"
+        """
         days_from = self.cal.days_from_pascha
         if days_from == 0:
             return "pascha"
         if days_from > 0:
             return f"pascha+{days_from}"
+        # During pre-Lent / Lent / Holy Week
         return f"lent{days_from}"
 
     def _lection_dict(self, lection: Lection, assignment: LectionAssignment) -> dict:
@@ -371,7 +432,17 @@ class ServiceAssembler:
             "is_paremia": assignment.is_paremia,
         }
 
+    # ── Patron troparia ───────────────────────────────────────────────
+
     async def _load_patron_troparia(self) -> dict[str, Any]:
+        """Load temple patron saint troparia and kontakia.
+
+        Uses Temple.patronsaint_id (FK→saints.id) and Temple.dedication_type.
+        DedicationType: lord, theotokos, saint — affects ordering per Typikon Ch. 52.
+
+        Troparia/kontakia are stored directly on the Saint model.
+        Falls back to ServiceBlock lookup for backwards compatibility.
+        """
         if not self._temple or not self._temple.patronsaint_id:
             return {"has_patron": False}
 
@@ -382,24 +453,63 @@ class ServiceAssembler:
         troparion = None
         kontakion = None
 
-        if saint.troparion_text:
-            troparion = {
-                "text": saint.troparion_text,
-                "tone": saint.troparion_tone,
-            }
-        if saint.kontakion_text:
-            kontakion = {
-                "text": saint.kontakion_text,
-                "tone": saint.kontakion_tone,
-            }
+        # Try Saint model fields first (preferred)
+        lang = self.language  # "fr" or "ru"
+
+        # Get troparion in requested language, fallback to other language
+        trop_text = getattr(saint, f"troparion_{lang}", None)
+        if not trop_text and lang != "ru":
+            trop_text = saint.troparion_ru
+        if not trop_text and lang != "fr":
+            trop_text = saint.troparion_fr
+        if trop_text:
+            troparion = {"text": trop_text, "tone": saint.troparion_tone}
+
+        # Get kontakion in requested language, fallback to other language
+        kont_text = getattr(saint, f"kontakion_{lang}", None)
+        if not kont_text and lang != "ru":
+            kont_text = saint.kontakion_ru
+        if not kont_text and lang != "fr":
+            kont_text = saint.kontakion_fr
+        if kont_text:
+            kontakion = {"text": kont_text, "tone": saint.kontakion_tone}
+
+        # Fallback to ServiceBlock lookup if Saint fields are empty
+        if not troparion or not kontakion:
+            for slot, key_suffix in [("troparion", "troparion"), ("kontakion", "kontakion")]:
+                if (slot == "troparion" and troparion) or (slot == "kontakion" and kontakion):
+                    continue  # Already have it from Saint model
+                loc_key = f"saint-{saint.slug}-{key_suffix}"
+                stmt = select(ServiceBlock).where(
+                    ServiceBlock.location_key == loc_key,
+                    ServiceBlock.language == self.language,
+                ).limit(1)
+                block = (await self.db.execute(stmt)).scalar_one_or_none()
+                if not block and self.language != "ru":
+                    stmt_ru = select(ServiceBlock).where(
+                        ServiceBlock.location_key == loc_key,
+                        ServiceBlock.language == "ru",
+                    ).limit(1)
+                    block = (await self.db.execute(stmt_ru)).scalar_one_or_none()
+                if block:
+                    entry = {"text": block.content, "tone": block.tone}
+                    if slot == "troparion":
+                        troparion = entry
+                    else:
+                        kontakion = entry
+
+        # Get saint name in requested language
+        name = getattr(saint, f"name_{lang}", None) or saint.name_ru or saint.name_fr
 
         return {
             "has_patron": True,
-            "saint_name": saint.name_en or saint.name_csy,
+            "saint_name": name,
             "dedication_type": self._temple.dedication_type,
             "troparion": troparion,
             "kontakion": kontakion,
         }
+
+    # ── Persistence ───────────────────────────────────────────────────
 
     async def _save_assembled_service(self, result: dict) -> None:
         record = AssembledService(
@@ -413,13 +523,15 @@ class ServiceAssembler:
         self.db.add(record)
         await self.db.commit()
 
+    # ── Helpers ────────────────────────────────────────────────────────
+
     @staticmethod
     def _entry_summary(entry: CalendarEntry) -> dict:
+        """Summarize a CalendarEntry for the assembled output."""
         return {
             "id": entry.id,
-            "title_csy": entry.title_csy,
+            "title_ru": entry.title_ru,
             "title_fr": entry.title_fr,
-            "title_en": entry.title_en,
             "rank": entry.rank,
             "tone": entry.tone,
             "fasting": entry.fasting,

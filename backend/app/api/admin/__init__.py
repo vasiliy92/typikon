@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends
 
 from app.api.admin.blocks import router as blocks_router
 from app.api.admin.calendar import router as calendar_router
-from app.api.admin.import import router as import_router
+from app.api.admin.data_import import router as import_router
 from app.api.admin.saints import router as saints_router
 from app.api.admin.templates import router as templates_router
 from app.api.deps import get_current_user

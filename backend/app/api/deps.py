@@ -1,11 +1,14 @@
 """FastAPI dependencies — authentication and authorization."""
 from __future__ import annotations
 
+from uuid import UUID
+
 from fastapi import Cookie, Depends, HTTPException, Request
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.user import User, UserRole
-from app.services.auth import get_session
+from app.services.auth import get_session as get_auth_session
 from app.services.db import get_session
 
 
@@ -39,6 +42,7 @@ async def get_current_user(
     # Legacy API key support
     api_key = request.headers.get("x-admin-key")
     if api_key and api_key == request.app.state.settings.ADMIN_API_KEY:
+        # API key grants superadmin-like access; return a synthetic user
         return User(
             email="api-key",
             password_hash="",
@@ -52,7 +56,7 @@ async def get_current_user(
     if not token:
         raise HTTPException(401, "Not authenticated")
 
-    session_data = await get_session(token)
+    session_data = await get_auth_session(token)
     if not session_data:
         raise HTTPException(401, "Session expired or invalid")
 
@@ -60,7 +64,6 @@ async def get_current_user(
     if not user_id:
         raise HTTPException(401, "Invalid session")
 
-    from uuid import UUID
     user = await db.get(User, UUID(user_id))
     if not user or not user.is_active:
         raise HTTPException(401, "User not found or inactive")

@@ -17,19 +17,24 @@ router = APIRouter(prefix="/calendar", tags=["calendar"])
 
 @router.get("/today")
 async def liturgical_today(
-    calendar_style: str = Query("new", pattern="^(new|old)$"),
+    style: str = Query("new", pattern="^(new|old)$", alias="style"),
+    calendar_style: str = Query(None, deprecated=True, description="Use 'style' instead"),
 ):
     """Get liturgical information for today."""
-    return compute_liturgical_date(date.today(), calendar_style)
+    cal_style = calendar_style if calendar_style else style
+    return compute_liturgical_date(date.today(), cal_style)
 
 
 @router.get("/date/{target_date}")
 async def liturgical_date(
     target_date: date,
-    calendar_style: str = Query("new", pattern="^(new|old)$"),
+    style: str = Query("new", pattern="^(new|old)$", alias="style"),
+    calendar_style: str = Query(None, deprecated=True, description="Use 'style' instead"),
 ):
     """Get liturgical information for a specific date (YYYY-MM-DD)."""
-    return compute_liturgical_date(target_date, calendar_style)
+    # Support both 'style' and deprecated 'calendar_style' params
+    cal_style = calendar_style if calendar_style else style
+    return compute_liturgical_date(target_date, cal_style)
 
 
 @router.get("/pascha/{year}")

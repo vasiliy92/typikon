@@ -7,12 +7,11 @@ import clsx from 'clsx';
 import { Moon, Sun, Church } from 'lucide-react';
 import { Locale, localeNames, locales } from '@/i18n/config';
 import fr from '@/i18n/messages/fr.json';
-import csy from '@/i18n/messages/csy.json';
 import ru from '@/i18n/messages/ru.json';
 import { I18nProvider, type Messages } from '@/lib/i18n';
 import { AuthProvider } from '@/lib/auth';
 
-const messages: Record<Locale, Messages> = { fr, csy, ru };
+const messages: Record<Locale, Messages> = { fr, ru };
 
 export default function LocaleLayout({
   children,

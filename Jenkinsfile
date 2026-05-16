@@ -48,6 +48,36 @@ pipeline {
                 '''
             }
         }
+
+        stage('Verify') {
+            steps {
+                sh '''
+                    echo "Waiting for services to become healthy..."
+                    MAX_WAIT=120
+                    ELAPSED=0
+                    while [ $ELAPSED -lt $MAX_WAIT ]; do
+                        BACKEND=$(docker inspect --format="{{.State.Health.Status}}" typikon-backend-1 2>/dev/null || echo "missing")
+                        NGINX=$(docker inspect --format="{{.State.Health.Status}}" typikon-nginx-1 2>/dev/null || echo "missing")
+                        echo "  backend=$BACKEND nginx=$NGINX (${ELAPSED}s)"
+                        if [ "$BACKEND" = "healthy" ] && [ "$NGINX" = "healthy" ]; then
+                            echo "All services healthy!"
+                            break
+                        fi
+                        sleep 5
+                        ELAPSED=$((ELAPSED + 5))
+                    done
+
+                    if [ $ELAPSED -ge $MAX_WAIT ]; then
+                        echo "ERROR: Services did not become healthy within ${MAX_WAIT}s"
+                        docker compose logs --tail=50
+                        exit 1
+                    fi
+
+                    echo "Running API health check..."
+                    docker compose exec backend python -c "import urllib.request; print(urllib.request.urlopen('http://localhost:8000/health').read().decode())" || true
+                '''
+            }
+        }
     }
 
     post {

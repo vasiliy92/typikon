@@ -19,9 +19,6 @@ from app.services.db import get_session
 router = APIRouter(prefix="/templates", tags=["admin-templates"])
 
 
-# --- ServiceTemplate ---
-
-
 @router.get("", response_model=PaginatedResponse[TemplateResponse])
 async def list_templates(
     page: int = Query(1, ge=1),
@@ -94,9 +91,6 @@ async def delete_template(template_id: int, db: AsyncSession = Depends(get_sessi
     return MessageResponse(message=f"Template {template_id} deleted")
 
 
-# --- TemplateBlock ---
-
-
 @router.get(
     "/{template_id}/blocks",
     response_model=PaginatedResponse[TemplateBlockResponse],
@@ -112,7 +106,7 @@ async def list_template_blocks(
     stmt = (
         select(ServiceTemplateBlock)
         .where(ServiceTemplateBlock.template_id == template_id)
-        .order_by(ServiceTemplateBlock.sort_order)
+        .order_by(ServiceTemplateBlock.block_order)
     )
     items = list((await db.execute(stmt)).scalars().all())
     return PaginatedResponse(
