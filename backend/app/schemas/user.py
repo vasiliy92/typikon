@@ -4,7 +4,7 @@ from __future__ import annotations
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 
 class LoginRequest(BaseModel):
@@ -15,7 +15,7 @@ class LoginRequest(BaseModel):
 
 class LoginResponse(BaseModel):
     """Successful login response."""
-    user: "CurrentUser"
+    user: CurrentUser
     message: str = "Login successful"
 
 
@@ -33,7 +33,7 @@ class CreateUserRequest(BaseModel):
     email: str
     password: str
     display_name: str
-    role: str = "admin"  # "admin" or "superadmin"
+    role: str = "admin"
 
 
 class UpdateUserRequest(BaseModel):
