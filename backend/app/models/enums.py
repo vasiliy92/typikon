@@ -98,8 +98,6 @@ class SaintCategory(StrEnum):
     RIGHTEOUS = "righteous"
 
 
-# ── Bilingual book metadata ──
-
 BOOK_NAMES: dict[BookCode, dict[str, str]] = {
     BookCode.GOSPEL: {"csy": "Еѵангелїе", "fr": "Évangile", "en": "Gospel", "ru": "Евангелие"},
     BookCode.APOSTOL: {"csy": "А҆пⷭ҇лъ", "fr": "Apôtre", "en": "Apostol", "ru": "Апостол"},
@@ -128,6 +126,6 @@ SERVICE_NAMES: dict[ServiceType, dict[str, str]] = {
     ServiceType.LITURGY: {"csy": "Літургі́ѧ", "fr": "Liturgie", "en": "Liturgy", "ru": "Литургия"},
     ServiceType.COMPLINE: {"csy": "Повече́рїе", "fr": "Complies", "en": "Compline", "ru": "Повечерие"},
     ServiceType.MIDNIGHT: {"csy": "Полꙋно́щница", "fr": "Office de minuit", "en": "Midnight Office", "ru": "Полунощница"},
-    ServiceType.TYPICA: {"csy": "Тѵпика́льны", "fr": "Typika", "en": "Typica", "ru": "Типика"},
+    ServiceType.TYPICA: {"csy": "Тѵпика́льны", "fr": "Typika", "en": "Typika", "ru": "Типика"},
     ServiceType.PRESANCTIFIED: {"csy": "Літургі́ѧ преждеосвѧще́нныхъ", "fr": "Liturgie des Saints Dons présanctifiés", "en": "Presanctified Liturgy", "ru": "Литургия преждеосвящённых Даров"},
 }
