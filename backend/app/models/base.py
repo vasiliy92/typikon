@@ -17,10 +17,10 @@ class TimestampMixin:
 
     created_at: Mapped[datetime] = mapped_column(
         server_default=func.now(),
-        default=func.now,
+        default=datetime.utcnow,
     )
     updated_at: Mapped[datetime] = mapped_column(
         server_default=func.now(),
-        onupdate=func.now(),
-        default=func.now,
+        onupdate=datetime.utcnow,
+        default=datetime.utcnow,
     )
