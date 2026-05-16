@@ -125,6 +125,114 @@ npm install
 npm run dev
 ```
 
+## Project Structure
+
+```
+typikon/
+├── docker-compose.yml          # Full stack orchestration
+├── Jenkinsfile                 # CI/CD pipeline
+├── nginx/
+│   ├── Dockerfile
+│   └── nginx.conf              # Internal reverse proxy
+├── backend/
+│   ├── Dockerfile
+│   ├── pyproject.toml
+│   ├── alembic.ini
+│   ├── alembic/
+│   │   ├── env.py
+│   │   ├── script.py.mako
+│   │   └── versions/
+│   │       └── 001_initial_schema.py
+│   ├── tests/
+│   │   ├── conftest.py
+│   │   └── test_calendar.py
+│   └── app/
+│       ├── config.py
+│       ├── main.py
+│       ├── models/
+│       │   ├── base.py         # SQLAlchemy Base + TimestampMixin
+│       │   ├── enums.py        # All enums + BOOK_NAMES/SERVICE_NAMES
+│       │   ├── temple.py       # Temple, SideChapel
+│       │   ├── saint.py        # Saint
+│       │   ├── calendar.py     # CalendarEntry, KathismaRule, MarkovRule
+│       │   └── liturgical.py   # ServiceBlock, Template, Lection, Assembled
+│       ├── schemas/
+│       │   ├── common.py       # PaginatedResponse, MessageResponse
+│       │   ├── saint.py
+│       │   ├── calendar.py
+│       │   └── liturgical.py
+│       ├── services/
+│       │   ├── db.py           # Async engine + session
+│       │   └── redis.py        # Redis client
+│       ├── engine/
+│       │   ├── calendar.py     # Paschalion + LiturgicalCalendar
+│       │   └── assembler.py    # Service assembly engine
+│       └── api/
+│           ├── calendar.py     # Public calendar API
+│           ├── service.py      # Public service assembly API
+│           └── admin/
+│               ├── blocks.py
+│               ├── calendar.py
+│               ├── saints.py
+│               ├── templates.py
+│               └── import.py
+└── frontend/
+    ├── Dockerfile
+    ├── package.json
+    ├── next.config.js
+    ├── tailwind.config.js
+    ├── tsconfig.json
+    ├── public/
+    └── src/
+        ├── app/
+        │   ├── globals.css
+        │   ├── layout.tsx
+        │   ├── page.tsx
+        │   └── [locale]/
+        │       ├── layout.tsx
+        │       ├── page.tsx
+        │       └── admin/
+        │           └── page.tsx
+        ├── components/
+        │   ├── AdminBlocks.tsx
+        │   ├── AdminCalendar.tsx
+        │   ├── AdminSaints.tsx
+        │   ├── AdminTemplates.tsx
+        │   └── AdminImport.tsx
+        ├── lib/
+        │   └── api.ts
+        └── i18n/
+            ├── config.ts
+            └── messages/
+                ├── fr.json
+                ├── csy.json
+                └── ru.json
+```
+
+## API Endpoints
+
+### Public
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/v1/calendar/{date}` | Liturgical day info |
+| GET | `/api/v1/service/{date}` | Assembled service |
+| GET | `/health` | Health check |
+
+### Admin (requires `X-Admin-Key` header)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET/POST | `/api/v1/admin/blocks` | List/create service blocks |
+| GET/PUT/DELETE | `/api/v1/admin/blocks/{id}` | CRUD single block |
+| GET/POST | `/api/v1/admin/calendar` | List/create calendar entries |
+| GET/PUT/DELETE | `/api/v1/admin/calendar/{id}` | CRUD single entry |
+| GET/POST | `/api/v1/admin/saints` | List/create saints |
+| GET/PUT/DELETE | `/api/v1/admin/saints/{id}` | CRUD single saint |
+| GET/POST | `/api/v1/admin/templates` | List/create templates |
+| GET/PUT/DELETE | `/api/v1/admin/templates/{id}` | CRUD single template |
+| POST | `/api/v1/admin/import/{type}` | Bulk JSON import |
+
 ## Paschalion Algorithm
 
 Uses the Meeus Julian algorithm — all computations are on the Julian calendar:
@@ -139,9 +247,13 @@ month = (d + e + 114) // 31
 day = ((d + e + 114) % 31) + 1
 ```
 
-Julian offset for 1900-2099: **+13 days** to get Gregorian date.
+Julian offset for 1900–2099: **+13 days** to get Gregorian date.
 
 Tone formula: `(week_from_pascha % 8) + 1` — Pascha = Tone 1, Thomas Sunday = Tone 2.
+
+## Liturgical Books (17)
+
+Gospel, Apostol, Psalter, Liturgicon, Horologion, Octoechos, Menaion (Monthly/Festal/General), Triodion, Pentecostarion, Irmologion, Typikon, Euchologion, Hieraticon, Prologue, Troparion
 
 ## Temple Patron Dedication Types
 
@@ -166,11 +278,18 @@ Liturgical texts are stored in PostgreSQL, NOT in git. Data is loaded through:
 2. **JSON import API** — `POST /api/v1/admin/import/{type}` with array of records
 3. **ETL pipeline** — separate program (not in this repo) for bulk loading from source texts
 
+### Orthodox Calendar Data Sources
+
+- [azbyka.ru](https://azbyka.ru) — Complete Russian Orthodox calendar data
+- [holytrinityorthodox.com](https://holytrinityorthodox.com) — OCA calendar API
+- Calendar data can be parsed and loaded via the import API once the project is running
+
 ## Church Slavonic Typography
 
 - Unicode ranges: U+2DE0-U+2DFF (combining) + U+A640-U+A69F
 - Recommended fonts: Ponomar Unicode, Monomakh
+- Font loaded via CSS: `font-family: 'Ponomar Unicode', 'Monomakh', var(--font-slavonic)`
 
 ## License
 
-Proprietary — Aleria Technology LLC
+Proprietary — Vasilii Krasov
