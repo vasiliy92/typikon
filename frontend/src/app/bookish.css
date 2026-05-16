@@ -331,11 +331,7 @@ body {
   color: var(--accent);
 }
 
-.service-picker-item.active::before {
-  content: "\u2022";
-  margin-right: 6px;
-  color: var(--accent);
-}
+
 
 /* --- Assemble Button --- */
 .btn-assemble {
@@ -705,13 +701,35 @@ body {
   display: none;
 }
 
-.mobile-controls-row {
+/* --- Mobile Controls Strip (collapsible, hidden on desktop) --- */
+.controls-strip {
+  display: none;
+}
+
+.controls-strip.collapsed {
+  max-height: 0;
+  opacity: 0;
+  border-bottom: none;
+  overflow: hidden;
+}
+
+.controls-strip.expanded {
+  max-height: 200px;
+  opacity: 1;
+  overflow: visible;
+}
+
+.controls-inner {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 16px;
+  padding: 10px 16px 12px;
   flex-wrap: wrap;
-  padding: 0 16px;
+}
+
+/* Settings toggle button (✦ ornament) — hidden on desktop */
+.settings-toggle {
+  display: none;
 }
 
 .mobile-text-column {
@@ -752,6 +770,21 @@ body {
     display: none;
   }
 
+  .controls-strip {
+    display: block;
+    position: fixed;
+    top: var(--topbar-h);
+    left: 0;
+    right: 0;
+    background: rgba(250,247,240,0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--rule);
+    z-index: 99;
+    overflow: clip;
+    transition: max-height .3s ease, opacity .3s ease;
+  }
+
   .topbar {
     display: none !important;
   }
@@ -782,21 +815,43 @@ body {
     gap: 6px;
   }
 
+  .settings-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    font-size: 1rem;
+    color: var(--muted);
+    background: none;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+
+  .settings-toggle:hover,
+  .settings-toggle.active {
+    color: var(--accent);
+    background: var(--pill-bg);
+  }
+
   /* --- Chip (Mobile) --- */
   .chip {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    gap: 3px;
     font-family: var(--font-ui), sans-serif;
-    font-size: 0.75rem;
+    font-size: 0.6875rem;
     font-weight: 500;
-    padding: 5px 10px;
+    padding: 4px 8px;
     border-radius: 999px;
     border: 1px solid var(--rule);
     background: var(--bg);
     color: var(--fg-soft);
     cursor: pointer;
     transition: all var(--transition-fast);
+    white-space: nowrap;
   }
 
   .chip:hover {
@@ -804,8 +859,9 @@ body {
   }
 
   .chip svg {
-    width: 14px;
-    height: 14px;
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
   }
 
   /* --- Chip Dropdown (Mobile) --- */
