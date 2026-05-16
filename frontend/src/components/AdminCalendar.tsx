@@ -199,9 +199,12 @@ function CalendarForm({
         <div className="admin-field">
           <label>{f.pascha_offset}</label>
           <input
-            type="number"
+            type="text"
+            inputMode="numeric"
+            pattern="-?[0-9]*"
             value={form.pascha_offset}
-            onChange={(e) => update('pascha_offset', e.target.value)}
+            onChange={(e) => update('pascha_offset', e.target.value.replace(/[^0-9-]/g, ''))}
+            placeholder="0"
           />
         </div>
       </div>
@@ -210,22 +213,24 @@ function CalendarForm({
         <div className="admin-form-grid admin-form-grid-2" style={{ marginTop: '12px' }}>
           <div className="admin-field">
             <label>{f.month}</label>
-            <input
-              type="number"
-              min="1"
-              max="12"
+            <AdminSelect
               value={form.month}
-              onChange={(e) => update('month', e.target.value)}
+              onChange={(v) => update('month', v)}
+              options={[
+                { value: '', label: '\u2014' },
+                ...t.months.map((m: string, i: number) => ({ value: String(i + 1), label: m })),
+              ]}
             />
           </div>
           <div className="admin-field">
             <label>{f.day}</label>
-            <input
-              type="number"
-              min="1"
-              max="31"
+            <AdminSelect
               value={form.day}
-              onChange={(e) => update('day', e.target.value)}
+              onChange={(v) => update('day', v)}
+              options={[
+                { value: '', label: '\u2014' },
+                ...Array.from({ length: 31 }, (_, i) => ({ value: String(i + 1), label: String(i + 1) })),
+              ]}
             />
           </div>
         </div>

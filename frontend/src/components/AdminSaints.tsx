@@ -181,11 +181,25 @@ function SaintForm({
         </div>
         <div className="admin-field">
           <label>{f.feast_month}</label>
-          <input type="number" min="1" max="12" value={form.feast_month} onChange={(e) => update('feast_month', e.target.value)} />
+          <AdminSelect
+            value={form.feast_month}
+            onChange={(v) => update('feast_month', v)}
+            options={[
+              { value: '', label: '—' },
+              ...t.months.map((m: string, i: number) => ({ value: String(i + 1), label: m })),
+            ]}
+          />
         </div>
         <div className="admin-field">
           <label>{f.feast_day}</label>
-          <input type="number" min="1" max="31" value={form.feast_day} onChange={(e) => update('feast_day', e.target.value)} />
+          <AdminSelect
+            value={form.feast_day}
+            onChange={(v) => update('feast_day', v)}
+            options={[
+              { value: '', label: '—' },
+              ...Array.from({ length: 31 }, (_, i) => ({ value: String(i + 1), label: String(i + 1) })),
+            ]}
+          />
         </div>
       </div>
 
@@ -202,7 +216,17 @@ function SaintForm({
           </div>
           <div className="admin-field">
             <label>{f.troparion_tone}</label>
-            <input value={form.troparion_tone} onChange={(e) => update('troparion_tone', e.target.value)} />
+            <AdminSelect
+              value={form.troparion_tone}
+              onChange={(v) => update('troparion_tone', v)}
+              options={[
+                { value: '', label: '\u2014' },
+                ...[1, 2, 3, 4, 5, 6, 7, 8].map((n) => ({
+                  value: String(n),
+                  label: `${t.service.tone_label} ${n}`,
+                })),
+              ]}
+            />
           </div>
         </div>
       </details>
@@ -220,7 +244,17 @@ function SaintForm({
           </div>
           <div className="admin-field">
             <label>{f.kontakion_tone}</label>
-            <input value={form.kontakion_tone} onChange={(e) => update('kontakion_tone', e.target.value)} />
+            <AdminSelect
+              value={form.kontakion_tone}
+              onChange={(v) => update('kontakion_tone', v)}
+              options={[
+                { value: '', label: '\u2014' },
+                ...[1, 2, 3, 4, 5, 6, 7, 8].map((n) => ({
+                  value: String(n),
+                  label: `${t.service.tone_label} ${n}`,
+                })),
+              ]}
+            />
           </div>
         </div>
       </details>
