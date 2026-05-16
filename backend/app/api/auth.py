@@ -90,7 +90,6 @@ async def logout(
     user: User = Depends(get_current_user),
 ):
     """Clear session and cookie."""
-    # Delete session from Redis
     token = request.cookies.get(_COOKIE_NAME)
     if token:
         await delete_session(token)
@@ -119,7 +118,7 @@ async def auth_diag(request: Request):
     if not api_key or api_key != request.app.state.settings.ADMIN_API_KEY:
         raise HTTPException(403, "Forbidden")
 
-    from app.services.redis import redis_client as rc
+    from app.services import redis as _redis_mod
 
     cookies = dict(request.cookies)
     headers = {
@@ -127,14 +126,14 @@ async def auth_diag(request: Request):
         if k.lower() in ("cookie", "x-forwarded-proto", "x-forwarded-for", "x-real-ip", "host", "origin")
     }
 
-    redis_status = "connected" if rc else "UNAVAILABLE"
+    redis_status = "connected" if _redis_mod.redis_client else "UNAVAILABLE"
 
     # Test Redis read/write
     redis_test = None
-    if rc:
+    if _redis_mod.redis_client:
         try:
-            await rc.setex("_diag:test", 10, "ok")
-            redis_test = await rc.get("_diag:test")
+            await _redis_mod.redis_client.setex("_diag:test", 10, "ok")
+            redis_test = await _redis_mod.redis_client.get("_diag:test")
         except Exception as e:
             redis_test = f"ERROR: {e}"
 
@@ -178,7 +177,7 @@ async def list_users(
         .order_by(User.created_at)
     )
     items = list((await db.execute(stmt)).scalars().all())
-    return PaginatedResponse(
+    return PaginatedResponse.create(
         items=[UserResponse.model_validate(u) for u in items],
         total=total,
         page=page,

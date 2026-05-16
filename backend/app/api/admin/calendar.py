@@ -39,7 +39,7 @@ async def list_entries(
     stmt = stmt.offset((page - 1) * page_size).limit(page_size).order_by(CalendarEntry.id)
     items = list((await db.execute(stmt)).scalars().all())
 
-    return PaginatedResponse(
+    return PaginatedResponse.create(
         items=[CalendarEntryResponse.model_validate(e) for e in items],
         total=total,
         page=page,

@@ -31,7 +31,7 @@ async def list_saints(
     stmt = stmt.offset((page - 1) * page_size).limit(page_size).order_by(Saint.id)
     items = list((await db.execute(stmt)).scalars().all())
 
-    return PaginatedResponse(
+    return PaginatedResponse.create(
         items=[SaintResponse.model_validate(s) for s in items],
         total=total,
         page=page,

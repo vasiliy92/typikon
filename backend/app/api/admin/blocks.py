@@ -35,7 +35,7 @@ async def list_blocks(
     stmt = stmt.offset((page - 1) * page_size).limit(page_size).order_by(ServiceBlock.id)
     items = list((await db.execute(stmt)).scalars().all())
 
-    return PaginatedResponse(
+    return PaginatedResponse.create(
         items=[ServiceBlockResponse.model_validate(b) for b in items],
         total=total,
         page=page,
@@ -80,7 +80,8 @@ async def update_block(
 
 
 @router.delete("/{block_id}", response_model=MessageResponse)
-async def delete_block(block_id: int, db: AsyncSession = Depends(get_session)):
+async def delete_block(block_id: int, db: AsyncSession = Depends(get_session),
+):
     block = await db.get(ServiceBlock, block_id)
     if not block:
         raise HTTPException(404, "ServiceBlock not found")

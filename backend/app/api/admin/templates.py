@@ -37,7 +37,7 @@ async def list_templates(
     stmt = stmt.offset((page - 1) * page_size).limit(page_size).order_by(ServiceTemplate.id)
     items = list((await db.execute(stmt)).scalars().all())
 
-    return PaginatedResponse(
+    return PaginatedResponse.create(
         items=[TemplateResponse.model_validate(t) for t in items],
         total=total,
         page=page,
@@ -109,7 +109,7 @@ async def list_template_blocks(
         .order_by(ServiceTemplateBlock.block_order)
     )
     items = list((await db.execute(stmt)).scalars().all())
-    return PaginatedResponse(
+    return PaginatedResponse.create(
         items=[TemplateBlockResponse.model_validate(b) for b in items],
         total=len(items),
         page=1,
