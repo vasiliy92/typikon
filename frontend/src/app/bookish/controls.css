@@ -1,0 +1,232 @@
+/* ============================================
+   Typikon Bookish Design System — Controls
+   ============================================ */
+
+/* --- Controls Bar --- */
+.controls-bar {
+  position: sticky;
+  top: var(--topbar-h);
+  height: var(--controls-h);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 24px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--rule-light);
+  z-index: 50;
+}
+
+/* --- Pill Group --- */
+.pill-group {
+  display: inline-flex;
+  align-items: center;
+  background: var(--pill-bg);
+  border-radius: 999px;
+  padding: 2px;
+  gap: 2px;
+}
+
+.pill {
+  font-family: var(--font-ui), sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.pill:hover {
+  color: var(--fg-soft);
+}
+
+.pill.active {
+  background: var(--bg);
+  color: var(--fg);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+/* --- Service Picker --- */
+.service-picker {
+  position: relative;
+}
+
+.service-picker-trigger {
+  font-family: var(--font-ui), sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--fg-soft);
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background var(--transition-fast);
+}
+
+.service-picker-trigger:hover {
+  background: var(--pill-bg);
+}
+
+.service-picker-trigger .arrow {
+  font-size: 0.625rem;
+  color: var(--muted);
+  transition: transform var(--transition-fast);
+}
+
+.service-picker-trigger.open .arrow {
+  transform: rotate(180deg);
+}
+
+.service-picker-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 240px;
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  padding: 4px;
+  z-index: 200;
+  display: none;
+}
+
+.service-picker-dropdown.open {
+  display: block;
+}
+
+.service-picker-group-label {
+  font-family: var(--font-ui), sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  padding: 8px 10px 4px;
+}
+
+.service-picker-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  font-family: var(--font-ui), sans-serif;
+  font-size: 0.8125rem;
+  color: var(--fg-soft);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.service-picker-item:hover {
+  background: var(--pill-bg);
+}
+
+.service-picker-item.active {
+  color: var(--accent);
+}
+
+/* --- Assemble Button --- */
+.btn-assemble {
+  font-family: var(--font-ui), sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 6px 18px;
+  background: var(--fg);
+  color: var(--bg);
+  border: none;
+  border-radius: 100px;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+  margin-left: auto;
+  letter-spacing: 0.02em;
+}
+
+.btn-assemble:hover {
+  background: var(--accent);
+}
+
+.btn-assemble:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* --- Font Size Control --- */
+.font-size-control {
+  position: relative;
+}
+
+.font-size-trigger {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--fg-soft);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background var(--transition-fast);
+}
+
+.font-size-trigger:hover {
+  background: var(--pill-bg);
+}
+
+.font-size-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  min-width: 140px;
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  padding: 4px;
+  z-index: 200;
+  display: none;
+}
+
+.font-size-dropdown.open {
+  display: block;
+}
+
+.font-size-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  font-family: var(--font-ui), sans-serif;
+  font-size: 0.8125rem;
+  color: var(--fg-soft);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+
+.font-size-option:hover {
+  background: var(--pill-bg);
+}
+
+.font-size-option.active {
+  color: var(--accent);
+}
+
+.font-size-option .dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent);
+}
