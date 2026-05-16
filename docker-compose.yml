@@ -45,6 +45,8 @@ services:
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-typikon}:${POSTGRES_PASSWORD:-typikon_dev}@${POSTGRES_HOST:-postgres}:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-typikon}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
       ADMIN_API_KEY: ${ADMIN_API_KEY:-change-me-in-production}
+      SUPERADMIN_EMAIL: ${SUPERADMIN_EMAIL:-}
+      SUPERADMIN_PASSWORD: ${SUPERADMIN_PASSWORD:-}
       LOG_LEVEL: ${LOG_LEVEL:-info}
       CORS_ORIGINS: ${CORS_ORIGINS:-*}
     depends_on:

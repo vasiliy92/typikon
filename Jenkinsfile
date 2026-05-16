@@ -2,12 +2,14 @@ pipeline {
     agent { label 'agent1' }
 
     environment {
-        DOMAIN          = credentials('typikon-domain')
-        ADMIN_API_KEY   = credentials('typikon-admin-api-key')
-        DB_PASSWORD     = credentials('typikon-db-password')
-        CORS_ORIGINS    = credentials('typikon-cors-origins')
+        DOMAIN            = credentials('typikon-domain')
+        ADMIN_API_KEY     = credentials('typikon-admin-api-key')
+        DB_PASSWORD       = credentials('typikon-db-password')
+        CORS_ORIGINS      = credentials('typikon-cors-origins')
+        SUPERADMIN_EMAIL  = credentials('typikon-superadmin-email')
+        SUPERADMIN_PASSWORD = credentials('typikon-superadmin-password')
         TRAEFIK_ENTRYPOINT = 'websecure'
-        TAG             = "${env.BUILD_NUMBER}"
+        TAG               = "${env.BUILD_NUMBER}"
     }
 
     stages {
@@ -38,6 +40,8 @@ pipeline {
                     export ADMIN_API_KEY=${ADMIN_API_KEY}
                     export POSTGRES_PASSWORD=${DB_PASSWORD}
                     export CORS_ORIGINS=${CORS_ORIGINS}
+                    export SUPERADMIN_EMAIL=${SUPERADMIN_EMAIL}
+                    export SUPERADMIN_PASSWORD=${SUPERADMIN_PASSWORD}
                     export TRAEFIK_ENTRYPOINT=${TRAEFIK_ENTRYPOINT}
                     export TAG=${TAG}
                     docker compose up -d --build --force-recreate
