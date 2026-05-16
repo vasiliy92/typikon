@@ -706,19 +706,6 @@ body {
   display: none;
 }
 
-.controls-strip.collapsed {
-  max-height: 0;
-  opacity: 0;
-  border-bottom: none;
-  overflow: hidden;
-}
-
-.controls-strip.expanded {
-  max-height: 200px;
-  opacity: 1;
-  overflow: visible;
-}
-
 .controls-inner {
   display: flex;
   align-items: center;
@@ -781,8 +768,20 @@ body {
     -webkit-backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--rule);
     z-index: 99;
-    overflow: clip;
     transition: max-height .3s ease, opacity .3s ease;
+  }
+
+  .controls-strip.collapsed {
+    max-height: 0;
+    opacity: 0;
+    border-bottom: none;
+    overflow: hidden;
+  }
+
+  .controls-strip.expanded {
+    max-height: 200px;
+    opacity: 1;
+    overflow: visible;
   }
 
   .topbar {
@@ -872,7 +871,7 @@ body {
   .chip-dropdown {
     position: absolute;
     top: calc(100% + 4px);
-    right: 0;
+    left: 0;
     min-width: 160px;
     background: #fff;
     border: 1px solid var(--rule);
@@ -1605,7 +1604,8 @@ body {
   font-size: 0.8125rem;
   padding: 10px 14px;
   border-radius: 8px;
-  border: 1px solid var(--rule);
+  border: 1px
+  solid var(--rule);
   color: var(--fg);
   margin-top: 12px;
 }
