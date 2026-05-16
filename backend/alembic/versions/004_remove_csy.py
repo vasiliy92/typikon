@@ -18,7 +18,6 @@ def upgrade() -> None:
     op.alter_column("saints", "name_ru", existing_type=sa.String(500), nullable=False)
     # Drop CSY columns
     op.drop_column("saints", "name_csy")
-    op.drop_column("saints", "name_summary_csy")
     op.drop_column("saints", "life_summary_csy")
     op.drop_column("saints", "troparion_csy")
     op.drop_column("saints", "kontakion_csy")
