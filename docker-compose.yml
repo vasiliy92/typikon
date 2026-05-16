@@ -69,8 +69,6 @@ services:
       dockerfile: Dockerfile
     image: typikon-frontend:${TAG:-latest}
     restart: unless-stopped
-    environment:
-      NEXT_PUBLIC_API_URL: ""
     networks:
       - typikon-net
 
