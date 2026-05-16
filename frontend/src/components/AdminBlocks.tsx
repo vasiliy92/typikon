@@ -5,9 +5,6 @@ import { useI18n } from '@/lib/i18n';
 import { useApi, apiPost, apiPut, apiDelete } from '@/lib/api';
 import type { ServiceBlockResponse, PaginatedResponse } from '@/lib/api';
 
-/** Look up an enum value in a translation object, with fallback to the raw key. */
-const enumLabel = (obj: Record<string, string>, key: string): string => obj[key] ?? key;
-
 export function AdminBlocks() {
   const { t } = useI18n();
   const [page, setPage] = useState(1);
@@ -28,37 +25,39 @@ export function AdminBlocks() {
     mutate();
   };
 
-  const bookOptions = Object.entries(t.books);
-  const langOptions = Object.entries(t.languages);
-
   return (
     <div>
-      <div className="admin-section-header">
-        <span className="admin-section-meta">{t.admin.total}: {total}</span>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+      <div className="flex items-center justify-between mb-4">
+        <span className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
+          {t.admin.total}: {total}
+        </span>
+        <div className="flex gap-2">
           <select
             value={bookFilter}
             onChange={(e) => { setBookFilter(e.target.value); setPage(1); }}
-            className="admin-filter-select"
+            className="rounded border px-2 py-1 text-xs"
+            style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }}
           >
             <option value="">{t.admin.filter_book}</option>
-            {bookOptions.map(([value, label]) => (
-              <option key={value} value={value}>{label}</option>
+            {['gospel', 'apostol', 'psalter', 'liturgicon', 'horologion', 'octoechos', 'menaion_monthly', 'menaion_festal', 'menaion_general', 'triodion', 'pentecostarion', 'irmologion', 'typikon', 'euchologion', 'hieraticon', 'prologue', 'troparion'].map((b) => (
+              <option key={b} value={b}>{b}</option>
             ))}
           </select>
           <select
             value={langFilter}
             onChange={(e) => { setLangFilter(e.target.value); setPage(1); }}
-            className="admin-filter-select"
+            className="rounded border px-2 py-1 text-xs"
+            style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }}
           >
             <option value="">{t.admin.filter_language}</option>
-            {langOptions.map(([value, label]) => (
-              <option key={value} value={value}>{label}</option>
+            {['fr', 'ru'].map((l) => (
+              <option key={l} value={l}>{l}</option>
             ))}
           </select>
           <button
             onClick={() => { setCreating(true); setEditing(null); }}
-            className="admin-btn admin-btn-primary"
+            className="px-3 py-1.5 rounded-lg text-sm font-medium"
+            style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}
           >
             {t.admin.add}
           </button>
@@ -83,24 +82,30 @@ export function AdminBlocks() {
       )}
 
       {items.length === 0 ? (
-        <p className="admin-section-meta" style={{ padding: '16px 0' }}>
+        <p className="text-sm py-4" style={{ color: 'var(--muted-foreground)' }}>
           {t.app.no_results}
         </p>
       ) : (
-        <div>
+        <div className="space-y-2">
           {items.map((b) => (
-            <div key={b.id} className="admin-row">
-              <div className="admin-row-main">
-                <div className="admin-row-title">{b.title ?? b.location_key}</div>
-                <div className="admin-row-sub">
-                  {enumLabel(t.books as Record<string, string>, b.book_code)} · {enumLabel(t.languages as Record<string, string>, b.language)} · {b.slot} · {t.admin.fields.tone} {b.tone ?? '-'}
+            <div
+              key={b.id}
+              className="flex items-center justify-between rounded-lg border px-4 py-3"
+              style={{ borderColor: 'var(--border)' }}
+            >
+              <div className="flex-1 min-w-0">
+                <div className="font-medium text-sm truncate" style={{ color: 'var(--foreground)' }}>
+                  {b.title ?? b.location_key}
+                </div>
+                <div className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>
+                  {b.book_code} · {b.language} · {b.slot} · tone {b.tone ?? '-'}
                 </div>
               </div>
-              <div className="admin-row-actions">
-                <button onClick={() => { setEditing(b); setCreating(false); }} className="admin-btn admin-btn-ghost">
+              <div className="flex gap-2 ml-2">
+                <button onClick={() => { setEditing(b); setCreating(false); }} className="text-xs px-2 py-1 rounded" style={{ color: 'var(--primary)' }}>
                   {t.admin.edit}
                 </button>
-                <button onClick={() => handleDelete(b.id)} className="admin-btn admin-btn-danger">
+                <button onClick={() => handleDelete(b.id)} className="text-xs px-2 py-1 rounded" style={{ color: 'var(--destructive)' }}>
                   {t.admin.delete}
                 </button>
               </div>
@@ -110,10 +115,10 @@ export function AdminBlocks() {
       )}
 
       {pages > 1 && (
-        <div className="admin-pagination">
-          <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page <= 1} className="admin-pagination-btn">←</button>
-          <span>{t.admin.page} {page} {t.admin.of} {pages}</span>
-          <button onClick={() => setPage(Math.min(pages, page + 1))} disabled={page >= pages} className="admin-pagination-btn">→</button>
+        <div className="flex items-center justify-center gap-2 mt-4">
+          <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page <= 1} className="px-3 py-1 rounded text-sm disabled:opacity-30" style={{ background: 'var(--muted)', color: 'var(--foreground)' }}>←</button>
+          <span className="text-sm" style={{ color: 'var(--muted-foreground)' }}>{t.admin.page} {page} {t.admin.of} {pages}</span>
+          <button onClick={() => setPage(Math.min(pages, page + 1))} disabled={page >= pages} className="px-3 py-1 rounded text-sm disabled:opacity-30" style={{ background: 'var(--muted)', color: 'var(--foreground)' }}>→</button>
         </div>
       )}
     </div>
@@ -130,7 +135,6 @@ function BlockForm({
   onCancel: () => void;
 }) {
   const { t } = useI18n();
-  const f = t.admin.fields;
   const [form, setForm] = useState<Record<string, string>>({
     book_code: block?.book_code ?? 'octoechos',
     location_key: block?.location_key ?? '',
@@ -169,74 +173,59 @@ function BlockForm({
 
   const update = (key: string, value: string) => setForm({ ...form, [key]: value });
 
-  const bookOptions = Object.entries(t.books).map(([value, label]) => ({ value, label }));
-  const langOptions = Object.entries(t.languages).map(([value, label]) => ({ value, label }));
-
   return (
-    <form onSubmit={handleSubmit} className="admin-form">
-      <div className="admin-form-grid admin-form-grid-3">
-        <div className="admin-field">
-          <label>{f.book_code}</label>
-          <select value={form.book_code} onChange={(e) => update('book_code', e.target.value)}>
-            {bookOptions.map((opt) => (<option key={opt.value} value={opt.value}>{opt.label}</option>))}
+    <form onSubmit={handleSubmit} className="rounded-lg border p-4 mb-4 space-y-3" style={{ borderColor: 'var(--border)' }}>
+      <div className="grid grid-cols-3 gap-3">
+        <div>
+          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>book_code</label>
+          <select value={form.book_code} onChange={(e) => update('book_code', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }}>
+            {['gospel', 'apostol', 'psalter', 'liturgicon', 'horologion', 'octoechos', 'menaion_monthly', 'menaion_festal', 'menaion_general', 'triodion', 'pentecostarion', 'irmologion', 'typikon', 'euchologion', 'hieraticon', 'prologue', 'troparion'].map((b) => (
+              <option key={b} value={b}>{b}</option>
+            ))}
           </select>
         </div>
-        <div className="admin-field">
-          <label>{f.language}</label>
-          <select value={form.language} onChange={(e) => update('language', e.target.value)}>
-            {langOptions.map((opt) => (<option key={opt.value} value={opt.value}>{opt.label}</option>))}
+        <div>
+          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>language</label>
+          <select value={form.language} onChange={(e) => update('language', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }}>
+            {['fr', 'ru'].map((l) => (<option key={l} value={l}>{l}</option>))}
           </select>
         </div>
-        <div className="admin-field">
-          <label>{f.tone}</label>
-          <input value={form.tone} onChange={(e) => update('tone', e.target.value)} />
+        <div>
+          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>tone</label>
+          <input value={form.tone} onChange={(e) => update('tone', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
         </div>
-        <div className="admin-field">
-          <label>{f.location_key}</label>
-          <input value={form.location_key} onChange={(e) => update('location_key', e.target.value)} required />
+        <div>
+          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>location_key</label>
+          <input value={form.location_key} onChange={(e) => update('location_key', e.target.value)} required className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
         </div>
-        <div className="admin-field">
-          <label>{f.slot}</label>
-          <input value={form.slot} onChange={(e) => update('slot', e.target.value)} required />
+        <div>
+          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>slot</label>
+          <input value={form.slot} onChange={(e) => update('slot', e.target.value)} required className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
         </div>
-        <div className="admin-field">
-          <label>{f.slot_order}</label>
-          <input type="number" value={form.slot_order} onChange={(e) => update('slot_order', e.target.value)} />
-        </div>
-      </div>
-      <div style={{ display: 'grid', gap: 12, marginTop: 12 }}>
-        <div className="admin-field">
-          <label>{f.title}</label>
-          <input value={form.title} onChange={(e) => update('title', e.target.value)} />
-        </div>
-        <div className="admin-field">
-          <label>{f.content}</label>
-          <textarea value={form.content} onChange={(e) => update('content', e.target.value)} rows={5} style={{ fontFamily: "'SF Mono', 'Fira Code', monospace" }} />
+        <div>
+          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>slot_order</label>
+          <input type="number" value={form.slot_order} onChange={(e) => update('slot_order', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
         </div>
       </div>
-      <div className="admin-form-grid admin-form-grid-2" style={{ marginTop: 12 }}>
-        <div className="admin-field">
-          <label>{f.source_ref}</label>
-          <input value={form.source_ref} onChange={(e) => update('source_ref', e.target.value)} />
-        </div>
-        <div className="admin-field">
-          <label>{f.rubric}</label>
-          <input value={form.rubric} onChange={(e) => update('rubric', e.target.value)} />
-        </div>
+      <div>
+        <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>title</label>
+        <input value={form.title} onChange={(e) => update('title', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
       </div>
-      <div style={{ display: 'flex', gap: 16, marginTop: 12, flexWrap: 'wrap' }}>
-        {(['is_doxastikon', 'is_theotokion', 'is_irmos', 'is_katabasia'] as const).map((flag) => (
-          <label key={flag} className="admin-field" style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+      <div>
+        <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>content</label>
+        <textarea value={form.content} onChange={(e) => update('content', e.target.value)} rows={5} className="w-full rounded border px-2 py-1 text-sm font-mono" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
+      </div>
+      <div className="grid grid-cols-4 gap-3">
+        {['is_doxastikon', 'is_theotokion', 'is_irmos', 'is_katabasia'].map((flag) => (
+          <label key={flag} className="flex items-center gap-2 text-xs" style={{ color: 'var(--muted-foreground)' }}>
             <input type="checkbox" checked={form[flag] === 'true'} onChange={(e) => update(flag, String(e.target.checked))} />
-            <span style={{ textTransform: 'none', letterSpacing: 'normal', fontSize: '0.8125rem', fontWeight: 400, color: 'var(--fg-soft)' }}>
-              {(f as Record<string, string>)[flag] ?? flag.replace('is_', '')}
-            </span>
+            {flag.replace('is_', '')}
           </label>
         ))}
       </div>
-      <div className="admin-form-actions">
-        <button type="button" onClick={onCancel} className="admin-btn admin-btn-secondary">{t.admin.cancel}</button>
-        <button type="submit" disabled={saving} className="admin-btn admin-btn-primary">{t.admin.save}</button>
+      <div className="flex gap-2 justify-end">
+        <button type="button" onClick={onCancel} className="px-3 py-1.5 rounded-lg text-sm" style={{ color: 'var(--muted-foreground)' }}>{t.admin.cancel}</button>
+        <button type="submit" disabled={saving} className="px-3 py-1.5 rounded-lg text-sm font-medium" style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}>{t.admin.save}</button>
       </div>
     </form>
   );
