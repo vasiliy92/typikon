@@ -162,7 +162,8 @@
       "role": "Роль",
       "is_active": "Активен",
       "saint": "Святой",
-      "template": "Шаблон"
+      "template": "Шаблон",
+      "translation_group_id": "Группа перевода"
     },
     "date_types": {
       "fixed": "Неподвижный",
