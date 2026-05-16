@@ -4,7 +4,21 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, field_validator
+
+from app.models.enums import BlockType, BookCode, Language, ServiceType
+
+
+# ── Enum validation helper ─────────────────────────────────────────────
+
+def _validate_enum(v: str, enum_cls: type, field_name: str) -> str:
+    """Validate that a string is a valid member of a StrEnum."""
+    try:
+        enum_cls(v)
+    except ValueError:
+        valid = ", ".join(e.value for e in enum_cls)
+        raise ValueError(f"Invalid {field_name}: '{v}'. Valid values: {valid}")
+    return v
 
 
 # ── ServiceBlock ──────────────────────────────────────────────────────
@@ -26,6 +40,16 @@ class ServiceBlockCreate(BaseModel):
     is_katabasia: bool = False
     source_ref: Optional[str] = None
     rubric: Optional[str] = None
+
+    @field_validator("book_code")
+    @classmethod
+    def validate_book_code(cls, v: str) -> str:
+        return _validate_enum(v, BookCode, "book_code")
+
+    @field_validator("language")
+    @classmethod
+    def validate_language(cls, v: str) -> str:
+        return _validate_enum(v, Language, "language")
 
 
 class ServiceBlockUpdate(BaseModel):
@@ -83,6 +107,11 @@ class TemplateBlockCreate(BaseModel):
     typikon_ref: Optional[str] = None
     condition: Optional[dict] = None
 
+    @field_validator("block_type")
+    @classmethod
+    def validate_block_type(cls, v: str) -> str:
+        return _validate_enum(v, BlockType, "block_type")
+
 
 class TemplateBlockResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -107,6 +136,11 @@ class TemplateCreate(BaseModel):
     is_special: bool = False
     trigger_condition: Optional[dict] = None
     description: Optional[str] = None
+
+    @field_validator("service_type")
+    @classmethod
+    def validate_service_type(cls, v: str) -> str:
+        return _validate_enum(v, ServiceType, "service_type")
 
 
 class TemplateUpdate(BaseModel):
@@ -143,6 +177,16 @@ class LectionCreate(BaseModel):
     content: str
     short_ref: str
 
+    @field_validator("book_code")
+    @classmethod
+    def validate_book_code(cls, v: str) -> str:
+        return _validate_enum(v, BookCode, "book_code")
+
+    @field_validator("language")
+    @classmethod
+    def validate_language(cls, v: str) -> str:
+        return _validate_enum(v, Language, "language")
+
 
 class LectionUpdate(BaseModel):
     title: Optional[str] = None
@@ -164,6 +208,35 @@ class LectionResponse(BaseModel):
     updated_at: Optional[datetime] = None
 
 
+# ── LectionAssignment ─────────────────────────────────────────────────
+
+class LectionAssignmentCreate(BaseModel):
+    service_type: str
+    moveable_key: Optional[str] = None
+    fixed_month: Optional[int] = None
+    fixed_day: Optional[int] = None
+    lection_book: str
+    zachalo: int
+    reading_order: int = 1
+    is_paremia: bool = False
+    language: str = "ru"
+
+    @field_validator("service_type")
+    @classmethod
+    def validate_service_type(cls, v: str) -> str:
+        return _validate_enum(v, ServiceType, "service_type")
+
+    @field_validator("lection_book")
+    @classmethod
+    def validate_lection_book(cls, v: str) -> str:
+        return _validate_enum(v, BookCode, "lection_book")
+
+    @field_validator("language")
+    @classmethod
+    def validate_language(cls, v: str) -> str:
+        return _validate_enum(v, Language, "language")
+
+
 # ── Import ────────────────────────────────────────────────────────────
 
 class ImportResult(BaseModel):
@@ -171,6 +244,29 @@ class ImportResult(BaseModel):
     total_created: int = 0
     total_errors: int = 0
     details: dict[str, dict] = {}
+
+
+# ── Validation ────────────────────────────────────────────────────────
+
+class RecordError(BaseModel):
+    """Validation errors for a single record, identified by its index."""
+    index: int
+    errors: list[str]
+
+
+class TypeSummary(BaseModel):
+    """Validation summary for one data type."""
+    total: int
+    valid: int
+    errors: int
+
+
+class ValidationResult(BaseModel):
+    """Full validation result for an import payload."""
+    valid: bool
+    summary: dict[str, TypeSummary]
+    errors: dict[str, list[RecordError]]
+    warnings: dict[str, list[RecordError]] = {}
 
 
 # ── Book info ─────────────────────────────────────────────────────────

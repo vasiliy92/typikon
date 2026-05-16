@@ -6,6 +6,8 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, field_validator
 
+from app.models.enums import DateType, FastingType, FeastRank
+
 
 class CalendarEntryCreate(BaseModel):
     date_type: str  # fixed | movable
@@ -26,8 +28,31 @@ class CalendarEntryCreate(BaseModel):
     @field_validator("date_type")
     @classmethod
     def validate_date_type(cls, v: str) -> str:
-        if v not in ("fixed", "movable"):
-            raise ValueError("date_type must be 'fixed' or 'movable'")
+        try:
+            DateType(v)
+        except ValueError:
+            valid = ", ".join(e.value for e in DateType)
+            raise ValueError(f"Invalid date_type: '{v}'. Valid values: {valid}")
+        return v
+
+    @field_validator("rank")
+    @classmethod
+    def validate_rank(cls, v: str) -> str:
+        try:
+            FeastRank(v)
+        except ValueError:
+            valid = ", ".join(e.value for e in FeastRank)
+            raise ValueError(f"Invalid rank: '{v}'. Valid values: {valid}")
+        return v
+
+    @field_validator("fasting")
+    @classmethod
+    def validate_fasting(cls, v: str) -> str:
+        try:
+            FastingType(v)
+        except ValueError:
+            valid = ", ".join(e.value for e in FastingType)
+            raise ValueError(f"Invalid fasting: '{v}'. Valid values: {valid}")
         return v
 
 
