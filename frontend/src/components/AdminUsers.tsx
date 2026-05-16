@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useI18n } from '@/lib/i18n';
 import { useAuth } from '@/lib/auth';
-import { apiGet, apiPost, apiPatch, apiDelete } from '@/lib/api';
+import { apiGet, apiPost, apiDelete } from '@/lib/api';
 
 interface User {
   id: string;
@@ -49,7 +49,7 @@ export function AdminUsers() {
   };
 
   const deleteUser = async (id: string) => {
-    if (!confirm('Delete this user?')) return;
+    if (!confirm(t.app.confirm_delete)) return;
     try {
       await apiDelete(`/auth/users/${id}`);
       loadUsers();
@@ -61,20 +61,22 @@ export function AdminUsers() {
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+        <h3 className="font-display text-lg font-semibold" style={{ color: 'var(--foreground)' }}>
           {t.admin.users}
         </h3>
         <div className="flex gap-2">
           <button
             onClick={loadUsers}
             disabled={loading}
-            className="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600"
+            className="px-3 py-1.5 text-sm rounded-lg transition-colors"
+            style={{ background: 'var(--muted)', color: 'var(--muted-foreground)' }}
           >
             {loading ? t.common.loading : t.admin.search}
           </button>
           <button
             onClick={() => setShowCreate(true)}
-            className="px-3 py-1.5 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+            className="px-3 py-1.5 text-sm rounded-lg text-white transition-colors"
+            style={{ background: 'var(--primary)' }}
           >
             {t.admin.create_user}
           </button>
@@ -82,39 +84,44 @@ export function AdminUsers() {
       </div>
 
       {showCreate && (
-        <div className="mb-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+        <div className="mb-4 p-4 rounded-lg" style={{ background: 'var(--muted)' }}>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <input
               type="email"
               placeholder={t.admin.email}
               value={newEmail}
               onChange={(e) => setNewEmail(e.target.value)}
-              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+              className="px-3 py-2 border rounded-lg text-sm"
+              style={{ borderColor: 'var(--border)', background: 'var(--card)', color: 'var(--foreground)' }}
             />
             <input
               type="password"
               placeholder={t.admin.password}
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+              className="px-3 py-2 border rounded-lg text-sm"
+              style={{ borderColor: 'var(--border)', background: 'var(--card)', color: 'var(--foreground)' }}
             />
             <div className="flex gap-2">
               <select
                 value={newRole}
                 onChange={(e) => setNewRole(e.target.value as 'admin')}
-                className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                className="px-3 py-2 border rounded-lg text-sm"
+                style={{ borderColor: 'var(--border)', background: 'var(--card)', color: 'var(--foreground)' }}
               >
                 <option value="admin">{t.admin.role_admin}</option>
               </select>
               <button
                 onClick={createUser}
-                className="px-3 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700"
+                className="px-3 py-2 text-white text-sm rounded-lg"
+                style={{ background: 'var(--primary)' }}
               >
                 {t.admin.save}
               </button>
               <button
                 onClick={() => setShowCreate(false)}
-                className="px-3 py-2 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm rounded-lg"
+                className="px-3 py-2 text-sm rounded-lg"
+                style={{ background: 'var(--muted)', color: 'var(--muted-foreground)' }}
               >
                 {t.admin.cancel}
               </button>
@@ -126,23 +133,23 @@ export function AdminUsers() {
       {users.length > 0 && (
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-gray-200 dark:border-gray-700">
-              <th className="text-left py-2 text-gray-600 dark:text-gray-400">{t.admin.email}</th>
-              <th className="text-left py-2 text-gray-600 dark:text-gray-400">Role</th>
+            <tr className="border-b" style={{ borderColor: 'var(--border)' }}>
+              <th className="text-left py-2" style={{ color: 'var(--muted-foreground)' }}>{t.admin.email}</th>
+              <th className="text-left py-2" style={{ color: 'var(--muted-foreground)' }}>Role</th>
               <th className="text-right py-2"></th>
             </tr>
           </thead>
           <tbody>
             {users.map((u) => (
-              <tr key={u.id} className="border-b border-gray-100 dark:border-gray-700/50">
-                <td className="py-2 text-gray-900 dark:text-white">{u.email}</td>
+              <tr key={u.id} className="border-b" style={{ borderColor: 'var(--border)' }}>
+                <td className="py-2" style={{ color: 'var(--foreground)' }}>{u.email}</td>
                 <td className="py-2">
                   <span
-                    className={`px-2 py-0.5 rounded text-xs font-medium ${
-                      u.role === 'superadmin'
-                        ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400'
-                        : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
-                    }`}
+                    className="px-2 py-0.5 rounded text-xs font-medium"
+                    style={{
+                      background: u.role === 'superadmin' ? 'var(--primary)/15' : 'var(--muted)',
+                      color: u.role === 'superadmin' ? 'var(--primary)' : 'var(--muted-foreground)',
+                    }}
                   >
                     {u.role === 'superadmin' ? t.admin.role_superadmin : t.admin.role_admin}
                   </span>
@@ -151,7 +158,8 @@ export function AdminUsers() {
                   {u.role !== 'superadmin' && (
                     <button
                       onClick={() => deleteUser(u.id)}
-                      className="text-red-600 hover:text-red-800 dark:text-red-400 text-xs"
+                      className="text-xs font-medium"
+                      style={{ color: 'var(--destructive)' }}
                     >
                       {t.admin.delete}
                     </button>

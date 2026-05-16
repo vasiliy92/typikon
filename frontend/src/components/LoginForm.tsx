@@ -26,54 +26,59 @@ export function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-      <div className="max-w-md w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
-        <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-6">
+    <div className="min-h-[60vh] flex items-center justify-center">
+      <form
+        onSubmit={handleSubmit}
+        className="w-full max-w-sm space-y-4 rounded-xl border p-8 shadow-lg"
+        style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
+      >
+        <h2 className="text-2xl font-bold text-center" style={{ color: 'var(--foreground)' }}>
           {t.admin.login}
         </h2>
 
         {error && (
-          <div className="mb-4 p-3 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg text-sm">
+          <div className="rounded-lg px-4 py-2 text-sm" style={{ background: 'var(--destructive)/10', color: 'var(--destructive)' }}>
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              {t.admin.email}
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-            />
-          </div>
+        <div>
+          <label className="block text-sm font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>
+            {t.admin.email}
+          </label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2"
+            style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)', '--tw-ring-color': 'var(--primary)' } as React.CSSProperties}
+          />
+        </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              {t.admin.password}
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-            />
-          </div>
+        <div>
+          <label className="block text-sm font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>
+            {t.admin.password}
+          </label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            className="w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2"
+            style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)', '--tw-ring-color': 'var(--primary)' } as React.CSSProperties}
+          />
+        </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-medium rounded-lg transition-colors"
-          >
-            {loading ? t.common.loading : t.admin.login_button}
-          </button>
-        </form>
-      </div>
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full rounded-lg px-4 py-2 text-sm font-semibold transition-colors disabled:opacity-50"
+          style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}
+        >
+          {loading ? t.common.loading : t.admin.login_button}
+        </button>
+      </form>
     </div>
   );
 }

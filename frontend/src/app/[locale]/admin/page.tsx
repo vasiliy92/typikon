@@ -1,12 +1,12 @@
 'use client';
 
 import { useI18n } from '@/lib/i18n';
-import { useAuth, AuthProvider } from '@/lib/auth';
+import { useAuth } from '@/lib/auth';
 import { LoginForm } from '@/components/LoginForm';
 import { AdminUsers } from '@/components/AdminUsers';
 import { useState } from 'react';
 
-function AdminContent() {
+export default function AdminPage() {
   const { t } = useI18n();
   const { user, logout, isAuthenticated, isSuperadmin } = useAuth();
   const [activeTab, setActiveTab] = useState('calendar');
@@ -25,19 +25,20 @@ function AdminContent() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="bg-white dark:bg-gray-800 shadow">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
+    <div className="min-h-screen" style={{ background: 'var(--background)' }}>
+      <div className="rounded-xl border p-4 mb-6" style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
+        <div className="flex items-center justify-between">
+          <h1 className="font-display text-xl font-semibold" style={{ color: 'var(--foreground)' }}>
             {t.admin.title}
           </h1>
           <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-600 dark:text-gray-400">
+            <span className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
               {user?.email}
             </span>
             <button
               onClick={logout}
-              className="text-sm text-red-600 hover:text-red-800 dark:text-red-400"
+              className="text-sm font-medium transition-colors"
+              style={{ color: 'var(--destructive)' }}
             >
               {t.admin.logout}
             </button>
@@ -45,60 +46,54 @@ function AdminContent() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        <div className="flex gap-2 mb-6">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                activeTab === tab.id
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+      <div className="flex gap-2 mb-6 flex-wrap">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              activeTab === tab.id
+                ? 'text-white'
+                : ''
+            }`}
+            style={activeTab === tab.id
+              ? { background: 'var(--primary)' }
+              : { background: 'var(--muted)', color: 'var(--muted-foreground)' }
+            }
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-          {activeTab === 'calendar' && (
-            <p className="text-gray-500 dark:text-gray-400">
-              {t.admin.calendar} — coming soon
-            </p>
-          )}
-          {activeTab === 'saints' && (
-            <p className="text-gray-500 dark:text-gray-400">
-              {t.admin.saints} — coming soon
-            </p>
-          )}
-          {activeTab === 'templates' && (
-            <p className="text-gray-500 dark:text-gray-400">
-              {t.admin.templates} — coming soon
-            </p>
-          )}
-          {activeTab === 'blocks' && (
-            <p className="text-gray-500 dark:text-gray-400">
-              {t.admin.blocks} — coming soon
-            </p>
-          )}
-          {activeTab === 'import' && (
-            <p className="text-gray-500 dark:text-gray-400">
-              {t.admin.import_data} — coming soon
-            </p>
-          )}
-          {activeTab === 'users' && isSuperadmin && <AdminUsers />}
-        </div>
+      <div className="rounded-xl border p-6" style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
+        {activeTab === 'calendar' && (
+          <p style={{ color: 'var(--muted-foreground)' }}>
+            {t.admin.calendarDesc}
+          </p>
+        )}
+        {activeTab === 'saints' && (
+          <p style={{ color: 'var(--muted-foreground)' }}>
+            {t.admin.saintsDesc}
+          </p>
+        )}
+        {activeTab === 'templates' && (
+          <p style={{ color: 'var(--muted-foreground)' }}>
+            {t.admin.templatesDesc}
+          </p>
+        )}
+        {activeTab === 'blocks' && (
+          <p style={{ color: 'var(--muted-foreground)' }}>
+            {t.admin.blocksDesc}
+          </p>
+        )}
+        {activeTab === 'import' && (
+          <p style={{ color: 'var(--muted-foreground)' }}>
+            {t.admin.importDesc}
+          </p>
+        )}
+        {activeTab === 'users' && isSuperadmin && <AdminUsers />}
       </div>
     </div>
-  );
-}
-
-export default function AdminPage() {
-  return (
-    <AuthProvider>
-      <AdminContent />
-    </AuthProvider>
   );
 }
