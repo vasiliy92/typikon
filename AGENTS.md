@@ -89,9 +89,11 @@ Infra:    Docker Compose — postgres, redis, backend, frontend, nginx
 | Native `<input type="number">` | Browser spinners/steppers clash with bookish design | Use `AdminSelect` for small ranges (month/day), `type="text" inputMode="numeric"` for free-form numbers |
 | Files >12KB via `push_files` | MCP truncates content | Use `create_or_update_file` with SHA for large files |
 | Accidental `push_files` of wrong content | Overwrote i18n.tsx with dummy code | Double-check file content before pushing, never push files marked "don't touch" |
+| Pushing components without i18n keys | Build breaks on main — `Property 'x' does not exist on type` | Always push i18n key additions IN THE SAME COMMIT/PR as the component code that references them |
 
 ## Conventions
 
+- **After completing work on a feature branch, always create a pull request to `main`** via GitHub MCP (`create_pull_request`). Do not leave branches without PRs.
 - **Admin components:** `Admin*.tsx` in `components/`, use `t.admin.*` for all user-facing strings
 - **Admin custom controls:** `AdminSelect`, `AdminCheckbox`, `AdminDatePicker` — always use these instead of native browser controls
 - **Admin tab switching:** Via `AdminTabContext` in `lib/admin-tab.tsx`, sidebar in `admin/layout.tsx`
@@ -157,6 +159,6 @@ docker-compose.yml              # postgres, redis, backend, frontend, nginx
 
 1. **Read first.** Before any task, read `AGENTS.md`. It contains non-obvious constraints that will break things if ignored.
 2. **Update when you learn.** If you discover a new invariant (something that broke the build, a non-obvious dependency, a convention not in code), add it here. Keep it concise — one line per invariant.
-3. **Prune stale entries.** If a section becomes outdated (e.g., a bug was permanently fixed in code), remove the entry. This file must stay compact (~160 lines max).
+3. **Prune stale entries.** If a section becomes outdated (e.g., a bug was permanently fixed in code), remove the entry. Remove it from the table. This file must stay compact (~160 lines max).
 4. **No history, no narratives.** This is a contract, not a changelog. Git tracks history. Write facts, not stories.
 5. **When in doubt, add to Known Pitfalls.** If something surprised you during work, it will surprise the next agent too. A one-row table entry prevents hours of debugging.
