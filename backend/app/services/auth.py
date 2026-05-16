@@ -28,9 +28,6 @@ def _get_pwd_context() -> Any:
 
 def hash_password(password: str) -> str:
     """Hash a plaintext password. Truncates to 72 bytes (bcrypt limit)."""
-    # bcrypt silently truncates at 72 bytes but raises an error if the
-    # input *after* UTF-8 encoding exceeds 72 bytes in some versions.
-    # Truncate explicitly to avoid bootstrap failures with long credentials.
     raw = password.encode("utf-8")[:72]
     return _get_pwd_context().hash(raw.decode("utf-8", errors="ignore"))
 
@@ -67,15 +64,20 @@ async def create_session(user: User) -> str:
             SESSION_TTL,
             json.dumps(data),
         )
+        print(f"[typikon] Session created: token={token[:8]}... user={user.email}")
+    else:
+        print(f"[typikon] WARNING: Session NOT stored (Redis unavailable). token={token[:8]}... user={user.email}")
     return token
 
 
 async def get_session(token: str) -> dict | None:
     """Look up a session by token. Returns session dict or None."""
     if not redis_client:
+        print(f"[typikon] Session lookup FAILED: Redis unavailable. token={token[:8]}...")
         return None
     raw = await redis_client.get(f"{SESSION_PREFIX}{token}")
     if raw is None:
+        print(f"[typikon] Session NOT FOUND in Redis. token={token[:8]}...")
         return None
     return json.loads(raw)
 
@@ -84,6 +86,9 @@ async def delete_session(token: str) -> None:
     """Delete a session (logout)."""
     if redis_client:
         await redis_client.delete(f"{SESSION_PREFIX}{token}")
+        print(f"[typikon] Session deleted: token={token[:8]}...")
+    else:
+        print(f"[typikon] Session delete skipped (Redis unavailable). token={token[:8]}...")
 
 
 # ── Superadmin bootstrap ──

@@ -42,7 +42,6 @@ async def get_current_user(
     # Legacy API key support
     api_key = request.headers.get("x-admin-key")
     if api_key and api_key == request.app.state.settings.ADMIN_API_KEY:
-        # API key grants superadmin-like access; return a synthetic user
         return User(
             email="api-key",
             password_hash="",
@@ -53,7 +52,12 @@ async def get_current_user(
 
     # Session-based auth
     token = await _get_token_from_request(request, session_token)
+
     if not token:
+        # Diagnostic: log what we received
+        has_cookie_header = "cookie" in request.headers
+        cookie_header = request.headers.get("cookie", "(none)")
+        print(f"[typikon] AUTH FAIL: No token found. Cookie header present={has_cookie_header}, cookie_header={cookie_header[:200]}")
         raise HTTPException(401, "Not authenticated")
 
     session_data = await get_auth_session(token)

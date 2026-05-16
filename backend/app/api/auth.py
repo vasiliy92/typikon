@@ -57,7 +57,10 @@ async def login(
     token = await create_session(user)
 
     # Detect HTTPS via X-Forwarded-Proto (set by Traefik/nginx)
-    is_https = request.headers.get("x-forwarded-proto", "http").lower() == "https"
+    forwarded_proto = request.headers.get("x-forwarded-proto", "http").lower()
+    is_https = forwarded_proto == "https"
+
+    print(f"[typikon] LOGIN: user={user.email}, x-forwarded-proto={forwarded_proto!r}, secure={is_https}")
 
     response.set_cookie(
         key=_COOKIE_NAME,
@@ -83,9 +86,14 @@ async def login(
 @router.post("/logout", response_model=MessageResponse)
 async def logout(
     response: Response,
+    request: Request,
     user: User = Depends(get_current_user),
 ):
     """Clear session and cookie."""
+    # Delete session from Redis
+    token = request.cookies.get(_COOKIE_NAME)
+    if token:
+        await delete_session(token)
     _clear_session_cookie(response)
     return MessageResponse(message="Logged out")
 
@@ -100,6 +108,42 @@ async def get_me(user: User = Depends(get_current_user)):
         role=user.role,
         is_active=user.is_active,
     )
+
+
+@router.get("/diag")
+async def auth_diag(request: Request):
+    """Diagnostic endpoint — shows cookies and headers for debugging auth issues.
+    Requires X-Admin-Key header.
+    """
+    api_key = request.headers.get("x-admin-key")
+    if not api_key or api_key != request.app.state.settings.ADMIN_API_KEY:
+        raise HTTPException(403, "Forbidden")
+
+    from app.services.redis import redis_client as rc
+
+    cookies = dict(request.cookies)
+    headers = {
+        k: v for k, v in request.headers.items()
+        if k.lower() in ("cookie", "x-forwarded-proto", "x-forwarded-for", "x-real-ip", "host", "origin")
+    }
+
+    redis_status = "connected" if rc else "UNAVAILABLE"
+
+    # Test Redis read/write
+    redis_test = None
+    if rc:
+        try:
+            await rc.setex("_diag:test", 10, "ok")
+            redis_test = await rc.get("_diag:test")
+        except Exception as e:
+            redis_test = f"ERROR: {e}"
+
+    return {
+        "cookies": cookies,
+        "relevant_headers": headers,
+        "redis_status": redis_status,
+        "redis_test": redis_test,
+    }
 
 
 @router.put("/password", response_model=MessageResponse)

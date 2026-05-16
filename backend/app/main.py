@@ -28,6 +28,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         except Exception as e:
             print(f"[typikon] Superadmin bootstrap skipped: {e}")
 
+    print(f"[typikon] CORS_ORIGINS={settings.CORS_ORIGINS}")
+
     yield
 
     # Shutdown
@@ -50,6 +52,10 @@ app = FastAPI(
 # Store settings on app.state for dependency access
 app.state.settings = settings
 
+# NOTE: When allow_credentials=True, allow_origins cannot be ["*"] per CORS spec.
+# Starlette works around this by echoing the request Origin, but some browsers
+# may still reject Set-Cookie in the response.  If cookie auth breaks, set
+# CORS_ORIGINS to the actual frontend origin(s) instead of "*".
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,

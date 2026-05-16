@@ -13,8 +13,10 @@ async def init_redis() -> None:
         import redis.asyncio as aioredis
         redis_client = aioredis.from_url(settings.REDIS_URL, decode_responses=True)
         await redis_client.ping()
-    except Exception:
+        print(f"[typikon] Redis connected: {settings.REDIS_URL}")
+    except Exception as e:
         redis_client = None
+        print(f"[typikon] Redis UNAVAILABLE ({e}). Sessions will NOT be persisted!")
 
 
 async def get_redis():
