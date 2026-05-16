@@ -1,7 +1,9 @@
 # AGENTS.md
 
-> Contract for AI agents working on this repository.
-> Read this BEFORE making changes. Update this WHEN you discover new invariants.
+> **Before making ANY changes to this repository, read this file in full.**
+> It contains critical invariants that will break the build if ignored.
+> After completing your task, if you discovered new non-obvious constraints
+> or pitfalls, update AGENTS.md. Keep it under 150 lines — prune stale entries.
 
 ## Critical Invariants
 
@@ -79,11 +81,19 @@ Infra:    Docker Compose — postgres, redis, backend, frontend, nginx
 | Raw field names in admin forms | Users see `date_type`, `book_code` | Use `t.admin.fields.*` translation keys |
 | `service.mode_label` key deleted | Bug returned 3 times | Never remove this key from locale files |
 | Layout named exports | Next.js build error | Only `export default` from layout files |
+| AdminTab in layout | Breaks Next.js rule: no named exports from layouts | AdminTab type + context live in `lib/admin-tab.tsx` |
+| Admin inline styles + Tailwind | Clashes with bookish design, inconsistent look | Use `admin-*.css` classes from `bookish/admin.css` |
+| Emoji tab icons | Breaks bookish aesthetic, inconsistent rendering | Use SVG icons in sidebar navigation |
+| Native `<select>` in admin | Browser chrome clashes with bookish design | Use `AdminSelect` custom component |
+| Native `<input type="checkbox">` | Same as above | Use `AdminCheckbox` custom component |
 | Files >12KB via `push_files` | MCP truncates content | Use `create_or_update_file` with SHA for large files |
 
 ## Conventions
 
 - **Admin components:** `Admin*.tsx` in `components/`, use `t.admin.*` for all user-facing strings
+- **Admin custom controls:** `AdminSelect`, `AdminCheckbox`, `AdminDatePicker` — always use these instead of native browser controls
+- **Admin tab switching:** Via `AdminTabContext` in `lib/admin-tab.tsx`, sidebar in `admin/layout.tsx`
+- **Admin CSS:** All admin classes in `bookish/admin.css` — sidebar, forms, item cards, stat cards, pagination, drop zone, date picker, select, checkbox
 - **Admin API paths:** `/admin/dashboard`, `/admin/blocks`, `/admin/saints`, `/admin/templates`, `/admin/calendar`, `/admin/import/validate`, `/admin/import/batch`, `/auth/users`
 - **CSS new classes:** add to appropriate `bookish/*.css` subfile, not `globals.css`
 - **Git commits:** descriptive messages, explain why not just what
@@ -100,18 +110,22 @@ frontend/src/
     layout.tsx                  # Root: fonts, <html><body>
     [locale]/layout.tsx         # TopbarTitleContext, logo, pills
     [locale]/page.tsx           # Service page + mobile sheets + settings
-    admin/layout.tsx            # AuthProvider + I18nProvider + auth guard
-    admin/page.tsx              # Admin dashboard + tab navigation
+    admin/layout.tsx            # AuthProvider + AdminShell (sidebar, I18nProvider, AdminTabContext)
+    admin/page.tsx              # Content router — reads AdminTabContext, renders Dashboard/Admin*.tsx
   lib/
     api.ts                      # SWR client (API_BASE='', relative paths)
     auth.tsx                    # AuthProvider, useAuth, login/logout
     i18n.tsx                    # I18nProvider, useI18n, Messages type
     topbar.tsx                  # TopbarTitleContext, useTopbarTitle
+    admin-tab.tsx               # AdminTab type + AdminTabContext + useAdminTab hook
   i18n/
     config.ts                   # locales=['fr','ru','en'], defaultLocale='fr'
     messages/{en,fr,ru}.json    # Translation files (fr.json = source of truth for types)
   components/
-    Admin*.tsx                  # 6 admin components (Dashboard, Blocks, Saints, Templates, Calendar, Import, Users)
+    Admin*.tsx                  # 7 admin components (Calendar, Saints, Blocks, Templates, Users, Import)
+    AdminSelect.tsx             # Custom dropdown (replaces native <select>)
+    AdminCheckbox.tsx           # Custom checkbox (replaces native <input type="checkbox">)
+    AdminDatePicker.tsx         # Custom calendar date picker (dropdown + inline variants)
     LoginForm.tsx               # Auth form
 
 backend/app/
