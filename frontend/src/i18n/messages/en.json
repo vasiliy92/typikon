@@ -82,7 +82,8 @@
     "bottom": "Bottom",
     "tone_label": "Tone",
     "troparion_tone": "Troparion, tone",
-    "kontakion_tone": "Kontakion, tone"
+    "kontakion_tone": "Kontakion, tone",
+    "mode_label": "Mode"
   },
   "admin": {
     "title": "Administration",
