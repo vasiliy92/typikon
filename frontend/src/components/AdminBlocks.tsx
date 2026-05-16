@@ -70,7 +70,7 @@ export function AdminBlocks() {
             { value: '', label: t.admin.all_templates ?? 'All templates' },
             ...(templatesData?.items ?? []).map((tp) => ({
               value: String(tp.id),
-              label: tp.title ?? `Template ${tp.id}`,
+              label: tp.name ?? `Template ${tp.id}`,
             })),
           ]}
         />
@@ -234,7 +234,7 @@ function BlockForm({
               { value: '', label: '\u2014' },
               ...(templatesData?.items ?? []).map((tp) => ({
                 value: String(tp.id),
-                label: tp.title ?? `Template ${tp.id}`,
+                label: tp.name ?? `Template ${tp.id}`,
               })),
             ]}
           />
