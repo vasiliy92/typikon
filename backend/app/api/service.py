@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from datetime import date
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.engine.assembler import AssemblyMode, ServiceAssembler
 from app.services.db import AsyncSession, get_session
@@ -31,4 +31,11 @@ async def assemble_service(
         calendar_style=calendar_style,
         mode=mode,
     )
-    return await assembler.assemble()
+    result = await assembler.assemble()
+
+    # If the assembler could not find a template, it returns an error dict.
+    # Convert that into a proper HTTP error so the frontend handles it correctly.
+    if isinstance(result, dict) and "error" in result and "blocks" not in result:
+        raise HTTPException(status_code=404, detail=result["error"])
+
+    return result

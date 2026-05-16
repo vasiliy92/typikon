@@ -102,6 +102,10 @@ function ServiceContent({ assembled, dayInfo, error, serviceType, t, locale }: {
     );
   }
 
+  const blocks = assembled.blocks ?? [];
+  const lections = assembled.lections ?? {};
+  const patronTroparia = assembled.patron_troparia ?? { has_patron: false };
+
   return (
     <>
       {/* Title Block */}
@@ -128,27 +132,27 @@ function ServiceContent({ assembled, dayInfo, error, serviceType, t, locale }: {
       <div className="divider">✦ ✦ ✦</div>
 
       {/* Patron Troparia */}
-      {assembled.patron_troparia?.has_patron && (
+      {patronTroparia.has_patron && (
         <div id="section-patron" data-nav-title={t.service.patron_troparia} className="section">
           <span className="block-marker">TROPARIA</span>
           <h2 className="section-title">{t.service.patron_troparia}</h2>
           <div className="rubric">
-            {assembled.patron_troparia.saint_name}
-            {assembled.patron_troparia.dedication_type && ` (${assembled.patron_troparia.dedication_type})`}
+            {patronTroparia.saint_name}
+            {patronTroparia.dedication_type && ` (${patronTroparia.dedication_type})`}
           </div>
-          {assembled.patron_troparia.troparion && (
+          {patronTroparia.troparion && (
             <div className="lit-text">
               <p className="red-init">
-                {t.service.troparion_tone} {assembled.patron_troparia.troparion.tone}.{' '}
-                {assembled.patron_troparia.troparion.text}
+                {t.service.troparion_tone} {patronTroparia.troparion.tone}.{' '}
+                {patronTroparia.troparion.text}
               </p>
             </div>
           )}
-          {assembled.patron_troparia.kontakion && (
+          {patronTroparia.kontakion && (
             <div className="lit-text">
               <p>
-                {t.service.kontakion_tone} {assembled.patron_troparia.kontakion.tone}.{' '}
-                {assembled.patron_troparia.kontakion.text}
+                {t.service.kontakion_tone} {patronTroparia.kontakion.tone}.{' '}
+                {patronTroparia.kontakion.text}
               </p>
             </div>
           )}
@@ -157,7 +161,7 @@ function ServiceContent({ assembled, dayInfo, error, serviceType, t, locale }: {
       )}
 
       {/* Service Blocks — continuous flow */}
-      {assembled.blocks.map((block, i) => (
+      {blocks.map((block, i) => (
         <div
           key={`${block.slot_key}-${i}`}
           id={`section-${i}`}
@@ -169,7 +173,7 @@ function ServiceContent({ assembled, dayInfo, error, serviceType, t, locale }: {
           {block.rubric && <div className="rubric">{block.rubric}</div>}
           {block.content && (
             <div className="lit-text">
-              <p className={i === 0 && !assembled.patron_troparia?.has_patron ? 'red-init' : ''}>{block.content}</p>
+              <p className={i === 0 && !patronTroparia?.has_patron ? 'red-init' : ''}>{block.content}</p>
             </div>
           )}
           {block.content_translated && (
@@ -182,9 +186,9 @@ function ServiceContent({ assembled, dayInfo, error, serviceType, t, locale }: {
       ))}
 
       {/* Lections — continuous flow */}
-      {assembled.lections && Object.keys(assembled.lections).length > 0 && (
+      {Object.keys(lections).length > 0 && (
         <>
-          {Object.entries(assembled.lections).map(([book, lections]) => (
+          {Object.entries(lections).map(([book, lections]) => (
             <div key={book}>
               {lections.map((lec, li) => {
                 const sectionId = `lection-${book}-${li}`;
@@ -299,6 +303,7 @@ export default function ServicePage() {
       setAssembled(result);
     } catch (err: any) {
       setError(err.message || t.app.error);
+      setAssembled(null);
     } finally {
       setLoading(false);
     }
