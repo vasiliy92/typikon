@@ -175,7 +175,8 @@
     "import_error": "Import error",
     "special": "Special",
     "regular": "Regular",
-    "blocks_count": "blocks"
+    "blocks_count": "blocks",
+    "display_name": "Display name"
   },
   "auth": {
     "login": "Login",
