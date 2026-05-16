@@ -3,7 +3,7 @@
 import { useState, useCallback } from 'react';
 import { useI18n } from '@/lib/i18n';
 import { apiPost, AssembledServiceResponse, LiturgicalDay, useApi } from '@/lib/api';
-import { Calendar, ChevronDown, BookOpen, Loader2, Cross, Clock, Music } from 'lucide-react';
+import { Calendar, ChevronDown, BookOpen, Loader2, Cross, Clock, Music, Church, Star, Flame } from 'lucide-react';
 import clsx from 'clsx';
 
 export default function ServicePage() {
@@ -17,17 +17,17 @@ export default function ServicePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch liturgical day info
   const { data: litDay } = useApi<LiturgicalDay>(
-    `/api/v1/calendar/${date}?style=${calendarStyle}`
+    `/calendar/date/${date}?style=${calendarStyle}`
   );
 
   const assemble = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
+      const lang = locale === 'csy' ? 'csy' : locale === 'ru' ? 'ru' : 'fr';
       const result = await apiPost<AssembledServiceResponse>(
-        `/api/v1/service/assemble?date=${date}&service_type=${serviceType}&temple_id=${templeId}&language=${locale === 'csy' ? 'csy' : 'fr'}&calendar_style=${calendarStyle}&mode=${mode}`,
+        `/service/assemble?target_date=${date}&service_type=${serviceType}&temple_id=${templeId}&language=${lang}&calendar_style=${calendarStyle}&mode=${mode}`,
         {}
       );
       setAssembled(result);
@@ -43,9 +43,10 @@ export default function ServicePage() {
     'compline', 'midnight_office', 'typica', 'presanctified',
   ];
 
+  const dayInfo = litDay || assembled?.liturgical_day;
+
   return (
     <div className="space-y-6">
-      {/* Hero section */}
       <div className="animate-fade-slide-up">
         <h1 className="font-display text-3xl font-bold mb-1" style={{ color: 'var(--foreground)' }}>
           {t.service.title}
@@ -55,9 +56,7 @@ export default function ServicePage() {
         </p>
       </div>
 
-      {/* Controls */}
       <div className="animate-fade-slide-up animate-delay-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-        {/* Date picker */}
         <div>
           <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>
             {t.service.select_date}
@@ -70,7 +69,6 @@ export default function ServicePage() {
           />
         </div>
 
-        {/* Service type */}
         <div>
           <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>
             {t.service.select_type}
@@ -88,7 +86,6 @@ export default function ServicePage() {
           </select>
         </div>
 
-        {/* Calendar style */}
         <div>
           <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>
             {t.service.calendar_style}
@@ -103,7 +100,6 @@ export default function ServicePage() {
           </select>
         </div>
 
-        {/* Mode */}
         <div>
           <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>
             {t.service.mode_full} / {t.service.mode_ustav}
@@ -132,7 +128,6 @@ export default function ServicePage() {
         </div>
       </div>
 
-      {/* Assemble button */}
       <div className="animate-fade-slide-up animate-delay-2">
         <button
           onClick={assemble}
@@ -148,56 +143,57 @@ export default function ServicePage() {
         </button>
       </div>
 
-      {/* Liturgical day info card */}
-      {(litDay || assembled?.liturgical_day) && (
-        <div className="animate-fade-slide-up animate-delay-3 service-block">
-          <div className="flex flex-wrap items-center gap-3 mb-3">
-            <h2 className="font-display font-semibold text-lg" style={{ color: 'var(--primary)' }}>
-              <Calendar size={18} className="inline mr-1.5" />
-              {(t.days_of_week as Record<string, string>)[
-                (litDay || assembled!.liturgical_day).day_of_week_name
-              ] || (litDay || assembled!.liturgical_day).day_of_week_name}
-            </h2>
-            <span className="tone-badge">
-              {(litDay || assembled!.liturgical_day).tone}
-            </span>
-            <span className="feast-rank-badge feast-rank-1 text-xs">
-              {(t.periods as Record<string, string>)[
-                (litDay || assembled!.liturgical_day).period
-              ] || (litDay || assembled!.liturgical_day).period}
-            </span>
-            <span className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
-              <Clock size={12} className="inline mr-1" />
-              {(t.fasting_types as Record<string, string>)[
-                (litDay || assembled!.liturgical_day).fasting
-              ] || (litDay || assembled!.liturgical_day).fasting}
-            </span>
-          </div>
-          <div className="text-sm grid grid-cols-2 gap-2" style={{ color: 'var(--muted-foreground)' }}>
-            <div>Julian: {(litDay || assembled!.liturgical_day).julian_date}</div>
-            <div>Gregorian: {(litDay || assembled!.liturgical_day).gregorian_date}</div>
-            <div>Pascha (Julian): {(litDay || assembled!.liturgical_day).pascha_julian}</div>
-            <div>Days from Pascha: {(litDay || assembled!.liturgical_day).days_from_pascha}</div>
-          </div>
-        </div>
-      )}
-
-      {/* Error */}
       {error && (
-        <div className="rounded-lg p-4 text-sm" style={{ background: 'oklch(0.6 0.2 25 / 0.15)', color: 'oklch(0.6 0.2 25)' }}>
+        <div className="rounded-lg border p-4 text-sm" style={{ borderColor: 'var(--destructive, #dc2626)', color: 'var(--destructive, #dc2626)' }}>
           {error}
         </div>
       )}
 
-      {/* Assembled service output */}
+      {dayInfo && (
+        <div className="animate-fade-slide-up animate-delay-3 service-block">
+          <div className="flex flex-wrap items-center gap-3 mb-3">
+            <h2 className="font-display font-semibold text-lg" style={{ color: 'var(--primary)' }}>
+              <Calendar size={18} className="inline mr-1.5" />
+              {(t.days_of_week as Record<string, string>)[dayInfo.day_of_week_name] || dayInfo.day_of_week_name}
+            </h2>
+            {dayInfo.tone && (
+              <span className="tone-badge">
+                {dayInfo.tone}
+              </span>
+            )}
+            <span className="feast-rank-badge feast-rank-1 text-xs">
+              {(t.periods as Record<string, string>)[dayInfo.period] || dayInfo.period}
+            </span>
+            <span className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
+              <Clock size={12} className="inline mr-1" />
+              {(t.fasting_types as Record<string, string>)[dayInfo.fasting] || dayInfo.fasting}
+            </span>
+          </div>
+          <div className="text-sm grid grid-cols-2 gap-2" style={{ color: 'var(--muted-foreground)' }}>
+            <div>Julian: {dayInfo.julian_date}</div>
+            <div>Gregorian: {dayInfo.gregorian_date}</div>
+            <div>Pascha (Julian): {dayInfo.pascha_julian}</div>
+            <div>Days from Pascha: {dayInfo.days_from_pascha}</div>
+          </div>
+        </div>
+      )}
+
       {assembled && (
-        <div className="space-y-4 animate-fade-slide-up">
-          {/* Feast entries */}
+        <div className="space-y-4 animate-fade-slide-up animate-delay-4">
+          <div className="flex items-center gap-3">
+            <span className={`feast-rank-badge feast-rank-${assembled.feast_rank}`}>
+              {(t.feast_ranks as Record<string, string>)[String(assembled.feast_rank)] || `Rank ${assembled.feast_rank}`}
+            </span>
+            <span className="text-xs font-medium px-2 py-0.5 rounded" style={{ background: 'var(--muted)', color: 'var(--muted-foreground)' }}>
+              {assembled.template_type}
+            </span>
+          </div>
+
           {(assembled.fixed_entries.length > 0 || assembled.movable_entries.length > 0) && (
             <div>
-              <h3 className="font-display font-semibold mb-2" style={{ color: 'var(--secondary)' }}>
-                <Music size={16} className="inline mr-1.5" />
-                {t.service.feast_rank}: {(t.feast_ranks as Record<string, string>)[String(assembled.feast_rank)] || assembled.feast_rank}
+              <h3 className="font-display font-semibold mb-2" style={{ color: 'var(--foreground)' }}>
+                <Star size={16} className="inline mr-1.5" />
+                {t.service.feast_rank}
               </h3>
               <div className="space-y-2">
                 {[...assembled.fixed_entries, ...assembled.movable_entries].map((entry, i) => (
@@ -209,7 +205,7 @@ export default function ServicePage() {
                       {entry.tone && <span className="tone-badge text-xs">{entry.tone}</span>}
                     </div>
                     <div className={clsx(locale === 'csy' && 'text-slavonic')}>
-                      {(locale === 'csy' ? entry.title_csy : (entry.title_fr || entry.title_csy))}
+                      {locale === 'csy' ? entry.title_csy : locale === 'ru' ? (entry.title_ru || entry.title_en || entry.title_fr || entry.title_csy) : (entry.title_fr || entry.title_en || entry.title_csy)}
                     </div>
                   </div>
                 ))}
@@ -217,8 +213,7 @@ export default function ServicePage() {
             </div>
           )}
 
-          {/* Patron troparia */}
-          {assembled.patron_troparia.has_patron && (
+          {assembled.patron_troparia?.has_patron && (
             <div className="service-block border-l-4" style={{ borderLeftColor: 'var(--secondary)' }}>
               <h3 className="service-block-title">{t.service.patron_troparia}</h3>
               <div className="text-sm mb-1" style={{ color: 'var(--muted-foreground)' }}>
@@ -248,7 +243,6 @@ export default function ServicePage() {
             </div>
           )}
 
-          {/* Service blocks */}
           {assembled.blocks.length > 0 && (
             <div>
               <h3 className="font-display font-semibold mb-2" style={{ color: 'var(--foreground)' }}>
@@ -292,10 +286,10 @@ export default function ServicePage() {
             </div>
           )}
 
-          {/* Lections */}
-          {Object.keys(assembled.lections).length > 0 && (
+          {assembled.lections && Object.keys(assembled.lections).length > 0 && (
             <div>
               <h3 className="font-display font-semibold mb-2" style={{ color: 'var(--foreground)' }}>
+                <BookOpen size={16} className="inline mr-1.5" />
                 {t.service.lections}
               </h3>
               <div className="space-y-2">
@@ -333,22 +327,34 @@ export default function ServicePage() {
         </div>
       )}
 
-      {/* Empty state */}
       {!assembled && !loading && !error && (
         <div className="text-center py-16 animate-fade-slide-up animate-delay-3">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center" style={{ background: 'var(--muted)' }}>
-            <BookOpen size={28} style={{ color: 'var(--muted-foreground)' }} />
+          <div className="w-20 h-20 mx-auto mb-5 rounded-2xl flex items-center justify-center" style={{ background: 'var(--muted)' }}>
+            <Church size={36} style={{ color: 'var(--primary)' }} />
           </div>
-          <p className="font-display text-lg" style={{ color: 'var(--muted-foreground)' }}>
-            {t.service.select_date}
+          <p className="font-display text-xl font-semibold mb-2" style={{ color: 'var(--foreground)' }}>
+            {t.home.title}
           </p>
-          <p className="text-sm mt-1" style={{ color: 'var(--muted-foreground)' }}>
-            {t.app.subtitle}
+          <p className="text-sm max-w-md mx-auto" style={{ color: 'var(--muted-foreground)' }}>
+            {t.home.description}
           </p>
+          <div className="flex items-center justify-center gap-4 mt-6">
+            <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--muted-foreground)' }}>
+              <Flame size={14} style={{ color: 'var(--secondary)' }} />
+              <span>Octoechos</span>
+            </div>
+            <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--muted-foreground)' }}>
+              <Star size={14} style={{ color: 'var(--secondary)' }} />
+              <span>Menaion</span>
+            </div>
+            <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--muted-foreground)' }}>
+              <Music size={14} style={{ color: 'var(--secondary)' }} />
+              <span>Triodion</span>
+            </div>
+          </div>
         </div>
       )}
 
-      {/* Bottom spacer for mobile nav */}
       <div className="h-16 md:hidden" />
     </div>
   );

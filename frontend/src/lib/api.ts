@@ -94,7 +94,6 @@ export function refreshApi(path: string) {
   mutate(path);
 }
 
-// Types
 export interface LiturgicalDay {
   gregorian_date: string;
   julian_date: string;
@@ -118,6 +117,7 @@ export interface CalendarEntryResponse {
   title_csy: string;
   title_fr: string | null;
   title_en: string | null;
+  title_ru: string | null;
   rank: string;
   tone: number | null;
   fasting: string;

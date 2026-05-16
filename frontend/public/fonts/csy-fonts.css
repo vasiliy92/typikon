@@ -1,0 +1,43 @@
+/* Church Slavonic (CSY) Font Declarations
+ *
+ * Ponomar Unicode — primary font for liturgical CSY text
+ * Monomakh — fallback for headings
+ * 
+ * These fonts support the Unicode ranges needed for Church Slavonic:
+ *   U+0400-U+04FF  Cyrillic
+ *   U+2DE0-U+2DFF  Combining Cyrillic Extended-A
+ *   U+A640-U+A69F  Cyrillic Extended-B
+ *   U+0300-U+036F  Combining Diacritical Marks
+ *
+ * Font files should be placed in /public/fonts/ or loaded from CDN.
+ * For production, download from:
+ *   https://sci.ponomar.net/fonts.html (Ponomar Unicode)
+ *   https://sci.ponomar.net/fonts.html (Monomakh)
+ */
+
+/* Ponomar Unicode — main body text for CSY */
+@font-face {
+  font-family: 'Ponomar Unicode';
+  src: local('Ponomar Unicode'),
+       local('PonomarUnicode'),
+       url('/fonts/PonomarUnicode.woff2') format('woff2'),
+       url('/fonts/PonomarUnicode.woff') format('woff'),
+       url('/fonts/PonomarUnicode.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0400-U+04FF, U+2DE0-U+2DFF, U+A640-U+A69F, U+0300-U+036F;
+}
+
+/* Monomakh — alternative CSY font, good for headings */
+@font-face {
+  font-family: 'Monomakh';
+  src: local('Monomakh'),
+       url('/fonts/Monomakh.woff2') format('woff2'),
+       url('/fonts/Monomakh.woff') format('woff'),
+       url('/fonts/Monomakh.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0400-U+04FF, U+2DE0-U+2DFF, U+A640-U+A69F, U+0300-U+036F;
+}
