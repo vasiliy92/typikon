@@ -95,10 +95,10 @@ export default function AdminLayout({
                       className={clsx(
                         'px-2.5 py-1 text-xs font-medium transition-all',
                         loc === locale
-                          ? 'text-white'
+                          ? ''
                           : 'text-[var(--muted-foreground)] hover:text-[var(--foreground)]',
                       )}
-                      style={loc === locale ? { background: 'var(--primary)' } : {}}
+                      style={loc === locale ? { background: 'var(--primary)', color: 'var(--primary-foreground)' } : {}}
                     >
                       {localeNames[loc]}
                     </button>
@@ -108,7 +108,7 @@ export default function AdminLayout({
                 {/* Dark mode toggle */}
                 <button
                   onClick={toggleDark}
-                  className="p-2 rounded-lg transition-all hover:bg-[var(--muted)]"
+                  className="p-2 rounded-lg transition-all hover:bg-[var(--muted-bg)]"
                   style={{ color: 'var(--muted-foreground)' }}
                 >
                   {dark ? <Sun size={18} /> : <Moon size={18} />}

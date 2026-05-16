@@ -72,14 +72,11 @@ export default function AdminPage() {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-              activeTab === tab.id ? 'text-white' : ''
-            }`
-            }
+            className="px-4 py-2 rounded-lg text-sm font-medium transition-all"
             style={
               activeTab === tab.id
-                ? { background: 'var(--primary)' }
-                : { background: 'var(--muted)', color: 'var(--muted-foreground)' }
+                ? { background: 'var(--primary)', color: 'var(--primary-foreground)' }
+                : { background: 'var(--muted-bg)', color: 'var(--muted-foreground)' }
             }
           >
             {tab.label}
