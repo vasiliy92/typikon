@@ -166,7 +166,8 @@
       "role": "Role",
       "is_active": "Active",
       "saint": "Saint",
-      "template": "Template"
+      "template": "Template",
+      "translation_group_id": "Translation Group"
     },
     "date_types": {
       "fixed": "Fixed",

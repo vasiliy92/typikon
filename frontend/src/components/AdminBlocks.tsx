@@ -5,7 +5,7 @@ import { useI18n } from '@/lib/i18n';
 import { useApi, apiPost, apiPut, apiDelete } from '@/lib/api';
 import { AdminSelect } from '@/components/AdminSelect';
 import { AdminCheckbox } from '@/components/AdminCheckbox';
-import type { BlockResponse, SaintResponse, TemplateResponse, PaginatedResponse } from '@/lib/api';
+import type { BlockResponse, PaginatedResponse } from '@/lib/api';
 
 export function AdminBlocks() {
   const { t } = useI18n();
@@ -15,12 +15,6 @@ export function AdminBlocks() {
   );
   const [editing, setEditing] = useState<BlockResponse | null>(null);
   const [creating, setCreating] = useState(false);
-
-  // Filters
-  const [filterSaint, setFilterSaint] = useState('');
-  const [filterTemplate, setFilterTemplate] = useState('');
-  const { data: saintsData } = useApi<PaginatedResponse<SaintResponse>>('/admin/saints?page_size=100');
-  const { data: templatesData } = useApi<PaginatedResponse<TemplateResponse>>('/admin/templates?page_size=100');
 
   const items = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -48,34 +42,6 @@ export function AdminBlocks() {
         </button>
       </div>
 
-      {/* Filters */}
-      <div className="admin-filter-bar">
-        <AdminSelect
-          value={filterSaint}
-          onChange={setFilterSaint}
-          placeholder={t.admin.fields.saint}
-          options={[
-            { value: '', label: t.admin.all_saints ?? 'All saints' },
-            ...(saintsData?.items ?? []).map((s) => ({
-              value: String(s.id),
-              label: s.name_ru,
-            })),
-          ]}
-        />
-        <AdminSelect
-          value={filterTemplate}
-          onChange={setFilterTemplate}
-          placeholder={t.admin.fields.template}
-          options={[
-            { value: '', label: t.admin.all_templates ?? 'All templates' },
-            ...(templatesData?.items ?? []).map((tp) => ({
-              value: String(tp.id),
-              label: tp.name ?? `Template ${tp.id}`,
-            })),
-          ]}
-        />
-      </div>
-
       {(creating || editing) && (
         <BlockForm
           block={editing}
@@ -99,15 +65,12 @@ export function AdminBlocks() {
         </p>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          {items
-            .filter((b) => !filterSaint || String(b.saint_id) === filterSaint)
-            .filter((b) => !filterTemplate || String(b.template_id) === filterTemplate)
-            .map((b) => (
+          {items.map((b) => (
             <div key={b.id} className="admin-item-card">
               <div className="admin-item-main">
                 <div className="admin-item-title">{b.title ?? `Block ${b.id}`}</div>
                 <div className="admin-item-sub">
-                  {b.slot} · {t.admin.fields.slot_order} {b.slot_order}
+                  {b.slot} · {t.admin.fields.slot_order} {b.slot_order} · {b.book_code} · {b.language.toUpperCase()}
                 </div>
               </div>
               <div className="admin-item-actions">
@@ -167,25 +130,24 @@ function BlockForm({
 }) {
   const { t } = useI18n();
   const f = t.admin.fields;
-  const { data: saintsData } = useApi<PaginatedResponse<SaintResponse>>('/admin/saints?page_size=100');
-  const { data: templatesData } = useApi<PaginatedResponse<TemplateResponse>>('/admin/templates?page_size=100');
 
   const [form, setForm] = useState<Record<string, string>>({
-    saint_id: String(block?.saint_id ?? ''),
-    template_id: String(block?.template_id ?? ''),
+    book_code: block?.book_code ?? '',
+    location_key: block?.location_key ?? '',
     slot: block?.slot ?? '',
     slot_order: String(block?.slot_order ?? ''),
+    language: block?.language ?? 'fr',
+    translation_group_id: block?.translation_group_id ?? '',
     title: block?.title ?? '',
     content: block?.content ?? '',
-    language: block?.language ?? 'fr',
-    sub_type: block?.sub_type ?? '',
     tone: block?.tone ?? '',
-    source_ref: block?.source_ref ?? '',
+    rank: String(block?.rank ?? ''),
     is_doxastikon: block?.is_doxastikon ? 'true' : 'false',
+    is_theotokion: block?.is_theotokion ? 'true' : 'false',
     is_irmos: block?.is_irmos ? 'true' : 'false',
     is_katabasia: block?.is_katabasia ? 'true' : 'false',
-    is_special: block?.is_special ? 'true' : 'false',
-    is_theotokion: block?.is_theotokion ? 'true' : 'false',
+    source_ref: block?.source_ref ?? '',
+    rubric: block?.rubric ?? '',
   });
   const [saving, setSaving] = useState(false);
 
@@ -194,7 +156,7 @@ function BlockForm({
     setSaving(true);
     const payload: Record<string, unknown> = {};
     for (const [k, v] of Object.entries(form)) {
-      if (['saint_id', 'template_id', 'slot_order'].includes(k)) {
+      if (['slot_order', 'rank'].includes(k)) {
         payload[k] = v ? Number(v) : null;
       } else if (k.startsWith('is_')) {
         payload[k] = v === 'true';
@@ -212,31 +174,25 @@ function BlockForm({
     <form onSubmit={handleSubmit} className="admin-form">
       <div className="admin-form-grid admin-form-grid-2">
         <div className="admin-field">
-          <label>{f.saint}</label>
+          <label>{f.book_code}</label>
           <AdminSelect
-            value={form.saint_id}
-            onChange={(v) => update('saint_id', v)}
+            value={form.book_code}
+            onChange={(v) => update('book_code', v)}
             options={[
               { value: '', label: '\u2014' },
-              ...(saintsData?.items ?? []).map((s) => ({
-                value: String(s.id),
-                label: s.name_ru,
+              ...Object.entries(t.books).map(([code, name]) => ({
+                value: code,
+                label: name as string,
               })),
             ]}
           />
         </div>
         <div className="admin-field">
-          <label>{f.template}</label>
+          <label>{f.language}</label>
           <AdminSelect
-            value={form.template_id}
-            onChange={(v) => update('template_id', v)}
-            options={[
-              { value: '', label: '\u2014' },
-              ...(templatesData?.items ?? []).map((tp) => ({
-                value: String(tp.id),
-                label: tp.name ?? `Template ${tp.id}`,
-              })),
-            ]}
+            value={form.language}
+            onChange={(v) => update('language', v)}
+            options={['fr', 'ru', 'en', 'gr'].map((l) => ({ value: l, label: l.toUpperCase() }))}
           />
         </div>
         <div className="admin-field">
@@ -253,6 +209,14 @@ function BlockForm({
             onChange={(e) => update('slot_order', e.target.value.replace(/[^0-9]/g, ''))}
             placeholder="0"
           />
+        </div>
+        <div className="admin-field">
+          <label>{f.location_key}</label>
+          <input value={form.location_key} onChange={(e) => update('location_key', e.target.value)} />
+        </div>
+        <div className="admin-field">
+          <label>{f.translation_group_id}</label>
+          <input value={form.translation_group_id} onChange={(e) => update('translation_group_id', e.target.value)} />
         </div>
       </div>
 
@@ -271,24 +235,37 @@ function BlockForm({
 
       <div className="admin-form-grid admin-form-grid-2" style={{ marginTop: '12px' }}>
         <div className="admin-field">
-          <label>{f.language}</label>
+          <label>{f.tone}</label>
           <AdminSelect
-            value={form.language}
-            onChange={(v) => update('language', v)}
-            options={['fr', 'ru', 'en', 'gr'].map((l) => ({ value: l, label: l.toUpperCase() }))}
+            value={form.tone}
+            onChange={(v) => update('tone', v)}
+            options={[
+              { value: '', label: '\u2014' },
+              ...[1, 2, 3, 4, 5, 6, 7, 8].map((n) => ({
+                value: String(n),
+                label: `${t.service.tone_label} ${n}`,
+              })),
+            ]}
           />
         </div>
         <div className="admin-field">
-          <label>{f.sub_type}</label>
-          <input value={form.sub_type} onChange={(e) => update('sub_type', e.target.value)} />
-        </div>
-        <div className="admin-field">
-          <label>{f.tone}</label>
-          <input value={form.tone} onChange={(e) => update('tone', e.target.value)} />
+          <label>{f.rank}</label>
+          <input
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            value={form.rank}
+            onChange={(e) => update('rank', e.target.value.replace(/[^0-9]/g, ''))}
+            placeholder="0"
+          />
         </div>
         <div className="admin-field">
           <label>{f.source_ref}</label>
           <input value={form.source_ref} onChange={(e) => update('source_ref', e.target.value)} />
+        </div>
+        <div className="admin-field">
+          <label>{f.rubric}</label>
+          <input value={form.rubric} onChange={(e) => update('rubric', e.target.value)} />
         </div>
       </div>
 
@@ -296,7 +273,6 @@ function BlockForm({
         <AdminCheckbox label={f.is_doxastikon} checked={form.is_doxastikon === 'true'} onChange={(c) => update('is_doxastikon', c ? 'true' : 'false')} />
         <AdminCheckbox label={f.is_irmos} checked={form.is_irmos === 'true'} onChange={(c) => update('is_irmos', c ? 'true' : 'false')} />
         <AdminCheckbox label={f.is_katabasia} checked={form.is_katabasia === 'true'} onChange={(c) => update('is_katabasia', c ? 'true' : 'false')} />
-        <AdminCheckbox label={f.is_special} checked={form.is_special === 'true'} onChange={(c) => update('is_special', c ? 'true' : 'false')} />
         <AdminCheckbox label={f.is_theotokion} checked={form.is_theotokion === 'true'} onChange={(c) => update('is_theotokion', c ? 'true' : 'false')} />
       </div>
 

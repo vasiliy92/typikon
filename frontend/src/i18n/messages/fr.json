@@ -147,6 +147,7 @@
       "language": "Langue",
       "tone": "Tonalité",
       "location_key": "Clé de localisation",
+      "translation_group_id": "Groupe de traduction",
       "slot": "Emplacement",
       "slot_order": "Ordre de l'emplacement",
       "title": "Titre",
