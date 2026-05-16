@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -35,19 +35,6 @@ _COOKIE_MAX_AGE = 60 * 60 * 24  # 24 hours
 _COOKIE_PATH = "/"
 
 
-def _set_session_cookie(response: Response, token: str) -> None:
-    """Set httpOnly session cookie."""
-    response.set_cookie(
-        key=_COOKIE_NAME,
-        value=token,
-        max_age=_COOKIE_MAX_AGE,
-        path=_COOKIE_PATH,
-        httponly=True,
-        samesite="lax",
-        secure=False,  # Set True in production behind HTTPS proxy
-    )
-
-
 def _clear_session_cookie(response: Response) -> None:
     """Clear session cookie."""
     response.delete_cookie(key=_COOKIE_NAME, path=_COOKIE_PATH)
@@ -57,6 +44,7 @@ def _clear_session_cookie(response: Response) -> None:
 async def login(
     data: LoginRequest,
     response: Response,
+    request: Request,
     db: AsyncSession = Depends(get_session),
 ):
     """Authenticate with email and password. Sets httpOnly session cookie."""
@@ -67,7 +55,19 @@ async def login(
         raise HTTPException(401, "Invalid email or password")
 
     token = await create_session(user)
-    _set_session_cookie(response, token)
+
+    # Detect HTTPS via X-Forwarded-Proto (set by Traefik/nginx)
+    is_https = request.headers.get("x-forwarded-proto", "http").lower() == "https"
+
+    response.set_cookie(
+        key=_COOKIE_NAME,
+        value=token,
+        max_age=_COOKIE_MAX_AGE,
+        path=_COOKIE_PATH,
+        httponly=True,
+        samesite="lax",
+        secure=is_https,
+    )
 
     return LoginResponse(
         user=CurrentUser(
