@@ -12,8 +12,6 @@ from app.config import settings
 from app.models.user import User, UserRole
 from app.services.redis import redis_client
 
-# ── Password hashing ──
-
 _pwd_context: Any = None
 
 
@@ -35,8 +33,6 @@ def verify_password(plain: str, hashed: str) -> bool:
     """Verify a plaintext password against its hash."""
     return _get_pwd_context().verify(plain, hashed)
 
-
-# ── Session management (Redis) ──
 
 SESSION_PREFIX = "session:"
 SESSION_TTL = 60 * 60 * 24  # 24 hours
@@ -81,18 +77,16 @@ async def delete_session(token: str) -> None:
         await redis_client.delete(f"{SESSION_PREFIX}{token}")
 
 
-# ── Superadmin bootstrap ──
-
 async def bootstrap_superadmin(db: AsyncSession) -> None:
     """Create the initial superadmin from env vars if no users exist."""
     result = await db.execute(select(User).limit(1))
     if result.scalar_one_or_none() is not None:
-        return  # Users already exist
+        return
 
     email = settings.SUPERADMIN_EMAIL
     password = settings.SUPERADMIN_PASSWORD
     if not email or not password:
-        return  # No bootstrap credentials configured
+        return
 
     user = User(
         email=email,

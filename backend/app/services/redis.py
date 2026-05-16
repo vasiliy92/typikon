@@ -1,34 +1,22 @@
-"""Async Redis client with graceful fallback."""
+"""Async Redis client — optional, used for service cache."""
 from __future__ import annotations
-
-import logging
 
 from app.config import settings
 
-logger = logging.getLogger(__name__)
-
 redis_client = None
 
-try:
-    import redis.asyncio as aioredis
-    redis_client = aioredis.from_url(settings.REDIS_URL, decode_responses=True)
-except Exception:
-    logger.warning("Redis not available — caching disabled")
 
-
-async def get_cached(key: str) -> str | None:
-    if not redis_client:
-        return None
+async def init_redis() -> None:
+    """Initialize Redis connection on startup. Non-fatal if unavailable."""
+    global redis_client
     try:
-        return await redis_client.get(key)
+        import redis.asyncio as aioredis
+        redis_client = aioredis.from_url(settings.REDIS_URL, decode_responses=True)
+        await redis_client.ping()
     except Exception:
-        return None
+        redis_client = None
 
 
-async def set_cached(key: str, value: str, ttl: int = 3600) -> None:
-    if not redis_client:
-        return
-    try:
-        await redis_client.set(key, value, ex=ttl)
-    except Exception:
-        pass
+async def get_redis():
+    """Return the Redis client (may be None if unavailable)."""
+    return redis_client
