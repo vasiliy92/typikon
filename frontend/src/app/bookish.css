@@ -16,10 +16,8 @@
   --pill-bg: rgba(28, 25, 23, 0.04);
   --pill-active: rgba(155, 59, 46, 0.08);
 
-  /* Typography */
-  --font-display: "Cormorant Garamond", Georgia, serif;
-  --font-heading: "Cormorant Garamond", Georgia, serif;
-  --font-ui: "DM Sans", sans-serif;
+  /* Typography — display and ui set by next/font/google via body class */
+  --font-heading: var(--font-display);
 
   /* Layout */
   --sidebar-w: 240px;
@@ -49,7 +47,7 @@
 
 /* --- Base body --- */
 body {
-  font-family: var(--font-display);
+  font-family: var(--font-display), Georgia, serif;
   background: var(--bg);
   color: var(--fg);
   font-size: calc(1rem * var(--font-scale));
@@ -75,7 +73,7 @@ body {
 }
 
 .topbar-logo {
-  font-family: var(--font-heading);
+  font-family: var(--font-heading), Georgia, serif;
   font-size: 1.25rem;
   font-weight: 400;
   letter-spacing: 0.04em;
@@ -90,7 +88,7 @@ body {
 }
 
 .topbar-title {
-  font-family: var(--font-ui);
+  font-family: var(--font-ui), sans-serif;
   font-size: 0.8125rem;
   color: var(--muted);
   font-weight: 400;
@@ -116,7 +114,7 @@ body {
 }
 
 .sidebar-label {
-  font-family: var(--font-display);
+  font-family: var(--font-display), Georgia, serif;
   font-size: 0.7813rem;
   font-variant: small-caps;
   letter-spacing: 0.08em;
@@ -158,7 +156,7 @@ body {
 }
 
 .sidebar-item-num {
-  font-family: var(--font-ui);
+  font-family: var(--font-ui), sans-serif;
   font-size: 0.7813rem;
   color: var(--muted);
   min-width: 1.5em;
@@ -166,7 +164,7 @@ body {
 }
 
 .sidebar-item-text {
-  font-family: var(--font-display);
+  font-family: var(--font-display), Georgia, serif;
   font-size: 1.0938rem;
   line-height: 1.3;
 }
@@ -185,7 +183,7 @@ body {
 }
 
 .sidebar-stat {
-  font-family: var(--font-ui);
+  font-family: var(--font-ui), sans-serif;
   font-size: 0.75rem;
   color: var(--muted);
 }
@@ -215,7 +213,7 @@ body {
 }
 
 .pill {
-  font-family: var(--font-ui);
+  font-family: var(--font-ui), sans-serif;
   font-size: 0.75rem;
   font-weight: 500;
   padding: 4px 12px;
@@ -244,7 +242,7 @@ body {
 }
 
 .service-picker-trigger {
-  font-family: var(--font-ui);
+  font-family: var(--font-ui), sans-serif;
   font-size: 0.8125rem;
   font-weight: 500;
   color: var(--fg-soft);
@@ -292,7 +290,7 @@ body {
 }
 
 .service-picker-group-label {
-  font-family: var(--font-ui);
+  font-family: var(--font-ui), sans-serif;
   font-size: 0.6875rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -306,7 +304,7 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 6px 10px;
-  font-family: var(--font-ui);
+  font-family: var(--font-ui), sans-serif;
   font-size: 0.8125rem;
   color: var(--fg-soft);
   border-radius: 4px;
@@ -330,7 +328,7 @@ body {
 
 /* --- Assemble Button --- */
 .btn-assemble {
-  font-family: var(--font-ui);
+  font-family: var(--font-ui), sans-serif;
   font-size: 0.8125rem;
   font-weight: 500;
   padding: 6px 16px;
@@ -358,7 +356,7 @@ body {
 }
 
 .font-size-trigger {
-  font-family: var(--font-display);
+  font-family: var(--font-display), Georgia, serif;
   font-size: 0.9375rem;
   font-weight: 600;
   color: var(--fg-soft);
@@ -397,7 +395,7 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 6px 10px;
-  font-family: var(--font-ui);
+  font-family: var(--font-ui), sans-serif;
   font-size: 0.8125rem;
   color: var(--fg-soft);
   border-radius: 4px;
@@ -443,7 +441,7 @@ body {
 .running-header {
   position: sticky;
   top: calc(var(--topbar-h) + var(--controls-h));
-  font-family: var(--font-ui);
+  font-family: var(--font-ui), sans-serif;
   font-size: 0.625rem;
   font-weight: 500;
   letter-spacing: 0.1em;
@@ -474,7 +472,7 @@ body {
 }
 
 .title-block h1 {
-  font-family: var(--font-heading);
+  font-family: var(--font-heading), Georgia, serif;
   font-size: 2rem;
   font-weight: 400;
   color: var(--fg);
@@ -483,7 +481,7 @@ body {
 }
 
 .title-block .subtitle {
-  font-family: var(--font-display);
+  font-family: var(--font-display), Georgia, serif;
   font-size: 1.3281rem;
   font-weight: 400;
   color: var(--fg-soft);
@@ -491,7 +489,7 @@ body {
 }
 
 .title-block .meta {
-  font-family: var(--font-ui);
+  font-family: var(--font-ui), sans-serif;
   font-size: 0.75rem;
   color: var(--muted);
   margin-top: 8px;
@@ -530,7 +528,7 @@ body {
 }
 
 .section-title {
-  font-family: var(--font-heading);
+  font-family: var(--font-heading), Georgia, serif;
   font-size: 1.375rem;
   font-weight: 400;
   text-align: center;
@@ -541,7 +539,7 @@ body {
 
 .block-marker {
   float: right;
-  font-family: var(--font-ui);
+  font-family: var(--font-ui), sans-serif;
   font-size: 0.5625rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -576,7 +574,7 @@ body {
 }
 
 .red-init::first-letter {
-  font-family: var(--font-display);
+  font-family: var(--font-display), Georgia, serif;
   font-size: 2.5em;
   float: left;
   line-height: 0.8;
@@ -593,7 +591,7 @@ body {
 }
 
 .lection-ref {
-  font-family: var(--font-ui);
+  font-family: var(--font-ui), sans-serif;
   font-size: 0.6875rem;
   font-weight: 500;
   color: var(--muted);
@@ -614,7 +612,7 @@ body {
 }
 
 .lection .paremia-label {
-  font-family: var(--font-ui);
+  font-family: var(--font-ui), sans-serif;
   font-size: 0.625rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -671,7 +669,7 @@ body {
 
 /* --- Date Input (bookish style) --- */
 .date-input {
-  font-family: var(--font-ui);
+  font-family: var(--font-ui), sans-serif;
   font-size: 0.8125rem;
   padding: 4px 10px;
   border: 1px solid var(--rule);
@@ -773,7 +771,7 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    font-family: var(--font-ui);
+    font-family: var(--font-ui), sans-serif;
     font-size: 0.75rem;
     font-weight: 500;
     padding: 5px 10px;
@@ -821,7 +819,7 @@ body {
     display: block;
     width: 100%;
     text-align: left;
-    font-family: var(--font-ui);
+    font-family: var(--font-ui), sans-serif;
     font-size: 0.8125rem;
     color: var(--fg-soft);
     padding: 6px 10px;
@@ -860,7 +858,7 @@ body {
     flex-direction: column;
     align-items: center;
     gap: 2px;
-    font-family: var(--font-ui);
+    font-family: var(--font-ui), sans-serif;
     font-size: 0.5625rem;
     font-weight: 600;
     letter-spacing: 0.06em;
@@ -928,7 +926,7 @@ body {
   }
 
   .bottom-sheet-title {
-    font-family: var(--font-heading);
+    font-family: var(--font-heading), Georgia, serif;
     font-size: 1.125rem;
     font-weight: 400;
     color: var(--fg);
