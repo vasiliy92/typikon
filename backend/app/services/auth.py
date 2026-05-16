@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
 from app.models.user import User, UserRole
-from app.services.redis import redis_client
+from app.services import redis as _redis_mod  # Import MODULE, not variable — avoids stale None reference
 
 # ── Password hashing ──
 
@@ -58,8 +58,9 @@ async def create_session(user: User) -> str:
         "role": user.role,
         "display_name": user.display_name,
     }
-    if redis_client:
-        await redis_client.setex(
+    rc = _redis_mod.redis_client  # Read current value from module at call time
+    if rc:
+        await rc.setex(
             f"{SESSION_PREFIX}{token}",
             SESSION_TTL,
             json.dumps(data),
@@ -72,10 +73,11 @@ async def create_session(user: User) -> str:
 
 async def get_session(token: str) -> dict | None:
     """Look up a session by token. Returns session dict or None."""
-    if not redis_client:
+    rc = _redis_mod.redis_client
+    if not rc:
         print(f"[typikon] Session lookup FAILED: Redis unavailable. token={token[:8]}...")
         return None
-    raw = await redis_client.get(f"{SESSION_PREFIX}{token}")
+    raw = await rc.get(f"{SESSION_PREFIX}{token}")
     if raw is None:
         print(f"[typikon] Session NOT FOUND in Redis. token={token[:8]}...")
         return None
@@ -84,8 +86,9 @@ async def get_session(token: str) -> dict | None:
 
 async def delete_session(token: str) -> None:
     """Delete a session (logout)."""
-    if redis_client:
-        await redis_client.delete(f"{SESSION_PREFIX}{token}")
+    rc = _redis_mod.redis_client
+    if rc:
+        await rc.delete(f"{SESSION_PREFIX}{token}")
         print(f"[typikon] Session deleted: token={token[:8]}...")
     else:
         print(f"[typikon] Session delete skipped (Redis unavailable). token={token[:8]}...")
