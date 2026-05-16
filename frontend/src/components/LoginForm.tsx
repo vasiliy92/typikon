@@ -77,7 +77,7 @@ export function LoginForm() {
               className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded transition-colors"
               style={{ color: 'var(--muted-foreground)' }}
               tabIndex={-1}
-              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              aria-label={showPassword ? t.auth.hide_password : t.auth.show_password}
             >
               {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>

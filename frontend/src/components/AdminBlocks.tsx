@@ -5,6 +5,9 @@ import { useI18n } from '@/lib/i18n';
 import { useApi, apiPost, apiPut, apiDelete } from '@/lib/api';
 import type { ServiceBlockResponse, PaginatedResponse } from '@/lib/api';
 
+/** Look up an enum value in a translation object, with fallback to the raw key. */
+const enumLabel = (obj: Record<string, string>, key: string): string => obj[key] ?? key;
+
 export function AdminBlocks() {
   const { t } = useI18n();
   const [page, setPage] = useState(1);
@@ -25,6 +28,9 @@ export function AdminBlocks() {
     mutate();
   };
 
+  const bookOptions = Object.entries(t.books);
+  const langOptions = Object.entries(t.languages);
+
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
@@ -39,8 +45,8 @@ export function AdminBlocks() {
             style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }}
           >
             <option value="">{t.admin.filter_book}</option>
-            {['gospel', 'apostol', 'psalter', 'liturgicon', 'horologion', 'octoechos', 'menaion_monthly', 'menaion_festal', 'menaion_general', 'triodion', 'pentecostarion', 'irmologion', 'typikon', 'euchologion', 'hieraticon', 'prologue', 'troparion'].map((b) => (
-              <option key={b} value={b}>{b}</option>
+            {bookOptions.map(([value, label]) => (
+              <option key={value} value={value}>{label}</option>
             ))}
           </select>
           <select
@@ -50,8 +56,8 @@ export function AdminBlocks() {
             style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }}
           >
             <option value="">{t.admin.filter_language}</option>
-            {['fr', 'ru'].map((l) => (
-              <option key={l} value={l}>{l}</option>
+            {langOptions.map(([value, label]) => (
+              <option key={value} value={value}>{label}</option>
             ))}
           </select>
           <button
@@ -98,7 +104,7 @@ export function AdminBlocks() {
                   {b.title ?? b.location_key}
                 </div>
                 <div className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>
-                  {b.book_code} · {b.language} · {b.slot} · tone {b.tone ?? '-'}
+                  {enumLabel(t.books as Record<string, string>, b.book_code)} · {enumLabel(t.languages as Record<string, string>, b.language)} · {b.slot} · {t.admin.fields.tone} {b.tone ?? '-'}
                 </div>
               </div>
               <div className="flex gap-2 ml-2">
@@ -116,9 +122,9 @@ export function AdminBlocks() {
 
       {pages > 1 && (
         <div className="flex items-center justify-center gap-2 mt-4">
-          <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page <= 1} className="px-3 py-1 rounded text-sm disabled:opacity-30" style={{ background: 'var(--muted-bg)', color: 'var(--foreground)' }}>←</button>
+          <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page <= 1} className="px-3 py-1 rounded text-sm disabled:opacity-30" style={{ background: 'var(--muted)', color: 'var(--foreground)' }}>←</button>
           <span className="text-sm" style={{ color: 'var(--muted-foreground)' }}>{t.admin.page} {page} {t.admin.of} {pages}</span>
-          <button onClick={() => setPage(Math.min(pages, page + 1))} disabled={page >= pages} className="px-3 py-1 rounded text-sm disabled:opacity-30" style={{ background: 'var(--muted-bg)', color: 'var(--foreground)' }}>→</button>
+          <button onClick={() => setPage(Math.min(pages, page + 1))} disabled={page >= pages} className="px-3 py-1 rounded text-sm disabled:opacity-30" style={{ background: 'var(--muted)', color: 'var(--foreground)' }}>→</button>
         </div>
       )}
     </div>
@@ -135,6 +141,7 @@ function BlockForm({
   onCancel: () => void;
 }) {
   const { t } = useI18n();
+  const f = t.admin.fields;
   const [form, setForm] = useState<Record<string, string>>({
     book_code: block?.book_code ?? 'octoechos',
     location_key: block?.location_key ?? '',
@@ -173,58 +180,73 @@ function BlockForm({
 
   const update = (key: string, value: string) => setForm({ ...form, [key]: value });
 
+  const bookOptions = Object.entries(t.books).map(([value, label]) => ({ value, label }));
+  const langOptions = Object.entries(t.languages).map(([value, label]) => ({ value, label }));
+
+  const inputStyle = { borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' } as React.CSSProperties;
+  const labelStyle = { color: 'var(--muted-foreground)' } as React.CSSProperties;
+  const inputCls = 'w-full rounded border px-2 py-1 text-sm';
+
   return (
     <form onSubmit={handleSubmit} className="rounded-lg border p-4 mb-4 space-y-3" style={{ borderColor: 'var(--border)' }}>
       <div className="grid grid-cols-3 gap-3">
         <div>
-          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>book_code</label>
-          <select value={form.book_code} onChange={(e) => update('book_code', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }}>
-            {['gospel', 'apostol', 'psalter', 'liturgicon', 'horologion', 'octoechos', 'menaion_monthly', 'menaion_festal', 'menaion_general', 'triodion', 'pentecostarion', 'irmologion', 'typikon', 'euchologion', 'hieraticon', 'prologue', 'troparion'].map((b) => (
-              <option key={b} value={b}>{b}</option>
-            ))}
+          <label className="block text-xs font-medium mb-1" style={labelStyle}>{f.book_code}</label>
+          <select value={form.book_code} onChange={(e) => update('book_code', e.target.value)} className={inputCls} style={inputStyle}>
+            {bookOptions.map((opt) => (<option key={opt.value} value={opt.value}>{opt.label}</option>))}
           </select>
         </div>
         <div>
-          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>language</label>
-          <select value={form.language} onChange={(e) => update('language', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }}>
-            {['fr', 'ru'].map((l) => (<option key={l} value={l}>{l}</option>))}
+          <label className="block text-xs font-medium mb-1" style={labelStyle}>{f.language}</label>
+          <select value={form.language} onChange={(e) => update('language', e.target.value)} className={inputCls} style={inputStyle}>
+            {langOptions.map((opt) => (<option key={opt.value} value={opt.value}>{opt.label}</option>))}
           </select>
         </div>
         <div>
-          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>tone</label>
-          <input value={form.tone} onChange={(e) => update('tone', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
+          <label className="block text-xs font-medium mb-1" style={labelStyle}>{f.tone}</label>
+          <input value={form.tone} onChange={(e) => update('tone', e.target.value)} className={inputCls} style={inputStyle} />
         </div>
         <div>
-          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>location_key</label>
-          <input value={form.location_key} onChange={(e) => update('location_key', e.target.value)} required className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
+          <label className="block text-xs font-medium mb-1" style={labelStyle}>{f.location_key}</label>
+          <input value={form.location_key} onChange={(e) => update('location_key', e.target.value)} required className={inputCls} style={inputStyle} />
         </div>
         <div>
-          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>slot</label>
-          <input value={form.slot} onChange={(e) => update('slot', e.target.value)} required className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
+          <label className="block text-xs font-medium mb-1" style={labelStyle}>{f.slot}</label>
+          <input value={form.slot} onChange={(e) => update('slot', e.target.value)} required className={inputCls} style={inputStyle} />
         </div>
         <div>
-          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>slot_order</label>
-          <input type="number" value={form.slot_order} onChange={(e) => update('slot_order', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
+          <label className="block text-xs font-medium mb-1" style={labelStyle}>{f.slot_order}</label>
+          <input type="number" value={form.slot_order} onChange={(e) => update('slot_order', e.target.value)} className={inputCls} style={inputStyle} />
         </div>
       </div>
       <div>
-        <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>title</label>
-        <input value={form.title} onChange={(e) => update('title', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
+        <label className="block text-xs font-medium mb-1" style={labelStyle}>{f.title}</label>
+        <input value={form.title} onChange={(e) => update('title', e.target.value)} className={inputCls} style={inputStyle} />
       </div>
       <div>
-        <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>content</label>
-        <textarea value={form.content} onChange={(e) => update('content', e.target.value)} rows={5} className="w-full rounded border px-2 py-1 text-sm font-mono" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
+        <label className="block text-xs font-medium mb-1" style={labelStyle}>{f.content}</label>
+        <textarea value={form.content} onChange={(e) => update('content', e.target.value)} rows={5} className="w-full rounded border px-2 py-1 text-sm font-mono" style={inputStyle} />
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="block text-xs font-medium mb-1" style={labelStyle}>{f.source_ref}</label>
+          <input value={form.source_ref} onChange={(e) => update('source_ref', e.target.value)} className={inputCls} style={inputStyle} />
+        </div>
+        <div>
+          <label className="block text-xs font-medium mb-1" style={labelStyle}>{f.rubric}</label>
+          <input value={form.rubric} onChange={(e) => update('rubric', e.target.value)} className={inputCls} style={inputStyle} />
+        </div>
       </div>
       <div className="grid grid-cols-4 gap-3">
-        {['is_doxastikon', 'is_theotokion', 'is_irmos', 'is_katabasia'].map((flag) => (
-          <label key={flag} className="flex items-center gap-2 text-xs" style={{ color: 'var(--muted-foreground)' }}>
+        {(['is_doxastikon', 'is_theotokion', 'is_irmos', 'is_katabasia'] as const).map((flag) => (
+          <label key={flag} className="flex items-center gap-2 text-xs" style={labelStyle}>
             <input type="checkbox" checked={form[flag] === 'true'} onChange={(e) => update(flag, String(e.target.checked))} />
-            {flag.replace('is_', '')}
+            {(f as Record<string, string>)[flag] ?? flag.replace('is_', '')}
           </label>
         ))}
       </div>
       <div className="flex gap-2 justify-end">
-        <button type="button" onClick={onCancel} className="px-3 py-1.5 rounded-lg text-sm" style={{ color: 'var(--muted-foreground)' }}>{t.admin.cancel}</button>
+        <button type="button" onClick={onCancel} className="px-3 py-1.5 rounded-lg text-sm" style={labelStyle}>{t.admin.cancel}</button>
         <button type="submit" disabled={saving} className="px-3 py-1.5 rounded-lg text-sm font-medium" style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}>{t.admin.save}</button>
       </div>
     </form>

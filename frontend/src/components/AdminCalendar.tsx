@@ -5,6 +5,9 @@ import { useI18n } from '@/lib/i18n';
 import { useApi, apiPost, apiPut, apiDelete } from '@/lib/api';
 import type { CalendarEntryResponse, PaginatedResponse } from '@/lib/api';
 
+/** Look up an enum value in a translation object, with fallback to the raw key. */
+const enumLabel = (obj: Record<string, string>, key: string): string => obj[key] ?? key;
+
 export function AdminCalendar() {
   const { t } = useI18n();
   const [page, setPage] = useState(1);
@@ -73,7 +76,7 @@ export function AdminCalendar() {
                   {e.title_ru}
                 </div>
                 <div className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>
-                  {e.date_type} · {e.rank} · {e.fasting}
+                  {enumLabel(t.admin.date_types as Record<string, string>, e.date_type)} · {enumLabel(t.feast_ranks as Record<string, string>, e.rank)} · {enumLabel(t.fasting_types as Record<string, string>, e.fasting)}
                 </div>
               </div>
               <div className="flex gap-2 ml-2">
@@ -103,7 +106,7 @@ export function AdminCalendar() {
             onClick={() => setPage(Math.max(1, page - 1))}
             disabled={page <= 1}
             className="px-3 py-1 rounded text-sm disabled:opacity-30"
-            style={{ background: 'var(--muted-bg)', color: 'var(--foreground)' }}
+            style={{ background: 'var(--muted)', color: 'var(--foreground)' }}
           >
             ←
           </button>
@@ -114,7 +117,7 @@ export function AdminCalendar() {
             onClick={() => setPage(Math.min(pages, page + 1))}
             disabled={page >= pages}
             className="px-3 py-1 rounded text-sm disabled:opacity-30"
-            style={{ background: 'var(--muted-bg)', color: 'var(--foreground)' }}
+            style={{ background: 'var(--muted)', color: 'var(--foreground)' }}
           >
             →
           </button>
@@ -134,6 +137,7 @@ function CalendarForm({
   onCancel: () => void;
 }) {
   const { t } = useI18n();
+  const f = t.admin.fields;
   const [form, setForm] = useState<Record<string, string>>({
     date_type: entry?.date_type ?? 'fixed',
     month: String(entry?.month ?? ''),
@@ -162,19 +166,23 @@ function CalendarForm({
     setSaving(false);
   };
 
+  const dateTypeOptions = Object.entries(t.admin.date_types).map(([value, label]) => ({ value, label }));
+  const rankOptions = Object.entries(t.feast_ranks).map(([value, label]) => ({ value, label }));
+  const fastingOptions = Object.entries(t.fasting_types).map(([value, label]) => ({ value, label }));
+
   return (
     <form onSubmit={handleSubmit} className="rounded-lg border p-4 mb-4 space-y-3" style={{ borderColor: 'var(--border)' }}>
       <div className="grid grid-cols-2 gap-3">
-        <Field label="date_type" form={form} setForm={setForm} />
-        <Field label="rank" form={form} setForm={setForm} />
-        <Field label="month" form={form} setForm={setForm} />
-        <Field label="day" form={form} setForm={setForm} />
-        <Field label="pascha_offset" form={form} setForm={setForm} />
-        <Field label="fasting" form={form} setForm={setForm} />
+        <Field label="date_type" displayLabel={f.date_type} form={form} setForm={setForm} options={dateTypeOptions} />
+        <Field label="rank" displayLabel={f.rank} form={form} setForm={setForm} options={rankOptions} />
+        <Field label="month" displayLabel={f.month} form={form} setForm={setForm} type="number" />
+        <Field label="day" displayLabel={f.day} form={form} setForm={setForm} type="number" />
+        <Field label="pascha_offset" displayLabel={f.pascha_offset} form={form} setForm={setForm} type="number" />
+        <Field label="fasting" displayLabel={f.fasting} form={form} setForm={setForm} options={fastingOptions} />
       </div>
-      <Field label="title_ru" form={form} setForm={setForm} />
-      <Field label="title_fr" form={form} setForm={setForm} />
-      <Field label="rubric" form={form} setForm={setForm} />
+      <Field label="title_ru" displayLabel={f.title_ru} form={form} setForm={setForm} />
+      <Field label="title_fr" displayLabel={f.title_fr} form={form} setForm={setForm} />
+      <Field label="rubric" displayLabel={f.rubric} form={form} setForm={setForm} />
       <div className="flex gap-2 justify-end">
         <button type="button" onClick={onCancel} className="px-3 py-1.5 rounded-lg text-sm" style={{ color: 'var(--muted-foreground)' }}>
           {t.admin.cancel}
@@ -187,16 +195,39 @@ function CalendarForm({
   );
 }
 
-function Field({ label, form, setForm }: { label: string; form: Record<string, string>; setForm: (f: Record<string, string>) => void }) {
+function Field({ label, displayLabel, form, setForm, type = 'text', options }: {
+  label: string;
+  displayLabel: string;
+  form: Record<string, string>;
+  setForm: (f: Record<string, string>) => void;
+  type?: string;
+  options?: { value: string; label: string }[];
+}) {
   return (
     <div>
-      <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>{label}</label>
-      <input
-        value={form[label] ?? ''}
-        onChange={(e) => setForm({ ...form, [label]: e.target.value })}
-        className="w-full rounded border px-2 py-1 text-sm"
-        style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }}
-      />
+      <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>
+        {displayLabel}
+      </label>
+      {options ? (
+        <select
+          value={form[label] ?? ''}
+          onChange={(e) => setForm({ ...form, [label]: e.target.value })}
+          className="w-full rounded border px-2 py-1 text-sm"
+          style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }}
+        >
+          {options.map((opt) => (
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
+          ))}
+        </select>
+      ) : (
+        <input
+          type={type}
+          value={form[label] ?? ''}
+          onChange={(e) => setForm({ ...form, [label]: e.target.value })}
+          className="w-full rounded border px-2 py-1 text-sm"
+          style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }}
+        />
+      )}
     </div>
   );
 }

@@ -34,7 +34,13 @@
     "close": "Закрыть",
     "back": "Назад",
     "next": "Далее",
-    "previous": "Предыдущий"
+    "previous": "Предыдущий",
+    "yes": "Да",
+    "no": "Нет"
+  },
+  "languages": {
+    "fr": "Français",
+    "ru": "Русский"
   },
   "home": {
     "title": "Типико́н",
@@ -100,7 +106,65 @@
     "delete": "Удалить",
     "save": "Сохранить",
     "cancel": "Отменить",
-    "search": "Поиск"
+    "search": "Поиск",
+    "fields": {
+      "date_type": "Тип даты",
+      "month": "Месяц",
+      "day": "День",
+      "pascha_offset": "Смещение от Пасхи",
+      "title_ru": "Заголовок (русский)",
+      "title_fr": "Заголовок (французский)",
+      "rubric": "Рубрика",
+      "rank": "Ранг",
+      "fasting": "Пост",
+      "name_ru": "Имя (русский)",
+      "name_fr": "Имя (французский)",
+      "categories": "Категории (через запятую)",
+      "feast_month": "Месяц праздника",
+      "feast_day": "День праздника",
+      "troparion": "Тропарь",
+      "troparion_ru": "Тропарь (русский)",
+      "troparion_fr": "Тропарь (французский)",
+      "troparion_tone": "Глас тропаря",
+      "kontakion": "Кондак",
+      "kontakion_ru": "Кондак (русский)",
+      "kontakion_fr": "Кондак (французский)",
+      "kontakion_tone": "Глас кондака",
+      "name": "Название",
+      "service_type": "Тип службы",
+      "sub_type": "Подтип",
+      "is_special": "Особый",
+      "description": "Описание",
+      "book_code": "Книга",
+      "language": "Язык",
+      "tone": "Глас",
+      "location_key": "Ключ расположения",
+      "slot": "Слот",
+      "slot_order": "Порядок",
+      "title": "Заголовок",
+      "content": "Содержание",
+      "source_ref": "Источник",
+      "is_doxastikon": "Доксастикон",
+      "is_theotokion": "Богородичен",
+      "is_irmos": "Ирмос",
+      "is_katabasia": "Катавасия",
+      "display_name": "Имя",
+      "email": "Email",
+      "password": "Пароль",
+      "role": "Роль",
+      "is_active": "Активен"
+    },
+    "date_types": {
+      "fixed": "Фиксированный",
+      "movable": "Подвижный"
+    },
+    "preview": "Предпросмотр",
+    "invalid_json": "Неверный файл JSON",
+    "import_success": "Успешно импортировано",
+    "import_error": "Ошибка импорта",
+    "special": "Особый",
+    "regular": "Обычный",
+    "blocks_count": "блоков"
   },
   "auth": {
     "login": "Вход",
@@ -110,7 +174,9 @@
     "noPermission": "Недостаточные права",
     "users": "Пользователи",
     "displayName": "Имя",
-    "createUser": "Создать пользователя"
+    "createUser": "Создать пользователя",
+    "show_password": "Показать пароль",
+    "hide_password": "Скрыть пароль"
   },
   "feast_ranks": {
     "1": "Повседневный",

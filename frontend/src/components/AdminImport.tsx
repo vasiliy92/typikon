@@ -21,7 +21,7 @@ export function AdminImport() {
       setPreview(json);
     } catch {
       setPreview(null);
-      setResult('Invalid JSON file');
+      setResult(t.admin.invalid_json);
     }
   };
 
@@ -31,9 +31,9 @@ export function AdminImport() {
     setResult('');
     try {
       const resp = await apiPost('/admin/import', preview);
-      setResult(`Imported: ${JSON.stringify(resp)}`);
+      setResult(`${t.admin.import_success}: ${JSON.stringify(resp)}`);
     } catch (err: unknown) {
-      setResult(`Error: ${err instanceof Error ? err.message : 'Import failed'}`);
+      setResult(`${t.admin.import_error}: ${err instanceof Error ? err.message : t.common.error}`);
     }
     setImporting(false);
   };
@@ -54,7 +54,7 @@ export function AdminImport() {
 
       {preview && (
         <div className="mb-4">
-          <h4 className="text-sm font-medium mb-2" style={{ color: 'var(--foreground)' }}>Preview</h4>
+          <h4 className="text-sm font-medium mb-2" style={{ color: 'var(--foreground)' }}>{t.admin.preview}</h4>
           <pre className="rounded-lg border p-3 text-xs overflow-auto max-h-64" style={{ borderColor: 'var(--border)', background: 'var(--muted)', color: 'var(--foreground)' }}>
             {JSON.stringify(preview, null, 2).slice(0, 2000)}
             {JSON.stringify(preview, null, 2).length > 2000 ? '\n... (truncated)' : ''}
@@ -71,7 +71,7 @@ export function AdminImport() {
       )}
 
       {result && (
-        <div className="rounded-lg border p-3 text-sm" style={{ borderColor: result.startsWith('Error') ? 'var(--destructive)' : 'var(--border)', color: 'var(--foreground)' }}>
+        <div className="rounded-lg border p-3 text-sm" style={{ borderColor: result.startsWith(t.admin.import_error) ? 'var(--destructive)' : 'var(--border)', color: 'var(--foreground)' }}>
           {result}
         </div>
       )}
