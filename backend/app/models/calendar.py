@@ -18,7 +18,7 @@ class CalendarEntry(Base, TimestampMixin):
     a movable one (offset from Pascha).
 
     Each entry records:
-    - What is commemorated (title in CSY/FR/EN/RU)
+    - What is commemorated (title in FR/RU)
     - Optional link to a Saint
     - Rank (1-5), tone, fasting type
     - Forefeast / afterfeast durations
@@ -41,11 +41,9 @@ class CalendarEntry(Base, TimestampMixin):
     # e.g. -48 = Sunday of Publican and Pharisee, +1 = Bright Monday
     pascha_offset: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, default=None)
 
-    # Multilingual titles
-    title_csy: Mapped[str] = mapped_column(String(500))
+    # Multilingual titles — title_ru is required (CSY civil script for liturgical)
+    title_ru: Mapped[str] = mapped_column(String(500))
     title_fr: Mapped[Optional[str]] = mapped_column(String(500), nullable=True, default=None)
-    title_en: Mapped[Optional[str]] = mapped_column(String(500), nullable=True, default=None)
-    title_ru: Mapped[Optional[str]] = mapped_column(String(500), nullable=True, default=None)
 
     # Optional saint link
     saint_id: Mapped[Optional[int]] = mapped_column(

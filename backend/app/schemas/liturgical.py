@@ -7,12 +7,14 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict
 
 
+# ── ServiceBlock ──────────────────────────────────────────────────────
+
 class ServiceBlockCreate(BaseModel):
     book_code: str
     location_key: str
     slot: str
     slot_order: int = 1
-    language: str = "csy"
+    language: str = "ru"
     translation_group_id: Optional[str] = None
     title: Optional[str] = None
     content: str
@@ -67,6 +69,8 @@ class ServiceBlockResponse(BaseModel):
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 
+
+# ── ServiceTemplate ───────────────────────────────────────────────────
 
 class TemplateBlockCreate(BaseModel):
     block_order: int
@@ -129,10 +133,12 @@ class TemplateResponse(BaseModel):
     updated_at: Optional[datetime] = None
 
 
+# ── Lection ───────────────────────────────────────────────────────────
+
 class LectionCreate(BaseModel):
     book_code: str
     zachalo: int
-    language: str = "csy"
+    language: str = "ru"
     title: str
     content: str
     short_ref: str
@@ -158,6 +164,8 @@ class LectionResponse(BaseModel):
     updated_at: Optional[datetime] = None
 
 
+# ── Import ────────────────────────────────────────────────────────────
+
 class ImportResult(BaseModel):
     status: str = "ok"
     total_created: int = 0
@@ -165,10 +173,11 @@ class ImportResult(BaseModel):
     details: dict[str, dict] = {}
 
 
+# ── Book info ─────────────────────────────────────────────────────────
+
 class BookInfo(BaseModel):
     code: str
-    name_csy: str
+    name_ru: str
     name_fr: str
-    name_en: str
     block_count: int = 0
     languages: list[str] = []
