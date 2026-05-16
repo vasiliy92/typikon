@@ -94,6 +94,7 @@ export function refreshApi(path: string) {
   mutate(path);
 }
 
+// Types
 export interface LiturgicalDay {
   gregorian_date: string;
   julian_date: string;
@@ -114,10 +115,8 @@ export interface CalendarEntryResponse {
   month: number | null;
   day: number | null;
   pascha_offset: number | null;
-  title_csy: string;
+  title_ru: string;
   title_fr: string | null;
-  title_en: string | null;
-  title_ru: string | null;
   rank: string;
   tone: number | null;
   fasting: string;
@@ -198,25 +197,24 @@ export interface ServiceBlockResponse {
   rubric: string | null;
 }
 
+/** Alias used by admin components */
+export type BlockResponse = ServiceBlockResponse;
+
 export interface SaintResponse {
   id: number;
-  name_csy: string;
+  name_ru: string;
   name_fr: string | null;
-  name_en: string | null;
   categories: string[];
   feast_month: number | null;
   feast_day: number | null;
-  brief_life_csy: string | null;
   brief_life_fr: string | null;
-  brief_life_en: string | null;
+  brief_life_ru: string | null;
   icon_url: string | null;
-  troparion_csy: string | null;
   troparion_fr: string | null;
-  troparion_en: string | null;
+  troparion_ru: string | null;
   troparion_tone: string | null;
-  kontakion_csy: string | null;
   kontakion_fr: string | null;
-  kontakion_en: string | null;
+  kontakion_ru: string | null;
   kontakion_tone: string | null;
 }
 
@@ -267,8 +265,8 @@ export interface ServiceTemplateBlockResponse {
 export interface PaginatedResponse<T> {
   items: T[];
   total: number;
-  page: number;
   page_size: number;
+  page: number;
   pages: number;
 }
 
