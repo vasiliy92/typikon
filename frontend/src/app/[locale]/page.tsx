@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useI18n } from '@/lib/i18n';
 import { apiPost, AssembledServiceResponse, LiturgicalDay, useApi } from '@/lib/api';
-import { useTopbarTitle } from '@/app/[locale]/layout';
+import { useTopbarTitle } from '@/lib/topbar';
 
 /* ─── Font Scale ─── */
 const FONT_SCALES = [
@@ -563,7 +563,7 @@ export default function ServicePage() {
             onClick={assemble}
             disabled={loading}
             style={{ marginLeft: 'auto', fontSize: '0.6875rem', padding: '4px 12px' }}
-          >
+            >
             {loading ? '…' : t.service.assemble}
           </button>
         </div>

@@ -9,18 +9,9 @@ import ru from '@/i18n/messages/ru.json';
 import en from '@/i18n/messages/en.json';
 import { I18nProvider, type Messages } from '@/lib/i18n';
 import { AuthProvider } from '@/lib/auth';
+import { TopbarTitleContext } from '@/lib/topbar';
 
 const messages: Record<Locale, Messages> = { fr, ru, en };
-
-/* ─── Topbar Title Context ─── */
-const TopbarTitleContext = createContext<{
-  title: string;
-  setTitle: (t: string) => void;
-}>({ title: '', setTitle: () => {} });
-
-export function useTopbarTitle() {
-  return useContext(TopbarTitleContext);
-}
 
 export default function LocaleLayout({
   children,
