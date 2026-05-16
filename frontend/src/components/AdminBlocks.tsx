@@ -3,20 +3,16 @@
 import { useState } from 'react';
 import { useI18n } from '@/lib/i18n';
 import { useApi, apiPost, apiPut, apiDelete } from '@/lib/api';
-import type { BlockResponse, PaginatedResponse } from '@/lib/api';
+import type { ServiceBlockResponse, PaginatedResponse } from '@/lib/api';
 
 export function AdminBlocks() {
   const { t } = useI18n();
   const [page, setPage] = useState(1);
-  const [filterBook, setFilterBook] = useState('');
-  const [filterLang, setFilterLang] = useState('');
-  const qs = [`page=${page}`, `page_size=20`];
-  if (filterBook) qs.push(`book=${filterBook}`);
-  if (filterLang) qs.push(`language=${filterLang}`);
-  const { data, mutate } = useApi<PaginatedResponse<BlockResponse>>(
-    `/admin/blocks?${qs.join('&')}`
-  );
-  const [editing, setEditing] = useState<BlockResponse | null>(null);
+  const [bookFilter, setBookFilter] = useState('');
+  const [langFilter, setLangFilter] = useState('');
+  const query = `/admin/blocks?page=${page}&page_size=20${bookFilter ? `&book_code=${bookFilter}` : ''}${langFilter ? `&language=${langFilter}` : ''}`;
+  const { data, mutate } = useApi<PaginatedResponse<ServiceBlockResponse>>(query);
+  const [editing, setEditing] = useState<ServiceBlockResponse | null>(null);
   const [creating, setCreating] = useState(false);
 
   const items = data?.items ?? [];
@@ -32,44 +28,86 @@ export function AdminBlocks() {
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <span className="text-sm" style={{ color: 'var(--muted-foreground)' }}>{t.admin.total}: {total}</span>
-        <button onClick={() => { setCreating(true); setEditing(null); }} className="px-3 py-1.5 rounded-lg text-sm font-medium" style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}>{t.admin.add}</button>
-      </div>
-
-      <div className="flex gap-3 mb-4">
-        <div className="flex items-center gap-1.5">
-          <label className="text-xs" style={{ color: 'var(--muted-foreground)' }}>{t.admin.filter_book}:</label>
-          <select value={filterBook} onChange={(e) => { setFilterBook(e.target.value); setPage(1); }} className="rounded border px-2 py-1 text-xs" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }}>
-            <option value="">All</option>
-            {['gospel', 'apostol', 'psalter', 'liturgicon', 'horologion', 'octoechos', 'menaion_monthly', 'menaion_festal', 'menaion_general', 'triodion', 'pentecostarion', 'irmologion', 'typikon', 'euchologion', 'hieraticon', 'prologue', 'troparion'].map((b) => (<option key={b} value={b}>{b}</option>))}
+        <span className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
+          {t.admin.total}: {total}
+        </span>
+        <div className="flex gap-2">
+          <select
+            value={bookFilter}
+            onChange={(e) => { setBookFilter(e.target.value); setPage(1); }}
+            className="rounded border px-2 py-1 text-xs"
+            style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }}
+          >
+            <option value="">{t.admin.filter_book}</option>
+            {['gospel', 'apostol', 'psalter', 'liturgicon', 'horologion', 'octoechos', 'menaion_monthly', 'menaion_festal', 'menaion_general', 'triodion', 'pentecostarion', 'irmologion', 'typikon', 'euchologion', 'hieraticon', 'prologue', 'troparion'].map((b) => (
+              <option key={b} value={b}>{b}</option>
+            ))}
           </select>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <label className="text-xs" style={{ color: 'var(--muted-foreground)' }}>{t.admin.filter_language}:</label>
-          <select value={filterLang} onChange={(e) => { setFilterLang(e.target.value); setPage(1); }} className="rounded border px-2 py-1 text-xs" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }}>
-            <option value="">All</option>
-            {['csy', 'fr', 'en', 'ru'].map((l) => (<option key={l} value={l}>{l}</option>))}
+          <select
+            value={langFilter}
+            onChange={(e) => { setLangFilter(e.target.value); setPage(1); }}
+            className="rounded border px-2 py-1 text-xs"
+            style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }}
+          >
+            <option value="">{t.admin.filter_language}</option>
+            {['fr', 'ru'].map((l) => (
+              <option key={l} value={l}>{l}</option>
+            ))}
           </select>
+          <button
+            onClick={() => { setCreating(true); setEditing(null); }}
+            className="px-3 py-1.5 rounded-lg text-sm font-medium"
+            style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}
+          >
+            {t.admin.add}
+          </button>
         </div>
       </div>
 
       {(creating || editing) && (
-        <BlockForm block={editing} onSave={async (payload) => { if (editing) { await apiPut(`/admin/blocks/${editing.id}`, payload); } else { await apiPost('/admin/blocks', payload); } setCreating(false); setEditing(null); mutate(); }} onCancel={() => { setCreating(false); setEditing(null); }} />
+        <BlockForm
+          block={editing}
+          onSave={async (payload) => {
+            if (editing) {
+              await apiPut(`/admin/blocks/${editing.id}`, payload);
+            } else {
+              await apiPost('/admin/blocks', payload);
+            }
+            setCreating(false);
+            setEditing(null);
+            mutate();
+          }}
+          onCancel={() => { setCreating(false); setEditing(null); }}
+        />
       )}
 
       {items.length === 0 ? (
-        <p className="text-sm py-4" style={{ color: 'var(--muted-foreground)' }}>{t.app.no_results}</p>
+        <p className="text-sm py-4" style={{ color: 'var(--muted-foreground)' }}>
+          {t.app.no_results}
+        </p>
       ) : (
         <div className="space-y-2">
           {items.map((b) => (
-            <div key={b.id} className="flex items-center justify-between rounded-lg border px-4 py-3" style={{ borderColor: 'var(--border)' }}>
+            <div
+              key={b.id}
+              className="flex items-center justify-between rounded-lg border px-4 py-3"
+              style={{ borderColor: 'var(--border)' }}
+            >
               <div className="flex-1 min-w-0">
-                <div className="font-medium text-sm truncate" style={{ color: 'var(--foreground)' }}>{b.title}</div>
-                <div className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>{b.book} · {b.language} · {b.block_type}</div>
+                <div className="font-medium text-sm truncate" style={{ color: 'var(--foreground)' }}>
+                  {b.title ?? b.location_key}
+                </div>
+                <div className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>
+                  {b.book_code} · {b.language} · {b.slot} · tone {b.tone ?? '-'}
+                </div>
               </div>
               <div className="flex gap-2 ml-2">
-                <button onClick={() => { setEditing(b); setCreating(false); }} className="text-xs px-2 py-1 rounded" style={{ color: 'var(--primary)' }}>{t.admin.edit}</button>
-                <button onClick={() => handleDelete(b.id)} className="text-xs px-2 py-1 rounded" style={{ color: 'var(--destructive)' }}>{t.admin.delete}</button>
+                <button onClick={() => { setEditing(b); setCreating(false); }} className="text-xs px-2 py-1 rounded" style={{ color: 'var(--primary)' }}>
+                  {t.admin.edit}
+                </button>
+                <button onClick={() => handleDelete(b.id)} className="text-xs px-2 py-1 rounded" style={{ color: 'var(--destructive)' }}>
+                  {t.admin.delete}
+                </button>
               </div>
             </div>
           ))}
@@ -87,41 +125,104 @@ export function AdminBlocks() {
   );
 }
 
-function BlockForm({ block, onSave, onCancel }: { block: BlockResponse | null; onSave: (payload: Record<string, unknown>) => Promise<void>; onCancel: () => void }) {
+function BlockForm({
+  block,
+  onSave,
+  onCancel,
+}: {
+  block: ServiceBlockResponse | null;
+  onSave: (payload: Record<string, unknown>) => Promise<void>;
+  onCancel: () => void;
+}) {
   const { t } = useI18n();
   const [form, setForm] = useState<Record<string, string>>({
-    title: block?.title ?? '', book: block?.book ?? 'gospel', language: block?.language ?? 'csy',
-    block_type: block?.block_type ?? 'prayer', tone: block?.tone ?? '',
-    text_content: block?.text_content ?? '', heading: block?.heading ?? '',
-    template_id: block?.template_id ?? '', sort_order: String(block?.sort_order ?? 0),
+    book_code: block?.book_code ?? 'octoechos',
+    location_key: block?.location_key ?? '',
+    slot: block?.slot ?? '',
+    slot_order: String(block?.slot_order ?? 0),
+    language: block?.language ?? 'ru',
+    title: block?.title ?? '',
+    content: block?.content ?? '',
+    tone: block?.tone ?? '',
+    rank: String(block?.rank ?? ''),
+    is_doxastikon: String(block?.is_doxastikon ?? false),
+    is_theotokion: String(block?.is_theotokion ?? false),
+    is_irmos: String(block?.is_irmos ?? false),
+    is_katabasia: String(block?.is_katabasia ?? false),
+    source_ref: block?.source_ref ?? '',
+    rubric: block?.rubric ?? '',
   });
   const [saving, setSaving] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault(); setSaving(true);
+    e.preventDefault();
+    setSaving(true);
     const payload: Record<string, unknown> = {};
     for (const [k, v] of Object.entries(form)) {
-      if (['template_id', 'sort_order', 'tone'].includes(k)) { payload[k] = v ? Number(v) : null; }
-      else { payload[k] = v || null; }
+      if (['slot_order', 'rank'].includes(k)) {
+        payload[k] = v ? Number(v) : null;
+      } else if (k.startsWith('is_')) {
+        payload[k] = v === 'true';
+      } else {
+        payload[k] = v || null;
+      }
     }
-    await onSave(payload); setSaving(false);
+    await onSave(payload);
+    setSaving(false);
   };
 
   const update = (key: string, value: string) => setForm({ ...form, [key]: value });
 
   return (
     <form onSubmit={handleSubmit} className="rounded-lg border p-4 mb-4 space-y-3" style={{ borderColor: 'var(--border)' }}>
-      <div className="grid grid-cols-2 gap-3">
-        <div><label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>title</label><input value={form.title} onChange={(e) => update('title', e.target.value)} required className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} /></div>
-        <div><label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>book</label><select value={form.book} onChange={(e) => update('book', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }}>{['gospel', 'apostol', 'psalter', 'liturgicon', 'horologion', 'octoechos', 'menaion_monthly', 'menaion_festal', 'menaion_general', 'triodion', 'pentecostarion', 'irmologion', 'typikon', 'euchologion', 'hieraticon', 'prologue', 'troparion'].map((b) => (<option key={b} value={b}>{b}</option>))}</select></div>
-        <div><label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>language</label><select value={form.language} onChange={(e) => update('language', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }}>{['csy', 'fr', 'en', 'ru'].map((l) => (<option key={l} value={l}>{l}</option>))}</select></div>
-        <div><label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>block_type</label><select value={form.block_type} onChange={(e) => update('block_type', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }}>{['prayer', 'reading', 'hymn', 'rubric', 'ektenia', 'exclamation', 'antiphon', 'kathisma', 'canon', 'stichera', 'troparion', 'kontakion', 'prokeimenon', 'alleluia', 'communion_verse'].map((bt) => (<option key={bt} value={bt}>{bt}</option>))}</select></div>
-        <div><label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>tone</label><input type="number" min="1" max="8" value={form.tone} onChange={(e) => update('tone', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} /></div>
-        <div><label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>sort_order</label><input type="number" value={form.sort_order} onChange={(e) => update('sort_order', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} /></div>
+      <div className="grid grid-cols-3 gap-3">
+        <div>
+          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>book_code</label>
+          <select value={form.book_code} onChange={(e) => update('book_code', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }}>
+            {['gospel', 'apostol', 'psalter', 'liturgicon', 'horologion', 'octoechos', 'menaion_monthly', 'menaion_festal', 'menaion_general', 'triodion', 'pentecostarion', 'irmologion', 'typikon', 'euchologion', 'hieraticon', 'prologue', 'troparion'].map((b) => (
+              <option key={b} value={b}>{b}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>language</label>
+          <select value={form.language} onChange={(e) => update('language', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }}>
+            {['fr', 'ru'].map((l) => (<option key={l} value={l}>{l}</option>))}
+          </select>
+        </div>
+        <div>
+          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>tone</label>
+          <input value={form.tone} onChange={(e) => update('tone', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
+        </div>
+        <div>
+          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>location_key</label>
+          <input value={form.location_key} onChange={(e) => update('location_key', e.target.value)} required className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
+        </div>
+        <div>
+          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>slot</label>
+          <input value={form.slot} onChange={(e) => update('slot', e.target.value)} required className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
+        </div>
+        <div>
+          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>slot_order</label>
+          <input type="number" value={form.slot_order} onChange={(e) => update('slot_order', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
+        </div>
       </div>
-      <div><label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>heading</label><input value={form.heading} onChange={(e) => update('heading', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} /></div>
-      <div><label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>text_content</label><textarea value={form.text_content} onChange={(e) => update('text_content', e.target.value)} rows={6} className="w-full rounded border px-2 py-1 text-sm font-mono" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} /></div>
-      <div><label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>template_id</label><input type="number" value={form.template_id} onChange={(e) => update('template_id', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} /></div>
+      <div>
+        <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>title</label>
+        <input value={form.title} onChange={(e) => update('title', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
+      </div>
+      <div>
+        <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>content</label>
+        <textarea value={form.content} onChange={(e) => update('content', e.target.value)} rows={5} className="w-full rounded border px-2 py-1 text-sm font-mono" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
+      </div>
+      <div className="grid grid-cols-4 gap-3">
+        {['is_doxastikon', 'is_theotokion', 'is_irmos', 'is_katabasia'].map((flag) => (
+          <label key={flag} className="flex items-center gap-2 text-xs" style={{ color: 'var(--muted-foreground)' }}>
+            <input type="checkbox" checked={form[flag] === 'true'} onChange={(e) => update(flag, String(e.target.checked))} />
+            {flag.replace('is_', '')}
+          </label>
+        ))}
+      </div>
       <div className="flex gap-2 justify-end">
         <button type="button" onClick={onCancel} className="px-3 py-1.5 rounded-lg text-sm" style={{ color: 'var(--muted-foreground)' }}>{t.admin.cancel}</button>
         <button type="submit" disabled={saving} className="px-3 py-1.5 rounded-lg text-sm font-medium" style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}>{t.admin.save}</button>

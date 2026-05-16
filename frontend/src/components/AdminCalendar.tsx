@@ -70,15 +70,27 @@ export function AdminCalendar() {
             >
               <div className="flex-1 min-w-0">
                 <div className="font-medium text-sm truncate" style={{ color: 'var(--foreground)' }}>
-                  {e.title_csy}
+                  {e.title_ru}
                 </div>
                 <div className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>
                   {e.date_type} · {e.rank} · {e.fasting}
                 </div>
               </div>
               <div className="flex gap-2 ml-2">
-                <button onClick={() => { setEditing(e); setCreating(false); }} className="text-xs px-2 py-1 rounded" style={{ color: 'var(--primary)' }}>{t.admin.edit}</button>
-                <button onClick={() => handleDelete(e.id)} className="text-xs px-2 py-1 rounded" style={{ color: 'var(--destructive)' }}>{t.admin.delete}</button>
+                <button
+                  onClick={() => { setEditing(e); setCreating(false); }}
+                  className="text-xs px-2 py-1 rounded"
+                  style={{ color: 'var(--primary)' }}
+                >
+                  {t.admin.edit}
+                </button>
+                <button
+                  onClick={() => handleDelete(e.id)}
+                  className="text-xs px-2 py-1 rounded"
+                  style={{ color: 'var(--destructive)' }}
+                >
+                  {t.admin.delete}
+                </button>
               </div>
             </div>
           ))}
@@ -87,25 +99,48 @@ export function AdminCalendar() {
 
       {pages > 1 && (
         <div className="flex items-center justify-center gap-2 mt-4">
-          <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page <= 1} className="px-3 py-1 rounded text-sm disabled:opacity-30" style={{ background: 'var(--muted)', color: 'var(--foreground)' }}>←</button>
-          <span className="text-sm" style={{ color: 'var(--muted-foreground)' }}>{t.admin.page} {page} {t.admin.of} {pages}</span>
-          <button onClick={() => setPage(Math.min(pages, page + 1))} disabled={page >= pages} className="px-3 py-1 rounded text-sm disabled:opacity-30" style={{ background: 'var(--muted)', color: 'var(--foreground)' }}>→</button>
+          <button
+            onClick={() => setPage(Math.max(1, page - 1))}
+            disabled={page <= 1}
+            className="px-3 py-1 rounded text-sm disabled:opacity-30"
+            style={{ background: 'var(--muted)', color: 'var(--foreground)' }}
+          >
+            ←
+          </button>
+          <span className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
+            {t.admin.page} {page} {t.admin.of} {pages}
+          </span>
+          <button
+            onClick={() => setPage(Math.min(pages, page + 1))}
+            disabled={page >= pages}
+            className="px-3 py-1 rounded text-sm disabled:opacity-30"
+            style={{ background: 'var(--muted)', color: 'var(--foreground)' }}
+          >
+            →
+          </button>
         </div>
       )}
     </div>
   );
 }
 
-function CalendarForm({ entry, onSave, onCancel }: { entry: CalendarEntryResponse | null; onSave: (payload: Record<string, unknown>) => Promise<void>; onCancel: () => void }) {
+function CalendarForm({
+  entry,
+  onSave,
+  onCancel,
+}: {
+  entry: CalendarEntryResponse | null;
+  onSave: (payload: Record<string, unknown>) => Promise<void>;
+  onCancel: () => void;
+}) {
   const { t } = useI18n();
   const [form, setForm] = useState<Record<string, string>>({
     date_type: entry?.date_type ?? 'fixed',
     month: String(entry?.month ?? ''),
     day: String(entry?.day ?? ''),
     pascha_offset: String(entry?.pascha_offset ?? ''),
-    title_csy: entry?.title_csy ?? '',
+    title_ru: entry?.title_ru ?? '',
     title_fr: entry?.title_fr ?? '',
-    title_en: entry?.title_en ?? '',
     rank: entry?.rank ?? '1',
     fasting: entry?.fasting ?? 'none',
     rubric: entry?.rubric ?? '',
@@ -117,8 +152,11 @@ function CalendarForm({ entry, onSave, onCancel }: { entry: CalendarEntryRespons
     setSaving(true);
     const payload: Record<string, unknown> = {};
     for (const [k, v] of Object.entries(form)) {
-      if (['month', 'day', 'pascha_offset', 'rank'].includes(k)) { payload[k] = v ? Number(v) : null; }
-      else { payload[k] = v || null; }
+      if (['month', 'day', 'pascha_offset', 'rank'].includes(k)) {
+        payload[k] = v ? Number(v) : null;
+      } else {
+        payload[k] = v || null;
+      }
     }
     await onSave(payload);
     setSaving(false);
@@ -134,13 +172,16 @@ function CalendarForm({ entry, onSave, onCancel }: { entry: CalendarEntryRespons
         <Field label="pascha_offset" form={form} setForm={setForm} />
         <Field label="fasting" form={form} setForm={setForm} />
       </div>
-      <Field label="title_csy" form={form} setForm={setForm} />
+      <Field label="title_ru" form={form} setForm={setForm} />
       <Field label="title_fr" form={form} setForm={setForm} />
-      <Field label="title_en" form={form} setForm={setForm} />
       <Field label="rubric" form={form} setForm={setForm} />
       <div className="flex gap-2 justify-end">
-        <button type="button" onClick={onCancel} className="px-3 py-1.5 rounded-lg text-sm" style={{ color: 'var(--muted-foreground)' }}>{t.admin.cancel}</button>
-        <button type="submit" disabled={saving} className="px-3 py-1.5 rounded-lg text-sm font-medium" style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}>{t.admin.save}</button>
+        <button type="button" onClick={onCancel} className="px-3 py-1.5 rounded-lg text-sm" style={{ color: 'var(--muted-foreground)' }}>
+          {t.admin.cancel}
+        </button>
+        <button type="submit" disabled={saving} className="px-3 py-1.5 rounded-lg text-sm font-medium" style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}>
+          {t.admin.save}
+        </button>
       </div>
     </form>
   );
@@ -150,7 +191,12 @@ function Field({ label, form, setForm }: { label: string; form: Record<string, s
   return (
     <div>
       <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>{label}</label>
-      <input value={form[label] ?? ''} onChange={(e) => setForm({ ...form, [label]: e.target.value })} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
+      <input
+        value={form[label] ?? ''}
+        onChange={(e) => setForm({ ...form, [label]: e.target.value })}
+        className="w-full rounded border px-2 py-1 text-sm"
+        style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }}
+      />
     </div>
   );
 }
