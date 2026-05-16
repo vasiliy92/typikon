@@ -41,21 +41,45 @@ class Language(StrEnum):
     RU = "ru"
 
 
+class CalendarMode(StrEnum):
+    JULIAN = "julian"
+    NEO_JULIAN = "neo_julian"
+
+
+class DedicationType(StrEnum):
+    SAVIOUR = "saviour"
+    THEOTOKOS = "theotokos"
+    SAINT = "saint"
+
+
 class FeastRank(StrEnum):
-    GREAT = "great"
-    MIDDLE_CROSS = "middle_cross"
-    MIDDLE = "middle"
-    LESSER_POLYLEOS = "lesser_polyleos"
-    SIX_VERSES = "six_verses"
-    SIMPLE = "simple"
+    DAILY = "1"
+    MINOR_SAINT = "2"
+    POLYELEOS = "3"
+    VIGIL = "4"
+    LORD_THEOTOKOS = "5"
 
 
 class FastingType(StrEnum):
     NONE = "none"
-    STRICT = "strict"
-    FISH = "fish"
-    OIL = "oil"
-    NO_OIL = "no_oil"
+    WEDNESDAY_FRIDAY = "wednesday_friday"
+    PHARISEE_WEEK = "pharisee_week"
+    CHEESEFARE = "cheesefare"
+    GREAT_LENT = "great_lent"
+    APOSTLES = "apostles"
+    DORMITION = "dormition"
+    NATIVITY = "nativity"
+
+
+class DateType(StrEnum):
+    FIXED = "fixed"
+    MOVABLE = "movable"
+
+
+class BlockType(StrEnum):
+    FIXED = "fixed"
+    VARIABLE = "variable"
+    CONDITIONAL = "conditional"
 
 
 class DayOfWeek(StrEnum):
