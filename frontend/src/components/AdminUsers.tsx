@@ -3,12 +3,14 @@
 import { useState } from 'react';
 import { useI18n } from '@/lib/i18n';
 import { useAuth } from '@/lib/auth';
-import { apiGet, apiPost, apiDelete } from '@/lib/api';
+import { apiGet, apiPost, apiDelete, type PaginatedResponse } from '@/lib/api';
 
 interface User {
   id: string;
   email: string;
+  display_name: string;
   role: 'superadmin' | 'admin';
+  is_active: boolean;
   created_at: string;
 }
 
@@ -20,15 +22,17 @@ export function AdminUsers() {
   const [showCreate, setShowCreate] = useState(false);
   const [newEmail, setNewEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
-  const [newRole, setNewRole] = useState<'admin'>('admin');
+  const [newDisplayName, setNewDisplayName] = useState('');
+  const [newRole, setNewRole] = useState<'admin' | 'superadmin'>('admin');
+  const [error, setError] = useState('');
 
   if (!isSuperadmin) return null;
 
   const loadUsers = async () => {
     setLoading(true);
     try {
-      const data = await apiGet<{ users: User[] }>('/auth/users');
-      setUsers(data.users);
+      const data = await apiGet<PaginatedResponse<User>>('/auth/users');
+      setUsers(data.items);
     } catch (err) {
       console.error('Failed to load users:', err);
     } finally {
@@ -37,14 +41,27 @@ export function AdminUsers() {
   };
 
   const createUser = async () => {
+    setError('');
+    if (!newEmail || !newPassword || !newDisplayName) {
+      setError('All fields are required');
+      return;
+    }
     try {
-      await apiPost('/auth/users', { email: newEmail, password: newPassword, role: newRole });
+      await apiPost('/auth/users', {
+        email: newEmail,
+        password: newPassword,
+        display_name: newDisplayName,
+        role: newRole,
+      });
       setNewEmail('');
       setNewPassword('');
+      setNewDisplayName('');
+      setNewRole('admin');
       setShowCreate(false);
       loadUsers();
-    } catch (err) {
-      console.error('Failed to create user:', err);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to create user';
+      setError(message);
     }
   };
 
@@ -85,7 +102,18 @@ export function AdminUsers() {
 
       {showCreate && (
         <div className="mb-4 p-4 rounded-lg" style={{ background: 'var(--muted)' }}>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          {error && (
+            <div className="mb-3 text-sm" style={{ color: 'var(--destructive)' }}>{error}</div>
+          )}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <input
+              type="text"
+              placeholder={t.auth.displayName}
+              value={newDisplayName}
+              onChange={(e) => setNewDisplayName(e.target.value)}
+              className="px-3 py-2 border rounded-lg text-sm"
+              style={{ borderColor: 'var(--border)', background: 'var(--card)', color: 'var(--foreground)' }}
+            />
             <input
               type="email"
               placeholder={t.admin.email}
@@ -105,11 +133,12 @@ export function AdminUsers() {
             <div className="flex gap-2">
               <select
                 value={newRole}
-                onChange={(e) => setNewRole(e.target.value as 'admin')}
+                onChange={(e) => setNewRole(e.target.value as 'admin' | 'superadmin')}
                 className="px-3 py-2 border rounded-lg text-sm"
                 style={{ borderColor: 'var(--border)', background: 'var(--card)', color: 'var(--foreground)' }}
               >
                 <option value="admin">{t.admin.role_admin}</option>
+                <option value="superadmin">{t.admin.role_superadmin}</option>
               </select>
               <button
                 onClick={createUser}
@@ -119,7 +148,7 @@ export function AdminUsers() {
                 {t.admin.save}
               </button>
               <button
-                onClick={() => setShowCreate(false)}
+                onClick={() => { setShowCreate(false); setError(''); }}
                 className="px-3 py-2 text-sm rounded-lg"
                 style={{ background: 'var(--muted)', color: 'var(--muted-foreground)' }}
               >
@@ -134,6 +163,7 @@ export function AdminUsers() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b" style={{ borderColor: 'var(--border)' }}>
+              <th className="text-left py-2" style={{ color: 'var(--muted-foreground)' }}>{t.auth.displayName}</th>
               <th className="text-left py-2" style={{ color: 'var(--muted-foreground)' }}>{t.admin.email}</th>
               <th className="text-left py-2" style={{ color: 'var(--muted-foreground)' }}>Role</th>
               <th className="text-right py-2"></th>
@@ -142,6 +172,7 @@ export function AdminUsers() {
           <tbody>
             {users.map((u) => (
               <tr key={u.id} className="border-b" style={{ borderColor: 'var(--border)' }}>
+                <td className="py-2" style={{ color: 'var(--foreground)' }}>{u.display_name}</td>
                 <td className="py-2" style={{ color: 'var(--foreground)' }}>{u.email}</td>
                 <td className="py-2">
                   <span
