@@ -372,6 +372,14 @@ class ServiceAssembler:
         }
 
     async def _load_patron_troparia(self) -> dict[str, Any]:
+        """Load temple patron saint troparia and kontakia.
+
+        Uses Temple.patronsaint_id (FK->saints.id) and Temple.dedication_type.
+        DedicationType: SAVIOUR, THEOTOKOS, SAINT - affects ordering per Typikon Ch. 52.
+
+        Troparia/kontakia are stored as ServiceBlocks with location_key
+        pattern: saint-{slug}-troparion / saint-{slug}-kontakion
+        """
         if not self._temple or not self._temple.patronsaint_id:
             return {"has_patron": False}
 
@@ -382,16 +390,25 @@ class ServiceAssembler:
         troparion = None
         kontakion = None
 
-        if saint.troparion_text:
-            troparion = {
-                "text": saint.troparion_text,
-                "tone": saint.troparion_tone,
-            }
-        if saint.kontakion_text:
-            kontakion = {
-                "text": saint.kontakion_text,
-                "tone": saint.kontakion_tone,
-            }
+        for slot, key_suffix in [("troparion", "troparion"), ("kontakion", "kontakion")]:
+            loc_key = f"saint-{saint.slug}-{key_suffix}"
+            stmt = select(ServiceBlock).where(
+                ServiceBlock.location_key == loc_key,
+                ServiceBlock.language == self.language,
+            ).limit(1)
+            block = (await self.db.execute(stmt)).scalar_one_or_none()
+            if not block and self.language != "csy":
+                stmt_csy = select(ServiceBlock).where(
+                    ServiceBlock.location_key == loc_key,
+                    ServiceBlock.language == "csy",
+                ).limit(1)
+                block = (await self.db.execute(stmt_csy)).scalar_one_or_none()
+            if block:
+                entry = {"text": block.content, "tone": block.tone}
+                if slot == "troparion":
+                    troparion = entry
+                else:
+                    kontakion = entry
 
         return {
             "has_patron": True,
