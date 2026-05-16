@@ -1,24 +1,28 @@
+@import './bookish.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: #f5f0e8;
-    --foreground: #1a1f3a;
+    /* Legacy variables kept for admin pages compatibility */
+    --background: #faf7f0;
+    --foreground: #1a1714;
     --card: #ffffff;
-    --card-foreground: #1a1f3a;
-    --primary: #7a1b2d;
-    --primary-foreground: #f5f0e8;
-    --secondary: #c9a84c;
-    --secondary-foreground: #1a1f3a;
-    --muted: #ede6d6;
-    --muted-foreground: #8b7355;
-    --accent: #2d4a3e;
-    --accent-foreground: #f5f0e8;
-    --border: #d4c5a9;
-    --ring: #7a1b2d;
+    --card-foreground: #1a1714;
+    --primary: #9b3b2e;
+    --primary-foreground: #faf7f0;
+    --secondary: #c4b89a;
+    --secondary-foreground: #1a1714;
+    --muted: rgba(28, 25, 23, 0.04);
+    --muted-foreground: #8a8278;
+    --accent: #9b3b2e;
+    --accent-foreground: #faf7f0;
+    --border: rgba(28, 25, 23, 0.12);
+    --ring: #9b3b2e;
     --radius: 0.5rem;
+    --destructive: #dc2626;
   }
 
   .dark {
@@ -41,64 +45,17 @@
   * {
     border-color: var(--border);
   }
-
-  body {
-    background: var(--background);
-    color: var(--foreground);
-    font-family: 'DM Sans', sans-serif;
-  }
 }
 
 @layer components {
+  /* Church Slavonic text (kept for potential future use) */
   .text-slavonic {
     font-family: 'Ponomar Unicode', 'Monomakh', serif;
     line-height: 1.8;
     letter-spacing: 0.02em;
   }
 
-  .service-block {
-    @apply rounded-lg p-4 mb-3 transition-all duration-200;
-    background: var(--card);
-    border: 1px solid var(--border);
-  }
-
-  .service-block:hover {
-    border-color: var(--secondary);
-  }
-
-  .service-block-title {
-    font-family: 'Space Grotesk', sans-serif;
-    font-weight: 600;
-    color: var(--primary);
-    margin-bottom: 0.5rem;
-  }
-
-  .lection-block {
-    @apply service-block border-l-4;
-    border-left-color: var(--accent);
-  }
-
-  .rubric-text {
-    @apply text-sm italic;
-    color: var(--muted-foreground);
-  }
-
-  .tone-badge {
-    @apply inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold;
-    background: var(--secondary);
-    color: var(--secondary-foreground);
-  }
-
-  .feast-rank-badge {
-    @apply inline-flex items-center px-2 py-0.5 rounded text-xs font-medium;
-  }
-
-  .feast-rank-1 { background: var(--muted); color: var(--muted-foreground); }
-  .feast-rank-2 { background: var(--secondary); color: var(--secondary-foreground); opacity: 0.8; }
-  .feast-rank-3 { background: var(--secondary); color: var(--secondary-foreground); }
-  .feast-rank-4 { background: var(--primary); color: var(--primary-foreground); }
-  .feast-rank-5 { background: var(--primary); color: var(--primary-foreground); font-weight: 700; }
-
+  /* Admin table styles (kept for admin pages) */
   .admin-table {
     @apply w-full text-sm;
   }
@@ -118,6 +75,7 @@
     background: var(--muted);
   }
 
+  /* Legacy button styles (kept for admin pages) */
   .btn-primary {
     @apply px-4 py-2 rounded-lg font-medium transition-all duration-200;
     background: var(--primary);
@@ -157,25 +115,3 @@
     box-shadow: 0 0 0 2px oklch(0.6247 0.2521 357.6 / 0.15);
   }
 }
-
-/* Staggered entrance animations */
-@keyframes fadeSlideUp {
-  from {
-    opacity: 0;
-    transform: translateY(16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-fade-slide-up {
-  animation: fadeSlideUp 0.5s ease-out forwards;
-  opacity: 0;
-}
-
-.animate-delay-1 { animation-delay: 0.1s; }
-.animate-delay-2 { animation-delay: 0.2s; }
-.animate-delay-3 { animation-delay: 0.3s; }
-.animate-delay-4 { animation-delay: 0.4s; }
