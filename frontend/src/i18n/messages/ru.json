@@ -160,7 +160,8 @@
       "email": "Электронная почта",
       "password": "Пароль",
       "role": "Роль",
-      "is_active": "Активен"
+      "is_active": "Активен",
+      "saint": "Святой"
     },
     "date_types": {
       "fixed": "Неподвижный",
@@ -177,7 +178,8 @@
     "total_blocks": "Всего блоков",
     "total_saints": "Всего святых",
     "total_templates": "Всего шаблонов",
-    "total_calendar": "Записей в календаре"
+    "total_calendar": "Записей в календаре",
+    "all_saints": "Все святые"
   },
   "auth": {
     "login": "Вход",

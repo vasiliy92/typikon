@@ -160,7 +160,8 @@
       "email": "E-mail",
       "password": "Mot de passe",
       "role": "Rôle",
-      "is_active": "Actif"
+      "is_active": "Actif",
+      "saint": "Saint"
     },
     "date_types": {
       "fixed": "Fixe",
@@ -177,7 +178,8 @@
     "total_blocks": "Blocs totaux",
     "total_saints": "Saints totaux",
     "total_templates": "Modèles totaux",
-    "total_calendar": "Entrées du calendrier"
+    "total_calendar": "Entrées du calendrier",
+    "all_saints": "Tous les saints"
   },
   "auth": {
     "login": "Connexion",

@@ -164,7 +164,8 @@
       "email": "Email",
       "password": "Password",
       "role": "Role",
-      "is_active": "Active"
+      "is_active": "Active",
+      "saint": "Saint"
     },
     "date_types": {
       "fixed": "Fixed",
@@ -182,7 +183,8 @@
     "total_blocks": "Total Blocks",
     "total_saints": "Total Saints",
     "total_templates": "Total Templates",
-    "total_calendar": "Calendar Entries"
+    "total_calendar": "Calendar Entries",
+    "all_saints": "All saints"
   },
   "auth": {
     "login": "Login",
