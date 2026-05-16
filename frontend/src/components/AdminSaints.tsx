@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useI18n } from '@/lib/i18n';
 import { useApi, apiPost, apiPut, apiDelete } from '@/lib/api';
+import { AdminSelect } from '@/components/AdminSelect';
 import type { SaintResponse, PaginatedResponse } from '@/lib/api';
 
 export function AdminSaints() {
@@ -24,19 +25,18 @@ export function AdminSaints() {
     mutate();
   };
 
-  const f = t.admin.fields;
-
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
-        <span className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
-          {t.admin.total}: {total}
-        </span>
+      <div className="admin-section-header">
+        <span className="admin-section-meta">{t.admin.total}: {total}</span>
         <button
           onClick={() => { setCreating(true); setEditing(null); }}
-          className="px-3 py-1.5 rounded-lg text-sm font-medium"
-          style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}
+          className="admin-btn admin-btn-add"
         >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
           {t.admin.add}
         </button>
       </div>
@@ -59,36 +59,29 @@ export function AdminSaints() {
       )}
 
       {items.length === 0 ? (
-        <p className="text-sm py-4" style={{ color: 'var(--muted-foreground)' }}>
+        <p style={{ fontFamily: 'var(--font-ui), sans-serif', fontSize: '0.8125rem', color: 'var(--muted)', padding: '16px 0' }}>
           {t.app.no_results}
-        </p>      ) : (
-        <div className="space-y-2">
+        </p>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {items.map((s) => (
-            <div
-              key={s.id}
-              className="flex items-center justify-between rounded-lg border px-4 py-3"
-              style={{ borderColor: 'var(--border)' }}
-            >
-              <div className="flex-1 min-w-0">
-                <div className="font-medium text-sm truncate" style={{ color: 'var(--foreground)' }}>
-                  {s.name_ru}
-                </div>
-                <div className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>
+            <div key={s.id} className="admin-item-card">
+              <div className="admin-item-main">
+                <div className="admin-item-title">{s.name_ru}</div>
+                <div className="admin-item-sub">
                   {s.name_fr ?? ''} · {s.categories?.join(', ')}
                 </div>
               </div>
-              <div className="flex gap-2 ml-2">
+              <div className="admin-item-actions">
                 <button
                   onClick={() => { setEditing(s); setCreating(false); }}
-                  className="text-xs px-2 py-1 rounded"
-                  style={{ color: 'var(--primary)' }}
+                  className="admin-btn admin-btn-ghost"
                 >
                   {t.admin.edit}
                 </button>
                 <button
                   onClick={() => handleDelete(s.id)}
-                  className="text-xs px-2 py-1 rounded"
-                  style={{ color: 'var(--destructive)' }}
+                  className="admin-btn admin-btn-danger"
                 >
                   {t.admin.delete}
                 </button>
@@ -99,25 +92,25 @@ export function AdminSaints() {
       )}
 
       {pages > 1 && (
-        <div className="flex items-center justify-center gap-2 mt-4">
+        <div className="admin-pagination">
           <button
             onClick={() => setPage(Math.max(1, page - 1))}
             disabled={page <= 1}
-            className="px-3 py-1 rounded text-sm disabled:opacity-30"
-            style={{ background: 'var(--muted)', color: 'var(--foreground)' }}
+            className="admin-pagination-btn"
           >
-            ←
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} style={{ width: 14, height: 14 }}>
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
           </button>
-          <span className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
-            {t.admin.page} {page} {t.admin.of} {pages}
-          </span>
+          <span>{t.admin.page} {page} {t.admin.of} {pages}</span>
           <button
             onClick={() => setPage(Math.min(pages, page + 1))}
             disabled={page >= pages}
-            className="px-3 py-1 rounded text-sm disabled:opacity-30"
-            style={{ background: 'var(--muted)', color: 'var(--foreground)' }}
+            className="admin-pagination-btn"
           >
-            →
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} style={{ width: 14, height: 14 }}>
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
           </button>
         </div>
       )}
@@ -172,68 +165,71 @@ function SaintForm({
   const update = (key: string, value: string) => setForm({ ...form, [key]: value });
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-lg border p-4 mb-4 space-y-3" style={{ borderColor: 'var(--border)' }}>
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>{f.name_ru}</label>
-          <input value={form.name_ru} onChange={(e) => update('name_ru', e.target.value)} required className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
+    <form onSubmit={handleSubmit} className="admin-form">
+      <div className="admin-form-grid admin-form-grid-2">
+        <div className="admin-field">
+          <label>{f.name_ru}</label>
+          <input value={form.name_ru} onChange={(e) => update('name_ru', e.target.value)} required />
         </div>
-        <div>
-          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>{f.name_fr}</label>
-          <input value={form.name_fr} onChange={(e) => update('name_fr', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
+        <div className="admin-field">
+          <label>{f.name_fr}</label>
+          <input value={form.name_fr} onChange={(e) => update('name_fr', e.target.value)} />
         </div>
-        <div>
-          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>{f.categories}</label>
-          <input value={form.categories} onChange={(e) => update('categories', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
+        <div className="admin-field">
+          <label>{f.categories}</label>
+          <input value={form.categories} onChange={(e) => update('categories', e.target.value)} />
         </div>
-        <div>
-          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>{f.feast_month}</label>
-          <input type="number" value={form.feast_month} onChange={(e) => update('feast_month', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
+        <div className="admin-field">
+          <label>{f.feast_month}</label>
+          <input type="number" min="1" max="12" value={form.feast_month} onChange={(e) => update('feast_month', e.target.value)} />
         </div>
-        <div>
-          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>{f.feast_day}</label>
-          <input type="number" value={form.feast_day} onChange={(e) => update('feast_day', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
+        <div className="admin-field">
+          <label>{f.feast_day}</label>
+          <input type="number" min="1" max="31" value={form.feast_day} onChange={(e) => update('feast_day', e.target.value)} />
         </div>
       </div>
-      <details className="border rounded p-2" style={{ borderColor: 'var(--border)' }}>
-        <summary className="text-xs font-medium cursor-pointer" style={{ color: 'var(--muted-foreground)' }}>{f.troparion}</summary>
-        <div className="grid grid-cols-2 gap-3 mt-2">
-          <div>
-            <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>{f.troparion_ru}</label>
-            <textarea value={form.troparion_ru} onChange={(e) => update('troparion_ru', e.target.value)} rows={3} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
+
+      <details className="admin-details" style={{ marginTop: '12px' }}>
+        <summary>{f.troparion}</summary>
+        <div className="admin-form-grid admin-form-grid-2" style={{ marginTop: '8px' }}>
+          <div className="admin-field">
+            <label>{f.troparion_ru}</label>
+            <textarea value={form.troparion_ru} onChange={(e) => update('troparion_ru', e.target.value)} rows={3} />
           </div>
-          <div>
-            <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>{f.troparion_fr}</label>
-            <textarea value={form.troparion_fr} onChange={(e) => update('troparion_fr', e.target.value)} rows={3} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
+          <div className="admin-field">
+            <label>{f.troparion_fr}</label>
+            <textarea value={form.troparion_fr} onChange={(e) => update('troparion_fr', e.target.value)} rows={3} />
           </div>
-          <div>
-            <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>{f.troparion_tone}</label>
-            <input value={form.troparion_tone} onChange={(e) => update('troparion_tone', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
-          </div>
-        </div>
-      </details>
-      <details className="border rounded p-2" style={{ borderColor: 'var(--border)' }}>
-        <summary className="text-xs font-medium cursor-pointer" style={{ color: 'var(--muted-foreground)' }}>{f.kontakion}</summary>
-        <div className="grid grid-cols-2 gap-3 mt-2">
-          <div>
-            <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>{f.kontakion_ru}</label>
-            <textarea value={form.kontakion_ru} onChange={(e) => update('kontakion_ru', e.target.value)} rows={3} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
-          </div>
-          <div>
-            <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>{f.kontakion_fr}</label>
-            <textarea value={form.kontakion_fr} onChange={(e) => update('kontakion_fr', e.target.value)} rows={3} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
-          </div>
-          <div>
-            <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>{f.kontakion_tone}</label>
-            <input value={form.kontakion_tone} onChange={(e) => update('kontakion_tone', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
+          <div className="admin-field">
+            <label>{f.troparion_tone}</label>
+            <input value={form.troparion_tone} onChange={(e) => update('troparion_tone', e.target.value)} />
           </div>
         </div>
       </details>
-      <div className="flex gap-2 justify-end">
-        <button type="button" onClick={onCancel} className="px-3 py-1.5 rounded-lg text-sm" style={{ color: 'var(--muted-foreground)' }}>
+
+      <details className="admin-details" style={{ marginTop: '8px' }}>
+        <summary>{f.kontakion}</summary>
+        <div className="admin-form-grid admin-form-grid-2" style={{ marginTop: '8px' }}>
+          <div className="admin-field">
+            <label>{f.kontakion_ru}</label>
+            <textarea value={form.kontakion_ru} onChange={(e) => update('kontakion_ru', e.target.value)} rows={3} />
+          </div>
+          <div className="admin-field">
+            <label>{f.kontakion_fr}</label>
+            <textarea value={form.kontakion_fr} onChange={(e) => update('kontakion_fr', e.target.value)} rows={3} />
+          </div>
+          <div className="admin-field">
+            <label>{f.kontakion_tone}</label>
+            <input value={form.kontakion_tone} onChange={(e) => update('kontakion_tone', e.target.value)} />
+          </div>
+        </div>
+      </details>
+
+      <div className="admin-form-actions">
+        <button type="button" onClick={onCancel} className="admin-btn admin-btn-secondary">
           {t.admin.cancel}
         </button>
-        <button type="submit" disabled={saving} className="px-3 py-1.5 rounded-lg text-sm font-medium" style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}>
+        <button type="submit" disabled={saving} className="admin-btn admin-btn-primary">
           {t.admin.save}
         </button>
       </div>
