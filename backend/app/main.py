@@ -10,17 +10,29 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api import router as api_router
 from app.config import settings
-from app.services.db import async_engine
-from app.services.redis import redis_client
+from app.services.db import async_engine, async_session
+from app.services.redis import init_redis
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Application lifespan: startup and shutdown hooks."""
     # Startup
+    await init_redis()
+
+    # Bootstrap superadmin from env vars
+    from app.services.auth import bootstrap_superadmin
+    async with async_session() as db:
+        try:
+            await bootstrap_superadmin(db)
+        except Exception as e:
+            print(f"[typikon] Superadmin bootstrap skipped: {e}")
+
     yield
+
     # Shutdown
     await async_engine.dispose()
+    from app.services.redis import redis_client
     if redis_client:
         await redis_client.close()
 
@@ -34,6 +46,9 @@ app = FastAPI(
     redoc_url="/api/redoc",
     openapi_url="/api/openapi.json",
 )
+
+# Store settings on app.state for dependency access
+app.state.settings = settings
 
 app.add_middleware(
     CORSMiddleware,

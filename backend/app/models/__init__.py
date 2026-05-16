@@ -13,6 +13,7 @@ from .liturgical import (
     LectionAssignment,
     AssembledService,
 )
+from .user import User, UserRole
 
 __all__ = [
     "Base",
@@ -30,4 +31,6 @@ __all__ = [
     "Lection",
     "LectionAssignment",
     "AssembledService",
+    "User",
+    "UserRole",
 ]
