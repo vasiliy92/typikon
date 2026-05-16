@@ -87,11 +87,7 @@ class LiturgicalCalendar:
         self.week_from_pascha = self.days_from_pascha // 7
 
     def get_tone(self) -> int:
-        """Compute the Octoechos tone (1-8) for the current week.
-
-        Pascha week (week 0) = Tone 1, Thomas Sunday (week 1) = Tone 2, etc.
-        Wraps after Tone 8 back to Tone 1.
-        """
+        """Compute the Octoechos tone (1-8) for the current week."""
         if self.days_from_pascha >= 0:
             tone = (self.week_from_pascha % 8) + 1
         else:
