@@ -1,4 +1,3 @@
-import en from './messages/en.json';
 import fr from './messages/fr.json';
 import ru from './messages/ru.json';
 
