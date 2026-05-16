@@ -2,9 +2,11 @@
 from __future__ import annotations
 
 from fastapi import Cookie, Depends, HTTPException, Request
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.user import User, UserRole
+from app.schemas.user import CurrentUser
 from app.services.auth import get_session
 from app.services.db import get_session
 
