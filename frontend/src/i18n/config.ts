@@ -9,7 +9,7 @@ export const localeNames: Record<Locale, string> = {
   ru: 'Русский',
 };
 
-export const messages: Record<Locale, Record<string, string>> = {
+export const messages: Record<Locale, Record<string, unknown>> = {
   fr,
   ru,
 };
