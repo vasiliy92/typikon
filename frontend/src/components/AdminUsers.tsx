@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useI18n } from '@/lib/i18n';
 import { useAuth } from '@/lib/auth';
 import { apiGet, apiPost, apiDelete } from '@/lib/api';
+import { AdminSelect } from '@/components/AdminSelect';
 
 interface User {
   id: string;
@@ -40,7 +41,6 @@ export function AdminUsers() {
     }
   };
 
-  // Auto-load users on mount
   useEffect(() => {
     loadUsers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -73,117 +73,104 @@ export function AdminUsers() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="font-display text-lg font-semibold" style={{ color: 'var(--foreground)' }}>
-          {t.admin.users}
-        </h3>
-        <div className="flex gap-2">
+      <div className="admin-section-header">
+        <span className="admin-section-meta">{t.admin.users}</span>
+        <div style={{ display: 'flex', gap: '8px' }}>
           <button
             onClick={loadUsers}
             disabled={loading}
-            className="px-3 py-1.5 text-sm rounded-lg transition-colors"
-            style={{ background: 'var(--muted)', color: 'var(--muted-foreground)' }}
+            className="admin-btn admin-btn-secondary"
           >
             {loading ? t.common.loading : t.admin.search}
           </button>
           <button
             onClick={() => setShowCreate(true)}
-            className="px-3 py-1.5 text-sm rounded-lg text-white transition-colors"
-            style={{ background: 'var(--primary)' }}
+            className="admin-btn admin-btn-add"
           >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
             {t.admin.create_user}
           </button>
         </div>
       </div>
 
       {showCreate && (
-        <div className="mb-4 p-4 rounded-lg" style={{ background: 'var(--muted)' }}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <input
-              type="email"
-              placeholder={f.email}
-              value={newEmail}
-              onChange={(e) => setNewEmail(e.target.value)}
-              className="px-3 py-2 border rounded-lg text-sm"
-              style={{ borderColor: 'var(--border)', background: 'var(--card)', color: 'var(--foreground)' }}
-            />
-            <input
-              type="text"
-              placeholder={f.display_name}
-              value={newDisplayName}
-              onChange={(e) => setNewDisplayName(e.target.value)}
-              className="px-3 py-2 border rounded-lg text-sm"
-              style={{ borderColor: 'var(--border)', background: 'var(--card)', color: 'var(--foreground)' }}
-            />
-            <input
-              type="password"
-              placeholder={f.password}
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              className="px-3 py-2 border rounded-lg text-sm"
-              style={{ borderColor: 'var(--border)', background: 'var(--card)', color: 'var(--foreground)' }}
-            />
-            <div className="flex gap-2">
-              <select
-                value={newRole}
-                onChange={(e) => setNewRole(e.target.value as 'admin')}
-                className="px-3 py-2 border rounded-lg text-sm"
-                style={{ borderColor: 'var(--border)', background: 'var(--card)', color: 'var(--foreground)' }}
-              >
-                <option value="admin">{t.admin.role_admin}</option>
-              </select>
-              <button
-                onClick={createUser}
-                className="px-3 py-2 text-white text-sm rounded-lg"
-                style={{ background: 'var(--primary)' }}
-              >
-                {t.admin.save}
-              </button>
-              <button
-                onClick={() => setShowCreate(false)}
-                className="px-3 py-2 text-sm rounded-lg"
-                style={{ background: 'var(--muted)', color: 'var(--muted-foreground)' }}
-              >
-                {t.admin.cancel}
-              </button>
+        <div className="admin-form" style={{ marginBottom: '16px' }}>
+          <div className="admin-form-grid admin-form-grid-2">
+            <div className="admin-field">
+              <label>{f.email}</label>
+              <input
+                type="email"
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+                placeholder={f.email}
+              />
             </div>
+            <div className="admin-field">
+              <label>{f.display_name}</label>
+              <input
+                type="text"
+                value={newDisplayName}
+                onChange={(e) => setNewDisplayName(e.target.value)}
+                placeholder={f.display_name}
+              />
+            </div>
+            <div className="admin-field">
+              <label>{f.password}</label>
+              <input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder={f.password}
+              />
+            </div>
+            <div className="admin-field">
+              <label>{f.role}</label>
+              <AdminSelect
+                value={newRole}
+                onChange={(v) => setNewRole(v as 'admin')}
+                options={[
+                  { value: 'admin', label: t.admin.role_admin },
+                ]}
+              />
+            </div>
+          </div>
+          <div className="admin-form-actions">
+            <button type="button" onClick={() => setShowCreate(false)} className="admin-btn admin-btn-secondary">
+              {t.admin.cancel}
+            </button>
+            <button type="button" onClick={createUser} className="admin-btn admin-btn-primary">
+              {t.admin.save}
+            </button>
           </div>
         </div>
       )}
 
       {users.length > 0 && (
-        <table className="w-full text-sm">
+        <table className="admin-table-bookish">
           <thead>
-            <tr className="border-b" style={{ borderColor: 'var(--border)' }}>
-              <th className="text-left py-2" style={{ color: 'var(--muted-foreground)' }}>{f.email}</th>
-              <th className="text-left py-2" style={{ color: 'var(--muted-foreground)' }}>{f.display_name}</th>
-              <th className="text-left py-2" style={{ color: 'var(--muted-foreground)' }}>{f.role}</th>
-              <th className="text-right py-2"></th>
+            <tr>
+              <th>{f.email}</th>
+              <th>{f.display_name}</th>
+              <th>{f.role}</th>
+              <th style={{ textAlign: 'right' }}></th>
             </tr>
           </thead>
           <tbody>
             {users.map((u) => (
-              <tr key={u.id} className="border-b" style={{ borderColor: 'var(--border)' }}>
-                <td className="py-2" style={{ color: 'var(--foreground)' }}>{u.email}</td>
-                <td className="py-2" style={{ color: 'var(--foreground)' }}>{u.display_name}</td>
-                <td className="py-2">
-                  <span
-                    className="px-2 py-0.5 rounded text-xs font-medium"
-                    style={{
-                      background: u.role === 'superadmin' ? 'var(--primary)/15' : 'var(--muted)',
-                      color: u.role === 'superadmin' ? 'var(--primary)' : 'var(--muted-foreground)',
-                    }}
-                  >
+              <tr key={u.id}>
+                <td>{u.email}</td>
+                <td>{u.display_name}</td>
+                <td>
+                  <span className={`admin-badge${u.role === 'superadmin' ? ' admin-badge-accent' : ' admin-badge-muted'}`}>
                     {u.role === 'superadmin' ? t.admin.role_superadmin : t.admin.role_admin}
                   </span>
                 </td>
-                <td className="py-2 text-right">
+                <td style={{ textAlign: 'right' }}>
                   {u.role !== 'superadmin' && (
-                    <button
-                      onClick={() => deleteUser(u.id)}
-                      className="text-xs font-medium"
-                      style={{ color: 'var(--destructive)' }}
-                    >
+                    <button onClick={() => deleteUser(u.id)} className="admin-btn admin-btn-danger">
                       {t.admin.delete}
                     </button>
                   )}
