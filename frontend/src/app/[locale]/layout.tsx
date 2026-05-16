@@ -40,7 +40,7 @@ export default function LocaleLayout({
         <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
           {/* Desktop Topbar */}
           <header className="topbar">
-            <div style={{ display: 'flex', alignItems: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '0px' }}>
               <Link href={`/${currentLocale}`} className="topbar-logo">
                 Typikon<em>.</em>
               </Link>
