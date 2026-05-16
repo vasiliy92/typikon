@@ -4,115 +4,56 @@
 
 @layer base {
   :root {
-    /* Legacy variables kept for admin pages compatibility */
-    --background: #faf7f0;
-    --foreground: #1a1714;
-    --card: #ffffff;
-    --card-foreground: #1a1714;
-    --primary: #9b3b2e;
-    --primary-foreground: #faf7f0;
-    --secondary: #c4b89a;
-    --secondary-foreground: #1a1714;
-    --muted-foreground: #8a8278;
-    --muted-bg: rgba(28, 25, 23, 0.06);
-    --accent: #9b3b2e;
-    --accent-foreground: #faf7f0;
-    --border: rgba(28, 25, 23, 0.12);
-    --ring: #9b3b2e;
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
     --radius: 0.5rem;
-    --destructive: #dc2626;
   }
 
   .dark {
-    --background: oklch(0.13 0.028 261.692);
-    --foreground: oklch(0.95 0.01 80);
-    --card: oklch(0.17 0.03 270);
-    --card-foreground: oklch(0.95 0.01 80);
-    --primary: oklch(0.6247 0.2521 357.6);
-    --primary-foreground: oklch(0.98 0.005 80);
-    --secondary: oklch(0.72 0.12 85);
-    --secondary-foreground: oklch(0.15 0.03 270);
-    --muted-foreground: oklch(0.65 0.03 80);
-    --muted-bg: oklch(0.22 0.03 270);
-    --accent: oklch(0.45 0.1 165);
-    --accent-foreground: oklch(0.95 0.01 80);
-    --border: oklch(0.28 0.03 270);
-    --ring: oklch(0.6247 0.2521 357.6);
-  }
-
-  * {
-    border-color: var(--border);
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
   }
 }
 
-/* Bookish design system — imported LAST to override Tailwind layers */
-@import './bookish.css';
-
-@layer components {
-  /* Church Slavonic text (kept for potential future use) */
-  .text-slavonic {
-    font-family: 'Ponomar Unicode', 'Monomakh', serif;
-    line-height: 1.8;
-    letter-spacing: 0.02em;
+@layer base {
+  * {
+    @apply border-border;
   }
-
-  /* Admin table styles (kept for admin pages) */
-  .admin-table {
-    @apply w-full text-sm;
-  }
-
-  .admin-table th {
-    @apply text-left p-3 font-medium;
-    color: var(--muted-foreground);
-    border-bottom: 1px solid var(--border);
-  }
-
-  .admin-table td {
-    @apply p-3;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .admin-table tr:hover td {
-    background: var(--muted-bg);
-  }
-
-  /* Legacy button styles (kept for admin pages) */
-  .btn-primary {
-    @apply px-4 py-2 rounded-lg font-medium transition-all duration-200;
-    background: var(--primary);
-    color: var(--primary-foreground);
-  }
-
-  .btn-primary:hover {
-    opacity: 0.9;
-    transform: translateY(-1px);
-  }
-
-  .btn-secondary {
-    @apply px-4 py-2 rounded-lg font-medium transition-all duration-200;
-    background: var(--secondary);
-    color: var(--secondary-foreground);
-  }
-
-  .btn-outline {
-    @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 border;
-    border-color: var(--border);
-    color: var(--foreground);
-  }
-
-  .btn-outline:hover {
-    background: var(--muted-bg);
-  }
-
-  .input-field {
-    @apply w-full px-3 py-2 rounded-lg text-sm transition-all duration-200 outline-none;
-    background: var(--card);
-    border: 1px solid var(--border);
-    color: var(--foreground);
-  }
-
-  .input-field:focus {
-    border-color: var(--ring);
-    box-shadow: 0 0 0 2px oklch(0.6247 0.2521 357.6 / 0.15);
+  body {
+    @apply bg-background text-foreground;
   }
 }
