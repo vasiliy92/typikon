@@ -89,7 +89,7 @@ services:
       - typikon-net
       - proxy
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost/health"]
+      test: ["CMD-SHELL", "wget -qO /dev/null http://localhost/nginx-health || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 10

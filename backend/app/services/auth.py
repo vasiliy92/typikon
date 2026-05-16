@@ -12,6 +12,8 @@ from app.config import settings
 from app.models.user import User, UserRole
 from app.services.redis import redis_client
 
+# ── Password hashing ──
+
 _pwd_context: Any = None
 
 
@@ -25,14 +27,21 @@ def _get_pwd_context() -> Any:
 
 
 def hash_password(password: str) -> str:
-    """Hash a plaintext password."""
-    return _get_pwd_context().hash(password)
+    """Hash a plaintext password. Truncates to 72 bytes (bcrypt limit)."""
+    # bcrypt silently truncates at 72 bytes but raises an error if the
+    # input *after* UTF-8 encoding exceeds 72 bytes in some versions.
+    # Truncate explicitly to avoid bootstrap failures with long credentials.
+    raw = password.encode("utf-8")[:72]
+    return _get_pwd_context().hash(raw.decode("utf-8", errors="ignore"))
 
 
 def verify_password(plain: str, hashed: str) -> bool:
-    """Verify a plaintext password against its hash."""
-    return _get_pwd_context().verify(plain, hashed)
+    """Verify a plaintext password against its hash. Truncates to 72 bytes."""
+    raw = plain.encode("utf-8")[:72]
+    return _get_pwd_context().verify(raw.decode("utf-8", errors="ignore"), hashed)
 
+
+# ── Session management (Redis) ──
 
 SESSION_PREFIX = "session:"
 SESSION_TTL = 60 * 60 * 24  # 24 hours
@@ -77,16 +86,18 @@ async def delete_session(token: str) -> None:
         await redis_client.delete(f"{SESSION_PREFIX}{token}")
 
 
+# ── Superadmin bootstrap ──
+
 async def bootstrap_superadmin(db: AsyncSession) -> None:
     """Create the initial superadmin from env vars if no users exist."""
     result = await db.execute(select(User).limit(1))
     if result.scalar_one_or_none() is not None:
-        return
+        return  # Users already exist
 
     email = settings.SUPERADMIN_EMAIL
     password = settings.SUPERADMIN_PASSWORD
     if not email or not password:
-        return
+        return  # No bootstrap credentials configured
 
     user = User(
         email=email,
