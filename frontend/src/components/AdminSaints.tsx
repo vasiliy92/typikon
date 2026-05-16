@@ -24,6 +24,8 @@ export function AdminSaints() {
     mutate();
   };
 
+  const f = t.admin.fields;
+
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
@@ -59,8 +61,7 @@ export function AdminSaints() {
       {items.length === 0 ? (
         <p className="text-sm py-4" style={{ color: 'var(--muted-foreground)' }}>
           {t.app.no_results}
-        </p>
-      ) : (
+        </p>      ) : (
         <div className="space-y-2">
           {items.map((s) => (
             <div
@@ -134,6 +135,8 @@ function SaintForm({
   onCancel: () => void;
 }) {
   const { t } = useI18n();
+  const f = t.admin.fields;
+
   const [form, setForm] = useState<Record<string, string>>({
     name_ru: saint?.name_ru ?? '',
     name_fr: saint?.name_fr ?? '',
@@ -171,37 +174,59 @@ function SaintForm({
   return (
     <form onSubmit={handleSubmit} className="rounded-lg border p-4 mb-4 space-y-3" style={{ borderColor: 'var(--border)' }}>
       <div className="grid grid-cols-2 gap-3">
-        <div><label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>name_ru</label>
-          <input value={form.name_ru} onChange={(e) => update('name_ru', e.target.value)} required className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} /></div>
-        <div><label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>name_fr</label>
-          <input value={form.name_fr} onChange={(e) => update('name_fr', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} /></div>
-        <div><label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>categories (comma-separated)</label>
-          <input value={form.categories} onChange={(e) => update('categories', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} /></div>
-        <div><label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>feast_month</label>
-          <input type="number" value={form.feast_month} onChange={(e) => update('feast_month', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} /></div>
-        <div><label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>feast_day</label>
-          <input type="number" value={form.feast_day} onChange={(e) => update('feast_day', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} /></div>
+        <div>
+          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>{f.name_ru}</label>
+          <input value={form.name_ru} onChange={(e) => update('name_ru', e.target.value)} required className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
+        </div>
+        <div>
+          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>{f.name_fr}</label>
+          <input value={form.name_fr} onChange={(e) => update('name_fr', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
+        </div>
+        <div>
+          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>{f.categories}</label>
+          <input value={form.categories} onChange={(e) => update('categories', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
+        </div>
+        <div>
+          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>{f.feast_month}</label>
+          <input type="number" value={form.feast_month} onChange={(e) => update('feast_month', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
+        </div>
+        <div>
+          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>{f.feast_day}</label>
+          <input type="number" value={form.feast_day} onChange={(e) => update('feast_day', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
+        </div>
       </div>
       <details className="border rounded p-2" style={{ borderColor: 'var(--border)' }}>
-        <summary className="text-xs font-medium cursor-pointer" style={{ color: 'var(--muted-foreground)' }}>Troparion</summary>
+        <summary className="text-xs font-medium cursor-pointer" style={{ color: 'var(--muted-foreground)' }}>{f.troparion}</summary>
         <div className="grid grid-cols-2 gap-3 mt-2">
-          <div><label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>troparion_ru</label>
-            <textarea value={form.troparion_ru} onChange={(e) => update('troparion_ru', e.target.value)} rows={3} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} /></div>
-          <div><label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>troparion_fr</label>
-            <textarea value={form.troparion_fr} onChange={(e) => update('troparion_fr', e.target.value)} rows={3} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} /></div>
-          <div><label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>troparion_tone</label>
-            <input value={form.troparion_tone} onChange={(e) => update('troparion_tone', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} /></div>
+          <div>
+            <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>{f.troparion_ru}</label>
+            <textarea value={form.troparion_ru} onChange={(e) => update('troparion_ru', e.target.value)} rows={3} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
+          </div>
+          <div>
+            <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>{f.troparion_fr}</label>
+            <textarea value={form.troparion_fr} onChange={(e) => update('troparion_fr', e.target.value)} rows={3} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
+          </div>
+          <div>
+            <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>{f.troparion_tone}</label>
+            <input value={form.troparion_tone} onChange={(e) => update('troparion_tone', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
+          </div>
         </div>
       </details>
       <details className="border rounded p-2" style={{ borderColor: 'var(--border)' }}>
-        <summary className="text-xs font-medium cursor-pointer" style={{ color: 'var(--muted-foreground)' }}>Kontakion</summary>
+        <summary className="text-xs font-medium cursor-pointer" style={{ color: 'var(--muted-foreground)' }}>{f.kontakion}</summary>
         <div className="grid grid-cols-2 gap-3 mt-2">
-          <div><label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>kontakion_ru</label>
-            <textarea value={form.kontakion_ru} onChange={(e) => update('kontakion_ru', e.target.value)} rows={3} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} /></div>
-          <div><label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>kontakion_fr</label>
-            <textarea value={form.kontakion_fr} onChange={(e) => update('kontakion_fr', e.target.value)} rows={3} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} /></div>
-          <div><label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>kontakion_tone</label>
-            <input value={form.kontakion_tone} onChange={(e) => update('kontakion_tone', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} /></div>
+          <div>
+            <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>{f.kontakion_ru}</label>
+            <textarea value={form.kontakion_ru} onChange={(e) => update('kontakion_ru', e.target.value)} rows={3} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
+          </div>
+          <div>
+            <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>{f.kontakion_fr}</label>
+            <textarea value={form.kontakion_fr} onChange={(e) => update('kontakion_fr', e.target.value)} rows={3} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
+          </div>
+          <div>
+            <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>{f.kontakion_tone}</label>
+            <input value={form.kontakion_tone} onChange={(e) => update('kontakion_tone', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} />
+          </div>
         </div>
       </details>
       <div className="flex gap-2 justify-end">
