@@ -5,9 +5,6 @@ import { useI18n } from '@/lib/i18n';
 import { useApi, apiPost, apiPut, apiDelete } from '@/lib/api';
 import type { TemplateResponse, PaginatedResponse } from '@/lib/api';
 
-/** Look up an enum value in a translation object, with fallback to the raw key. */
-const enumLabel = (obj: Record<string, string>, key: string): string => obj[key] ?? key;
-
 export function AdminTemplates() {
   const { t } = useI18n();
   const [page, setPage] = useState(1);
@@ -29,60 +26,28 @@ export function AdminTemplates() {
 
   return (
     <div>
-      <div className="admin-section-header">
-        <span className="admin-section-meta">{t.admin.total}: {total}</span>
-        <button
-          onClick={() => { setCreating(true); setEditing(null); }}
-          className="admin-btn admin-btn-primary"
-        >
-          {t.admin.add}
-        </button>
+      <div className="flex items-center justify-between mb-4">
+        <span className="text-sm" style={{ color: 'var(--muted-foreground)' }}>{t.admin.total}: {total}</span>
+        <button onClick={() => { setCreating(true); setEditing(null); }} className="px-3 py-1.5 rounded-lg text-sm font-medium" style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}>{t.admin.add}</button>
       </div>
 
       {(creating || editing) && (
-        <TemplateForm
-          template={editing}
-          onSave={async (payload) => {
-            if (editing) {
-              await apiPut(`/admin/templates/${editing.id}`, payload);
-            } else {
-              await apiPost('/admin/templates', payload);
-            }
-            setCreating(false);
-            setEditing(null);
-            mutate();
-          }}
-          onCancel={() => { setCreating(false); setEditing(null); }}
-        />
+        <TemplateForm template={editing} onSave={async (payload) => { if (editing) { await apiPut(`/admin/templates/${editing.id}`, payload); } else { await apiPost('/admin/templates', payload); } setCreating(false); setEditing(null); mutate(); }} onCancel={() => { setCreating(false); setEditing(null); }} />
       )}
 
       {items.length === 0 ? (
-        <p className="admin-section-meta" style={{ padding: '16px 0' }}>
-          {t.app.no_results}
-        </p>
+        <p className="text-sm py-4" style={{ color: 'var(--muted-foreground)' }}>{t.app.no_results}</p>
       ) : (
-        <div>
+        <div className="space-y-2">
           {items.map((tpl) => (
-            <div key={tpl.id} className="admin-row">
-              <div className="admin-row-main">
-                <div className="admin-row-title">{tpl.name}</div>
-                <div className="admin-row-sub">
-                  {enumLabel(t.service_types as Record<string, string>, tpl.service_type)} · {tpl.is_special ? `★ ${t.admin.special}` : t.admin.regular} · {tpl.blocks?.length ?? 0} {t.admin.blocks_count}
-                </div>
+            <div key={tpl.id} className="flex items-center justify-between rounded-lg border px-4 py-3" style={{ borderColor: 'var(--border)' }}>
+              <div className="flex-1 min-w-0">
+                <div className="font-medium text-sm truncate" style={{ color: 'var(--foreground)' }}>{tpl.name}</div>
+                <div className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>{tpl.service_type} · {tpl.is_special ? '★ special' : 'regular'} · {tpl.blocks?.length ?? 0} blocks</div>
               </div>
-              <div className="admin-row-actions">
-                <button
-                  onClick={() => { setEditing(tpl); setCreating(false); }}
-                  className="admin-btn admin-btn-ghost"
-                >
-                  {t.admin.edit}
-                </button>
-                <button
-                  onClick={() => handleDelete(tpl.id)}
-                  className="admin-btn admin-btn-danger"
-                >
-                  {t.admin.delete}
-                </button>
+              <div className="flex gap-2 ml-2">
+                <button onClick={() => { setEditing(tpl); setCreating(false); }} className="text-xs px-2 py-1 rounded" style={{ color: 'var(--primary)' }}>{t.admin.edit}</button>
+                <button onClick={() => handleDelete(tpl.id)} className="text-xs px-2 py-1 rounded" style={{ color: 'var(--destructive)' }}>{t.admin.delete}</button>
               </div>
             </div>
           ))}
@@ -90,10 +55,10 @@ export function AdminTemplates() {
       )}
 
       {pages > 1 && (
-        <div className="admin-pagination">
-          <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page <= 1} className="admin-pagination-btn">←</button>
-          <span>{t.admin.page} {page} {t.admin.of} {pages}</span>
-          <button onClick={() => setPage(Math.min(pages, page + 1))} disabled={page >= pages} className="admin-pagination-btn">→</button>
+        <div className="flex items-center justify-center gap-2 mt-4">
+          <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page <= 1} className="px-3 py-1 rounded text-sm disabled:opacity-30" style={{ background: 'var(--muted)', color: 'var(--foreground)' }}>←</button>
+          <span className="text-sm" style={{ color: 'var(--muted-foreground)' }}>{t.admin.page} {page} {t.admin.of} {pages}</span>
+          <button onClick={() => setPage(Math.min(pages, page + 1))} disabled={page >= pages} className="px-3 py-1 rounded text-sm disabled:opacity-30" style={{ background: 'var(--muted)', color: 'var(--foreground)' }}>→</button>
         </div>
       )}
     </div>
@@ -102,67 +67,29 @@ export function AdminTemplates() {
 
 function TemplateForm({ template, onSave, onCancel }: { template: TemplateResponse | null; onSave: (payload: Record<string, unknown>) => Promise<void>; onCancel: () => void }) {
   const { t } = useI18n();
-  const f = t.admin.fields;
-  const [form, setForm] = useState<Record<string, string>>({
-    name: template?.name ?? '',
-    service_type: template?.service_type ?? 'liturgy',
-    sub_type: template?.sub_type ?? '',
-    is_special: String(template?.is_special ?? false),
-    description: template?.description ?? '',
-  });
+  const [form, setForm] = useState<Record<string, string>>({ name: template?.name ?? '', service_type: template?.service_type ?? 'liturgy', sub_type: template?.sub_type ?? '', is_special: String(template?.is_special ?? false), description: template?.description ?? '' });
   const [saving, setSaving] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
-    await onSave({
-      name: form.name,
-      service_type: form.service_type,
-      sub_type: form.sub_type || null,
-      is_special: form.is_special === 'true',
-      description: form.description || null,
-    });
+    e.preventDefault(); setSaving(true);
+    await onSave({ name: form.name, service_type: form.service_type, sub_type: form.sub_type || null, is_special: form.is_special === 'true', description: form.description || null });
     setSaving(false);
   };
 
   const update = (key: string, value: string) => setForm({ ...form, [key]: value });
 
-  const serviceTypeOptions = Object.entries(t.service_types).map(([value, label]) => ({ value, label }));
-
   return (
-    <form onSubmit={handleSubmit} className="admin-form">
-      <div className="admin-form-grid admin-form-grid-2">
-        <div className="admin-field">
-          <label>{f.name}</label>
-          <input value={form.name} onChange={(e) => update('name', e.target.value)} required />
-        </div>
-        <div className="admin-field">
-          <label>{f.service_type}</label>
-          <select value={form.service_type} onChange={(e) => update('service_type', e.target.value)}>
-            {serviceTypeOptions.map((opt) => (<option key={opt.value} value={opt.value}>{opt.label}</option>))}
-          </select>
-        </div>
-        <div className="admin-field">
-          <label>{f.sub_type}</label>
-          <input value={form.sub_type} onChange={(e) => update('sub_type', e.target.value)} />
-        </div>
-        <div className="admin-field">
-          <label>{f.is_special}</label>
-          <select value={form.is_special} onChange={(e) => update('is_special', e.target.value)}>
-            <option value="false">{t.common.no}</option>
-            <option value="true">{t.common.yes}</option>
-          </select>
-        </div>
+    <form onSubmit={handleSubmit} className="rounded-lg border p-4 mb-4 space-y-3" style={{ borderColor: 'var(--border)' }}>
+      <div className="grid grid-cols-2 gap-3">
+        <div><label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>name</label><input value={form.name} onChange={(e) => update('name', e.target.value)} required className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} /></div>
+        <div><label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>service_type</label><select value={form.service_type} onChange={(e) => update('service_type', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }}>{['liturgy', 'vespers', 'matins', 'vigil', 'hours', 'compline', 'midnight_office', 'typica', 'presanctified'].map((st) => (<option key={st} value={st}>{st}</option>))}</select></div>
+        <div><label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>sub_type</label><input value={form.sub_type} onChange={(e) => update('sub_type', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} /></div>
+        <div><label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>is_special</label><select value={form.is_special} onChange={(e) => update('is_special', e.target.value)} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }}><option value="false">No</option><option value="true">Yes</option></select></div>
       </div>
-      <div style={{ marginTop: 12 }}>
-        <div className="admin-field">
-          <label>{f.description}</label>
-          <textarea value={form.description} onChange={(e) => update('description', e.target.value)} rows={2} />
-        </div>
-      </div>
-      <div className="admin-form-actions">
-        <button type="button" onClick={onCancel} className="admin-btn admin-btn-secondary">{t.admin.cancel}</button>
-        <button type="submit" disabled={saving} className="admin-btn admin-btn-primary">{t.admin.save}</button>
+      <div><label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted-foreground)' }}>description</label><textarea value={form.description} onChange={(e) => update('description', e.target.value)} rows={2} className="w-full rounded border px-2 py-1 text-sm" style={{ borderColor: 'var(--border)', background: 'transparent', color: 'var(--foreground)' }} /></div>
+      <div className="flex gap-2 justify-end">
+        <button type="button" onClick={onCancel} className="px-3 py-1.5 rounded-lg text-sm" style={{ color: 'var(--muted-foreground)' }}>{t.admin.cancel}</button>
+        <button type="submit" disabled={saving} className="px-3 py-1.5 rounded-lg text-sm font-medium" style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }}>{t.admin.save}</button>
       </div>
     </form>
   );
