@@ -3,15 +3,15 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Locale, localeNames, locales } from '@/i18n/config';
-import fr from '@/i18n/messages/fr.json';
-import ru from '@/i18n/messages/ru.json';
-import en from '@/i18n/messages/en.json';
-import { I18nProvider, type Messages } from '@/lib/i18n';
-import { AuthProvider } from '@/lib/auth';
+import { useTranslations } from 'next-intl';
 import { TopbarTitleContext } from '@/lib/topbar';
+import '@/../public/styles/globals.css';
 
-const messages: Record<Locale, Messages> = { fr, ru, en };
+const LOCALES = [
+  { code: 'fr', label: 'FR' },
+  { code: 'ru', label: 'RU' },
+  { code: 'en', label: 'EN' },
+];
 
 export default function LocaleLayout({
   children,
@@ -20,76 +20,65 @@ export default function LocaleLayout({
   children: React.ReactNode;
   params: { locale: string };
 }) {
-  const currentLocale = (locales.includes(locale as Locale) ? locale : 'fr') as Locale;
-  const t = messages[currentLocale];
+  const t = useTranslations();
   const pathname = usePathname();
+  const [dark, setDark] = useState(false);
   const [topbarTitle, setTopbarTitle] = useState('');
 
-  // Sync <html lang> with current locale
   useEffect(() => {
-    document.documentElement.lang = currentLocale;
-  }, [currentLocale]);
+    const saved = localStorage.getItem('darkMode');
+    if (saved === 'true') setDark(true);
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', dark);
+    localStorage.setItem('darkMode', String(dark));
+  }, [dark]);
 
   return (
-    <I18nProvider value={{ locale: currentLocale, t }}>
-      <AuthProvider>
-        <TopbarTitleContext.Provider value={{ title: topbarTitle, setTitle: setTopbarTitle }}>
-        <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
-          {/* Desktop Topbar */}
-          <header className="topbar">
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: '0px' }}>
-              <Link href={`/${currentLocale}`} className="topbar-logo">
-                Typikon<em>.</em>
-              </Link>
-              {topbarTitle && (
-                <>
-                  <span className="topbar-sep">·</span>
-                  <span className="topbar-title">
-                    {topbarTitle}
-                  </span>
-                </>
-              )}
-            </div>
-            <div className="topbar-actions">
-              <div className="pill-group">
-                {locales.map((loc) => (
-                  <Link
-                    key={loc}
-                    href={pathname.replace(`/${currentLocale}`, `/${loc}`)}
-                    className={`pill ${loc === currentLocale ? 'active' : ''}`}
-                  >
-                    {localeNames[loc]}
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </header>
-
-          {/* Mobile Topbar */}
-          <header className="mobile-topbar">
-            <Link href={`/${currentLocale}`} className="topbar-logo">
-              Typikon<em>.</em>
+    <TopbarTitleContext.Provider value={{ title: topbarTitle, setTitle: setTopbarTitle }}>
+      <div className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors">
+        {/* Header */}
+        <header className="sticky top-0 z-40 bg-white/80 dark:bg-gray-900/80 backdrop-blur border-b border-gray-200 dark:border-gray-700">
+          <div className="max-w-5xl mx-auto flex items-center justify-between px-4 py-3">
+            <Link href={`/${locale}`} className="text-xl font-bold tracking-tight">
+              {t('app.title')}
             </Link>
-            <div className="mobile-topbar-actions">
-              <div className="pill-group">
-                {locales.map((loc) => (
+            <div className="flex items-center gap-3">
+              {/* Language Switcher */}
+              <div className="flex gap-1 text-sm">
+                {LOCALES.map((l) => (
                   <Link
-                    key={loc}
-                    href={pathname.replace(`/${currentLocale}`, `/${loc}`)}
-                    className={`pill ${loc === currentLocale ? 'active' : ''}`}
+                    key={l.code}
+                    href={`/${l.code}${pathname.replace(/^\/[a-z]{2}/, '')}`}
+                    className={`px-2 py-0.5 rounded transition-colors ${
+                      locale === l.code
+                        ? 'bg-blue-600 text-white'
+                        : 'text-gray-500 hover:text-gray-900 dark:hover:text-gray-200'
+                    }`
+                  }
                   >
-                    {localeNames[loc]}
+                    {l.label}
                   </Link>
                 ))}
               </div>
+              {/* Dark Mode Toggle */}
+              <button
+                onClick={() => setDark(!dark)}
+                className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                aria-label="Toggle dark mode"
+              >
+                {dark ? '☀️' : '🌙'}
+              </button>
             </div>
-          </header>
+          </div>
+        </header>
 
-          {/* Main content — children provide their own layout */}
+        {/* Content */}
+        <main className="max-w-5xl mx-auto px-4 py-6">
           {children}
-        </div>
-        </TopbarTitleContext.Provider>
-      </AuthProvider>
-    </I18nProvider>
+        </main>
+      </div>
+    </TopbarTitleContext.Provider>
   );
 }

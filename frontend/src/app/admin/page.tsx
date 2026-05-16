@@ -1,78 +1,62 @@
 'use client';
 
-import { useI18n } from '@/lib/i18n';
-import { useAuth } from '@/lib/auth';
-import { LoginForm } from '@/components/LoginForm';
-import { AdminUsers } from '@/components/AdminUsers';
-import { AdminCalendar } from '@/components/AdminCalendar';
-import { AdminSaints } from '@/components/AdminSaints';
-import { AdminTemplates } from '@/components/AdminTemplates';
-import { AdminBlocks } from '@/components/AdminBlocks';
-import { AdminImport } from '@/components/AdminImport';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useMessages } from './layout';
 
-export default function AdminPage() {
-  const { t } = useI18n();
-  const { user, logout, isAuthenticated, isSuperadmin, loading } = useAuth();
-  const [activeTab, setActiveTab] = useState('calendar');
+interface DashboardStats {
+  total_blocks: number;
+  total_saints: number;
+  total_templates: number;
+  total_calendar_entries: number;
+}
 
-  if (loading) {
-    return (
-      <div className="min-h-[60vh] flex items-center justify-center">
-        <span style={{ color: 'var(--muted)', fontFamily: 'var(--font-ui), sans-serif', fontSize: '0.8125rem' }}>
-          {t.common.loading}
-        </span>
-      </div>
-    );
-  }
+export default function AdminDashboard() {
+  const messages = useMessages();
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  if (!isAuthenticated) {
-    return <LoginForm />;
-  }
+  const t = (key: string) => {
+    const keys = key.split('.');
+    let val: any = messages;
+    for (const k of keys) {
+      if (val && typeof val === 'object' && k in val) val = val[k];
+      else return key;
+    }
+    return typeof val === 'string' ? val : key;
+  };
 
-  const tabs = [
-    { id: 'calendar', label: t.admin.calendar },
-    { id: 'saints', label: t.admin.saints },
-    { id: 'templates', label: t.admin.templates },
-    { id: 'blocks', label: t.admin.blocks },
-    { id: 'import', label: t.admin.import },
-    ...(isSuperadmin ? [{ id: 'users', label: t.admin.users }] : []),
-  ];
+  useEffect(() => {
+    fetch('/api/admin/dashboard', { credentials: 'include' })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        setStats(data);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
 
   return (
     <div>
-      {/* User info bar */}
-      <div className="admin-section-header" style={{ marginBottom: 20 }}>
-        <div className="admin-user-info">
-          <span className="admin-user-email">{user?.email}</span>
+      <h1 className="text-2xl font-bold mb-6">{t('admin.dashboard')}</h1>
+      {loading ? (
+        <p className="text-gray-500">Loading...</p>
+      ) : stats ? (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {[
+            { label: t('admin.nav.blocks'), value: stats.total_blocks },
+            { label: t('admin.nav.saints'), value: stats.total_saints },
+            { label: t('admin.nav.templates'), value: stats.total_templates },
+            { label: t('admin.nav.calendar'), value: stats.total_calendar_entries },
+          ].map((item) => (
+            <div key={item.label} className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+              <p className="text-sm text-gray-500 dark:text-gray-400">{item.label}</p>
+              <p className="text-2xl font-bold mt-1">{item.value}</p>
+            </div>
+          ))}
         </div>
-        <button onClick={logout} className="admin-logout-btn">
-          {t.admin.logout}
-        </button>
-      </div>
-
-      {/* Tab bar */}
-      <div className="admin-tabs">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`admin-tab ${activeTab === tab.id ? 'active' : ''}`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Content card */}
-      <div className="admin-card">
-        {activeTab === 'calendar' && <AdminCalendar />}
-        {activeTab === 'saints' && <AdminSaints />}
-        {activeTab === 'templates' && <AdminTemplates />}
-        {activeTab === 'blocks' && <AdminBlocks />}
-        {activeTab === 'import' && <AdminImport />}
-        {activeTab === 'users' && isSuperadmin && <AdminUsers />}
-      </div>
+      ) : (
+        <p className="text-gray-500">{t('admin.no_data')}</p>
+      )}
     </div>
   );
 }
