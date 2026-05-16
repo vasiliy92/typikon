@@ -26,6 +26,16 @@
     "of": "sur",
     "import": "Importer"
   },
+  "common": {
+    "loading": "Chargement…",
+    "error": "Erreur",
+    "not_found": "Non trouvé",
+    "language": "Langue",
+    "close": "Fermer",
+    "back": "Retour",
+    "next": "Suivant",
+    "previous": "Précédent"
+  },
   "home": {
     "title": "Typikon",
     "subtitle": "Générateur de services liturgiques orthodoxes",
@@ -75,7 +85,22 @@
     "filter_language": "Filtrer par langue",
     "page": "Page",
     "of": "sur",
-    "total": "total"
+    "total": "total",
+    "login": "Connexion",
+    "logout": "Déconnexion",
+    "email": "Email",
+    "password": "Mot de passe",
+    "login_button": "Se connecter",
+    "login_error": "Email ou mot de passe incorrect",
+    "role_superadmin": "Super-admin",
+    "role_admin": "Admin",
+    "create_user": "Créer un utilisateur",
+    "add": "Ajouter",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "search": "Rechercher"
   },
   "auth": {
     "login": "Connexion",

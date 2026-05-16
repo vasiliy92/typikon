@@ -26,6 +26,16 @@
     "of": "из",
     "import": "Импортировать"
   },
+  "common": {
+    "loading": "Загрузка…",
+    "error": "Ошибка",
+    "not_found": "Не найдено",
+    "language": "Язык",
+    "close": "Закрыть",
+    "back": "Назад",
+    "next": "Далее",
+    "previous": "Предыдущий"
+  },
   "home": {
     "title": "Типико́н",
     "subtitle": "Православное богослужебное сложение",
@@ -75,7 +85,22 @@
     "filter_language": "Фильтр по языку",
     "page": "Страница",
     "of": "из",
-    "total": "всего"
+    "total": "всего",
+    "login": "Вход",
+    "logout": "Выход",
+    "email": "Email",
+    "password": "Пароль",
+    "login_button": "Войти",
+    "login_error": "Неверный email или пароль",
+    "role_superadmin": "Суперадмин",
+    "role_admin": "Админ",
+    "create_user": "Создать пользователя",
+    "add": "Добавить",
+    "edit": "Редактировать",
+    "delete": "Удалить",
+    "save": "Сохранить",
+    "cancel": "Отменить",
+    "search": "Поиск"
   },
   "auth": {
     "login": "Вход",
