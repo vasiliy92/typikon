@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useMessages } from './layout';
+import { useMessages } from './context';
 
 interface DashboardStats {
   total_blocks: number;

@@ -1,17 +1,10 @@
 'use client';
 
-import { useState, useEffect, createContext, useContext } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import en from '@/i18n/messages/en.json';
-
-export type Locale = 'en' | 'fr' | 'ru';
-
-const LocaleContext = createContext<Locale>('en');
-const MessagesContext = createContext(en);
-
-export function useLocale() { return useContext(LocaleContext); }
-export function useMessages() { return useContext(MessagesContext); }
+import { LocaleContext, MessagesContext, type Locale } from './context';
 
 const MESSAGES: Record<Locale, typeof en> = { en, fr: en, ru: en };
 

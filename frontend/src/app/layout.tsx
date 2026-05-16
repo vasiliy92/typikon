@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import '@/../public/styles/globals.css';
+import './globals.css';
 
 export const metadata: Metadata = {
   title: 'Typikon',
