@@ -161,7 +161,8 @@
       "password": "Mot de passe",
       "role": "Rôle",
       "is_active": "Actif",
-      "saint": "Saint"
+      "saint": "Saint",
+      "template": "Modèle"
     },
     "date_types": {
       "fixed": "Fixe",
@@ -179,7 +180,8 @@
     "total_saints": "Saints totaux",
     "total_templates": "Modèles totaux",
     "total_calendar": "Entrées du calendrier",
-    "all_saints": "Tous les saints"
+    "all_saints": "Tous les saints",
+    "all_templates": "Tous les modèles"
   },
   "auth": {
     "login": "Connexion",

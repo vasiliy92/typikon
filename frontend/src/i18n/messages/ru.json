@@ -161,7 +161,8 @@
       "password": "Пароль",
       "role": "Роль",
       "is_active": "Активен",
-      "saint": "Святой"
+      "saint": "Святой",
+      "template": "Шаблон"
     },
     "date_types": {
       "fixed": "Неподвижный",
@@ -179,7 +180,8 @@
     "total_saints": "Всего святых",
     "total_templates": "Всего шаблонов",
     "total_calendar": "Записей в календаре",
-    "all_saints": "Все святые"
+    "all_saints": "Все святые",
+    "all_templates": "Все шаблоны"
   },
   "auth": {
     "login": "Вход",
