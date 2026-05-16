@@ -1,0 +1,36 @@
+/* ============================================
+   Typikon Bookish Design System — Base
+   ============================================ */
+
+/* --- Scrollbar hiding --- */
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+*::-webkit-scrollbar {
+  display: none;
+}
+
+/* --- Base body --- */
+body {
+  font-family: var(--font-display), Georgia, serif;
+  background: var(--bg);
+  color: var(--fg);
+  font-size: calc(1rem * var(--font-scale));
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* --- Admin: restore scrollbars and use UI font --- */
+.admin-layout,
+.admin-layout * {
+  scrollbar-width: auto;
+  -ms-overflow-style: auto;
+}
+.admin-layout *::-webkit-scrollbar {
+  display: auto;
+}
+.admin-layout {
+  font-family: var(--font-ui), sans-serif;
+}
