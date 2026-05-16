@@ -1,74 +1,79 @@
-"use client";
+'use client';
 
-import React, { useState } from "react";
-import { useAuth } from "@/lib/auth";
-import { useI18n } from "@/lib/i18n";
+import { useState, FormEvent } from 'react';
+import { useI18n } from '@/lib/i18n';
+import { useAuth } from '@/lib/auth';
 
-export default function LoginForm() {
-  const { login } = useAuth();
+export function LoginForm() {
   const { t } = useI18n();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [submitting, setSubmitting] = useState(false);
+  const { login } = useAuth();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setError("");
-    setSubmitting(true);
+    setError('');
+    setLoading(true);
     try {
       await login(email, password);
     } catch {
-      setError(t.auth.loginFailed);
+      setError(t.admin.login_error);
     } finally {
-      setSubmitting(false);
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-[60vh] flex items-center justify-center">
-      <form
-        onSubmit={handleSubmit}
-        className="w-full max-w-sm space-y-4 rounded-xl border border-foreground/10 bg-surface p-8 shadow-lg"
-      >
-        <h2 className="text-2xl font-bold text-center">{t.auth.login}</h2>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+      <div className="max-w-md w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
+        <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-6">
+          {t.admin.login}
+        </h2>
 
         {error && (
-          <div className="rounded-lg bg-red-500/10 text-red-400 px-4 py-2 text-sm">
+          <div className="mb-4 p-3 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg text-sm">
             {error}
           </div>
         )}
 
-        <div>
-          <label className="block text-sm font-medium mb-1">Email</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="w-full rounded-lg border border-foreground/20 bg-transparent px-3 py-2 text-sm focus:border-accent focus:outline-none"
-          />
-        </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              {t.admin.email}
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            />
+          </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-1">{t.auth.password}</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className="w-full rounded-lg border border-foreground/20 bg-transparent px-3 py-2 text-sm focus:border-accent focus:outline-none"
-          />
-        </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              {t.admin.password}
+            </label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            />
+          </div>
 
-        <button
-          type="submit"
-          disabled={submitting}
-          className="w-full rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground hover:bg-accent/90 disabled:opacity-50 transition-colors"
-        >
-          {submitting ? "..." : t.auth.login}
-        </button>
-      </form>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-medium rounded-lg transition-colors"
+          >
+            {loading ? t.common.loading : t.admin.login_button}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
