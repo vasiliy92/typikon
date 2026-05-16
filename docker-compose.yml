@@ -47,6 +47,7 @@ services:
       ADMIN_API_KEY: ${ADMIN_API_KEY:-change-me-in-production}
       SUPERADMIN_EMAIL: ${SUPERADMIN_EMAIL:-}
       SUPERADMIN_PASSWORD: ${SUPERADMIN_PASSWORD:-}
+      SEED_DATA: ${SEED_DATA:-false}
       LOG_LEVEL: ${LOG_LEVEL:-info}
       CORS_ORIGINS: ${CORS_ORIGINS:-*}
     depends_on:

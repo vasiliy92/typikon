@@ -372,14 +372,6 @@ class ServiceAssembler:
         }
 
     async def _load_patron_troparia(self) -> dict[str, Any]:
-        """Load temple patron saint troparia and kontakia.
-
-        Uses Temple.patronsaint_id (FK->saints.id) and Temple.dedication_type.
-        DedicationType: SAVIOUR, THEOTOKOS, SAINT - affects ordering per Typikon Ch. 52.
-
-        Troparia/kontakia are stored as ServiceBlocks with location_key
-        pattern: saint-{slug}-troparion / saint-{slug}-kontakion
-        """
         if not self._temple or not self._temple.patronsaint_id:
             return {"has_patron": False}
 
@@ -390,29 +382,49 @@ class ServiceAssembler:
         troparion = None
         kontakion = None
 
-        for slot, key_suffix in [("troparion", "troparion"), ("kontakion", "kontakion")]:
-            loc_key = f"saint-{saint.slug}-{key_suffix}"
-            stmt = select(ServiceBlock).where(
-                ServiceBlock.location_key == loc_key,
-                ServiceBlock.language == self.language,
-            ).limit(1)
-            block = (await self.db.execute(stmt)).scalar_one_or_none()
-            if not block and self.language != "csy":
-                stmt_csy = select(ServiceBlock).where(
+        lang_map = {"csy": "csy", "fr": "fr", "en": "en", "ru": "ru"}
+        lang = lang_map.get(self.language, "fr")
+
+        trop_text = getattr(saint, f"troparion_{lang}", None)
+        if not trop_text and lang != "csy":
+            trop_text = saint.troparion_csy
+        if trop_text:
+            troparion = {"text": trop_text, "tone": saint.troparion_tone}
+
+        kont_text = getattr(saint, f"kontakion_{lang}", None)
+        if not kont_text and lang != "csy":
+            kont_text = saint.kontakion_csy
+        if kont_text:
+            kontakion = {"text": kont_text, "tone": saint.kontakion_tone}
+
+        if not troparion or not kontakion:
+            for slot, key_suffix in [("troparion", "troparion"), ("kontakion", "kontakion")]:
+                if (slot == "troparion" and troparion) or (slot == "kontakion" and kontakion):
+                    continue
+                loc_key = f"saint-{saint.slug}-{key_suffix}"
+                stmt = select(ServiceBlock).where(
                     ServiceBlock.location_key == loc_key,
-                    ServiceBlock.language == "csy",
+                    ServiceBlock.language == self.language,
                 ).limit(1)
-                block = (await self.db.execute(stmt_csy)).scalar_one_or_none()
-            if block:
-                entry = {"text": block.content, "tone": block.tone}
-                if slot == "troparion":
-                    troparion = entry
-                else:
-                    kontakion = entry
+                block = (await self.db.execute(stmt)).scalar_one_or_none()
+                if not block and self.language != "csy":
+                    stmt_csy = select(ServiceBlock).where(
+                        ServiceBlock.location_key == loc_key,
+                        ServiceBlock.language == "csy",
+                    ).limit(1)
+                    block = (await self.db.execute(stmt_csy)).scalar_one_or_none()
+                if block:
+                    entry = {"text": block.content, "tone": block.tone}
+                    if slot == "troparion":
+                        troparion = entry
+                    else:
+                        kontakion = entry
+
+        name = getattr(saint, f"name_{lang}", None) or saint.name_en or saint.name_csy
 
         return {
             "has_patron": True,
-            "saint_name": saint.name_en or saint.name_csy,
+            "saint_name": name,
             "dedication_type": self._temple.dedication_type,
             "troparion": troparion,
             "kontakion": kontakion,
@@ -437,6 +449,7 @@ class ServiceAssembler:
             "title_csy": entry.title_csy,
             "title_fr": entry.title_fr,
             "title_en": entry.title_en,
+            "title_ru": entry.title_ru,
             "rank": entry.rank,
             "tone": entry.tone,
             "fasting": entry.fasting,
