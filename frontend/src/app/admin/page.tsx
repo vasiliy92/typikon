@@ -2,15 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { useI18n } from '@/lib/i18n';
-import { apiGet } from '@/lib/api';
+import { useApi } from '@/lib/api';
+import { AdminUsers } from '@/components/AdminUsers';
 import { AdminCalendar } from '@/components/AdminCalendar';
 import { AdminSaints } from '@/components/AdminSaints';
 import { AdminBlocks } from '@/components/AdminBlocks';
 import { AdminTemplates } from '@/components/AdminTemplates';
-import { AdminUsers } from '@/components/AdminUsers';
 import { AdminImport } from '@/components/AdminImport';
-
-type Tab = 'dashboard' | 'calendar' | 'saints' | 'blocks' | 'templates' | 'users' | 'import';
+import type { AdminTab } from './layout';
 
 interface DashboardStats {
   total_blocks: number;
@@ -19,88 +18,72 @@ interface DashboardStats {
   total_calendar_entries: number;
 }
 
-function Dashboard() {
-  const { t } = useI18n();
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    apiGet<DashboardStats>('/api/admin/dashboard')
-      .then((data) => setStats(data))
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
-
-  if (loading) {
-    return <p style={{ color: 'var(--muted)', fontFamily: 'var(--font-ui), sans-serif', fontSize: '0.875rem' }}>…</p>;
-  }
-
-  if (!stats) {
-    return null;
-  }
-
-  const cards = [
-    { label: t.admin.blocks, value: stats.total_blocks, desc: t.admin.blocksDesc },
-    { label: t.admin.saints, value: stats.total_saints, desc: t.admin.saintsDesc },
-    { label: t.admin.templates, value: stats.total_templates, desc: t.admin.templatesDesc },
-    { label: t.admin.calendar, value: stats.total_calendar_entries, desc: t.admin.calendarDesc },
-  ];
-
-  return (
-    <div>
-      <div className="admin-section-header">
-        <h2 className="admin-section-title">{t.admin.title}</h2>
-      </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
-        {cards.map((card) => (
-          <div key={card.label} className="admin-card">
-            <p style={{ fontFamily: 'var(--font-ui), sans-serif', fontSize: '0.6875rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--muted)', marginBottom: '4px' }}>
-              {card.label}
-            </p>
-            <p style={{ fontFamily: 'var(--font-heading), Georgia, serif', fontSize: '2rem', fontWeight: 400, color: 'var(--fg)', lineHeight: 1.1 }}>
-              {card.value}
-            </p>
-            <p style={{ fontFamily: 'var(--font-ui), sans-serif', fontSize: '0.75rem', color: 'var(--muted)', marginTop: '8px' }}>
-              {card.desc}
-            </p>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-const TABS: { key: Tab; i18nKey: string }[] = [
-  { key: 'dashboard', i18nKey: 'title' },
-  { key: 'calendar', i18nKey: 'calendar' },
-  { key: 'saints', i18nKey: 'saints' },
-  { key: 'blocks', i18nKey: 'blocks' },
-  { key: 'templates', i18nKey: 'templates' },
-  { key: 'users', i18nKey: 'users' },
-  { key: 'import', i18nKey: 'import_data' },
+const TABS: { key: AdminTab; icon: string }[] = [
+  { key: 'dashboard', icon: '📊' },
+  { key: 'calendar', icon: '📅' },
+  { key: 'saints', icon: '✝️' },
+  { key: 'blocks', icon: '🧱' },
+  { key: 'templates', icon: '📋' },
+  { key: 'users', icon: '👥' },
+  { key: 'import', icon: '📥' },
 ];
 
 export default function AdminPage() {
   const { t } = useI18n();
-  const [activeTab, setActiveTab] = useState<Tab>('dashboard');
+  const [activeTab, setActiveTab] = useState<AdminTab>('dashboard');
+  const { data: stats } = useApi<DashboardStats>('/admin/dashboard');
+
+  const a = t.admin;
 
   return (
     <div>
       {/* Tab bar */}
-      <div className="admin-tabs" style={{ marginBottom: '24px' }}>
-        {TABS.map((tab) => (
+      <div className="flex flex-wrap gap-1 mb-6 border-b" style={{ borderColor: 'var(--border)' }}>
+        {TABS.map(({ key, icon }) => (
           <button
-            key={tab.key}
-            className={`admin-tab${activeTab === tab.key ? ' active' : ''}`}
-            onClick={() => setActiveTab(tab.key)}
+            key={key}
+            onClick={() => setActiveTab(key)}
+            className={`px-3 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === key ? '' : ''}`}
+            style={{
+              borderColor: activeTab === key ? 'var(--primary)' : 'transparent',
+              color: activeTab === key ? 'var(--primary)' : 'var(--muted-foreground)',
+            }}
           >
-            {String((t.admin as Record<string, unknown>)[tab.i18nKey] || tab.i18nKey)}
+            <span className="mr-1">{icon}</span>
+            {a[key as keyof typeof a] as string}
           </button>
         ))}
       </div>
 
-      {/* Tab content */}
-      {activeTab === 'dashboard' && <Dashboard />}
+      {/* Content */}
+      {activeTab === 'dashboard' && (
+        <div>
+          <h2 className="font-display text-xl font-semibold mb-4" style={{ color: 'var(--foreground)' }}>
+            {a.dashboard}
+          </h2>
+          {stats ? (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[
+                { label: a.total_blocks, value: stats.total_blocks },
+                { label: a.total_saints, value: stats.total_saints },
+                { label: a.total_templates, value: stats.total_templates },
+                { label: a.total_calendar, value: stats.total_calendar_entries },
+              ].map(({ label, value }) => (
+                <div
+                  key={label}
+                  className="rounded-lg border p-4 text-center"
+                  style={{ borderColor: 'var(--border)', background: 'var(--card)' }}
+                >
+                  <div className="text-2xl font-bold" style={{ color: 'var(--primary)' }}>{value}</div>
+                  <div className="text-xs mt-1" style={{ color: 'var(--muted-foreground)' }}>{label}</div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>{t.common.loading}</p>
+          )}
+        </div>
+      )}
       {activeTab === 'calendar' && <AdminCalendar />}
       {activeTab === 'saints' && <AdminSaints />}
       {activeTab === 'blocks' && <AdminBlocks />}
