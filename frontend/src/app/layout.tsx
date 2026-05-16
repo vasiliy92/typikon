@@ -1,17 +1,19 @@
 import type { Metadata } from 'next';
-import { Space_Grotesk, DM_Sans } from 'next/font/google';
+import { Cormorant_Garamond, DM_Sans } from 'next/font/google';
 import './globals.css';
 
-const spaceGrotesk = Space_Grotesk({
-  subsets: ['latin'],
+const cormorantGaramond = Cormorant_Garamond({
+  subsets: ['latin', 'latin-ext'],
   variable: '--font-display',
   display: 'swap',
+  weight: ['400', '500', '600', '700'],
 });
 
 const dmSans = DM_Sans({
   subsets: ['latin'],
-  variable: '--font-body',
+  variable: '--font-ui',
   display: 'swap',
+  weight: ['400', '500', '600'],
 });
 
 export const metadata: Metadata = {
@@ -26,13 +28,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fr" suppressHydrationWarning>
-      <head>
-        <link
-          href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&display=swap"
-          rel="stylesheet"
-        />
-      </head>
-      <body className={`${spaceGrotesk.variable} ${dmSans.variable} font-body antialiased`}>
+      <body className={`${cormorantGaramond.variable} ${dmSans.variable}`}>
         {children}
       </body>
     </html>
