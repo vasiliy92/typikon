@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, createContext, useContext } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Locale, localeNames, locales } from '@/i18n/config';
@@ -10,6 +10,16 @@ import { I18nProvider, type Messages } from '@/lib/i18n';
 import { AuthProvider } from '@/lib/auth';
 
 const messages: Record<Locale, Messages> = { fr, ru };
+
+/* ─── Topbar Title Context ─── */
+const TopbarTitleContext = createContext<{
+  title: string;
+  setTitle: (t: string) => void;
+}>({ title: '', setTitle: () => {} });
+
+export function useTopbarTitle() {
+  return useContext(TopbarTitleContext);
+}
 
 export default function LocaleLayout({
   children,
@@ -21,21 +31,27 @@ export default function LocaleLayout({
   const currentLocale = (locales.includes(locale as Locale) ? locale : 'fr') as Locale;
   const t = messages[currentLocale];
   const pathname = usePathname();
+  const [topbarTitle, setTopbarTitle] = useState('');
 
   return (
     <I18nProvider value={{ locale: currentLocale, t }}>
       <AuthProvider>
+        <TopbarTitleContext.Provider value={{ title: topbarTitle, setTitle: setTopbarTitle }}>
         <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
           {/* Desktop Topbar */}
           <header className="topbar">
             <div style={{ display: 'flex', alignItems: 'center' }}>
               <Link href={`/${currentLocale}`} className="topbar-logo">
-                Typikon
+                Typikon<em>.</em>
               </Link>
-              <span className="topbar-sep">·</span>
-              <span className="topbar-title">
-                {t.app.title}
-              </span>
+              {topbarTitle && (
+                <>
+                  <span className="topbar-sep">·</span>
+                  <span className="topbar-title">
+                    {topbarTitle}
+                  </span>
+                </>
+              )}
             </div>
             <div className="topbar-actions">
               <div className="pill-group">
@@ -55,7 +71,7 @@ export default function LocaleLayout({
           {/* Mobile Topbar */}
           <header className="mobile-topbar">
             <Link href={`/${currentLocale}`} className="topbar-logo">
-              Typikon.
+              Typikon<em>.</em>
             </Link>
             <div className="mobile-topbar-actions">
               <div className="pill-group">
@@ -75,6 +91,7 @@ export default function LocaleLayout({
           {/* Main content — children provide their own layout */}
           {children}
         </div>
+        </TopbarTitleContext.Provider>
       </AuthProvider>
     </I18nProvider>
   );

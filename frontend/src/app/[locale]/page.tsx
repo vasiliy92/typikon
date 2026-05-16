@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useI18n } from '@/lib/i18n';
 import { apiPost, AssembledServiceResponse, LiturgicalDay, useApi } from '@/lib/api';
+import { useTopbarTitle } from '@/app/[locale]/layout';
 
 /* ─── Font Scale ─── */
 const FONT_SCALES = [
@@ -229,6 +230,7 @@ function ServiceContent({ assembled, dayInfo, error, serviceType, t, locale }: {
 /* ─── Main Page ─── */
 export default function ServicePage() {
   const { locale, t } = useI18n();
+  const { setTitle: setTopbarTitle } = useTopbarTitle();
   const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [serviceType, setServiceType] = useState('liturgy');
   const [calendarStyle, setCalendarStyle] = useState<'new' | 'old'>('new');
@@ -237,6 +239,16 @@ export default function ServicePage() {
   const [assembled, setAssembled] = useState<AssembledServiceResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  /* Update topbar breadcrumb with service name */
+  useEffect(() => {
+    if (assembled) {
+      const serviceName = (t.service_types as Record<string, string>)[serviceType] || serviceType;
+      setTopbarTitle(serviceName);
+    } else {
+      setTopbarTitle('');
+    }
+  }, [assembled, serviceType, t, setTopbarTitle]);
 
   const [fontScale, setFontScale] = useFontScale();
   const [showFontMenu, setShowFontMenu] = useState(false);
