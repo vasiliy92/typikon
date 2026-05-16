@@ -2,8 +2,8 @@
 
 > **Before making ANY changes to this repository, read this file in full.**
 > It contains critical invariants that will break the build if ignored.
-> After completing your task, if you discovered new non-obvious constraints
-> or pitfalls, update AGENTS.md. Keep it under 150 lines — prune stale entries.
+> **After every task, review whether you discovered new non-obvious constraints
+> or pitfalls. If yes, update AGENTS.md and push the update.** Keep it under 160 lines — prune stale entries.
 
 ## Critical Invariants
 
@@ -86,7 +86,9 @@ Infra:    Docker Compose — postgres, redis, backend, frontend, nginx
 | Emoji tab icons | Breaks bookish aesthetic, inconsistent rendering | Use SVG icons in sidebar navigation |
 | Native `<select>` in admin | Browser chrome clashes with bookish design | Use `AdminSelect` custom component |
 | Native `<input type="checkbox">` | Same as above | Use `AdminCheckbox` custom component |
+| Native `<input type="number">` | Browser spinners/steppers clash with bookish design | Use `AdminSelect` for small ranges (month/day), `type="text" inputMode="numeric"` for free-form numbers |
 | Files >12KB via `push_files` | MCP truncates content | Use `create_or_update_file` with SHA for large files |
+| Accidental `push_files` of wrong content | Overwrote i18n.tsx with dummy code | Double-check file content before pushing, never push files marked "don't touch" |
 
 ## Conventions
 
@@ -155,6 +157,6 @@ docker-compose.yml              # postgres, redis, backend, frontend, nginx
 
 1. **Read first.** Before any task, read `AGENTS.md`. It contains non-obvious constraints that will break things if ignored.
 2. **Update when you learn.** If you discover a new invariant (something that broke the build, a non-obvious dependency, a convention not in code), add it here. Keep it concise — one line per invariant.
-3. **Prune stale entries.** If a section becomes outdated (e.g., a bug was permanently fixed in code), remove the entry. This file must stay compact (~150 lines max).
+3. **Prune stale entries.** If a section becomes outdated (e.g., a bug was permanently fixed in code), remove the entry. This file must stay compact (~160 lines max).
 4. **No history, no narratives.** This is a contract, not a changelog. Git tracks history. Write facts, not stories.
 5. **When in doubt, add to Known Pitfalls.** If something surprised you during work, it will surprise the next agent too. A one-row table entry prevents hours of debugging.
