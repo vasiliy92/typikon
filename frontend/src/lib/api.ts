@@ -3,7 +3,7 @@ import useSWR, { mutate } from 'swr';
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
 
 async function fetcher<T>(url: string): Promise<T> {
-  const res = await fetch(`${API_BASE}${url}`);
+  const res = await fetch(`${API_BASE}${url}`, { credentials: 'include' });
   if (!res.ok) {
     const error = await res.json().catch(() => ({ detail: res.statusText }));
     throw new Error(error.detail || res.statusText);
@@ -18,10 +18,15 @@ export function useApi<T>(path: string | null) {
   });
 }
 
+export async function apiGet<T>(path: string): Promise<T> {
+  return fetcher<T>(path);
+}
+
 export async function apiPost<T>(path: string, data: unknown): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
     body: JSON.stringify(data),
   });
   if (!res.ok) {
@@ -35,6 +40,21 @@ export async function apiPut<T>(path: string, data: unknown): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({ detail: res.statusText }));
+    throw new Error(error.detail || res.statusText);
+  }
+  return res.json();
+}
+
+export async function apiPatch<T>(path: string, data: unknown): Promise<T> {
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
     body: JSON.stringify(data),
   });
   if (!res.ok) {
@@ -45,7 +65,10 @@ export async function apiPut<T>(path: string, data: unknown): Promise<T> {
 }
 
 export async function apiDelete(path: string): Promise<void> {
-  const res = await fetch(`${API_BASE}${path}`, { method: 'DELETE' });
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: 'DELETE',
+    credentials: 'include',
+  });
   if (!res.ok) {
     const error = await res.json().catch(() => ({ detail: res.statusText }));
     throw new Error(error.detail || res.statusText);
@@ -57,6 +80,7 @@ export async function apiUpload<T>(path: string, file: File): Promise<T> {
   formData.append('file', file);
   const res = await fetch(`${API_BASE}${path}`, {
     method: 'POST',
+    credentials: 'include',
     body: formData,
   });
   if (!res.ok) {
