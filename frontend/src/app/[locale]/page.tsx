@@ -263,6 +263,22 @@ export default function ServicePage() {
   const [showServiceSheet, setShowServiceSheet] = useState(false);
   const [showMobileCalendar, setShowMobileCalendar] = useState(false);
   const [showMobileMode, setShowMobileMode] = useState(false);
+  const [showMobileSettings, setShowMobileSettings] = useState(false);
+
+  /* Wire settings toggle button (in layout) to this component's state */
+  useEffect(() => {
+    const btn = document.getElementById('mobileSettingsToggle');
+    if (!btn) return;
+    const toggle = () => setShowMobileSettings(prev => !prev);
+    btn.addEventListener('click', toggle);
+    return () => btn.removeEventListener('click', toggle);
+  }, []);
+
+  /* Sync toggle button active state */
+  useEffect(() => {
+    const btn = document.getElementById('mobileSettingsToggle');
+    if (btn) btn.classList.toggle('active', showMobileSettings);
+  }, [showMobileSettings]);
 
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -474,18 +490,17 @@ export default function ServicePage() {
       </div>
 
       {/* ═══════════════════════════════════════
-          MOBILE: Controls Row + Content + Bottom Bar
+          MOBILE: Controls Strip (collapsible) + Content + Bottom Bar
           ═══════════════════════════════════════ */}
-      <div className="mobile-content">
-        {/* Mobile Controls Row */}
-        <div className="mobile-controls-row">
+      <div className={`controls-strip ${showMobileSettings ? 'expanded' : 'collapsed'}`}>
+        <div className="controls-inner">
           {/* Calendar Chip */}
           <div className="chip-wrapper" onClick={stopProp}>
             <button
               className="chip"
               onClick={() => setShowMobileCalendar(!showMobileCalendar)}
             >
-              <CalendarIcon />
+              <CalendarIcon size={12} />
               {calendarStyle === 'new' ? t.service.new_calendar : t.service.old_calendar}
             </button>
             {showMobileCalendar && (
@@ -512,7 +527,7 @@ export default function ServicePage() {
               className="chip"
               onClick={() => setShowMobileMode(!showMobileMode)}
             >
-              <BookIcon />
+              <BookIcon size={12} />
               {mode === 'full' ? t.service.mode_full : t.service.mode_ustav}
             </button>
             {showMobileMode && (
@@ -539,7 +554,7 @@ export default function ServicePage() {
             value={date}
             onChange={(e) => setDate(e.target.value)}
             className="date-input"
-            style={{ fontSize: '0.75rem', padding: '4px 8px' }}
+            style={{ fontSize: '0.6875rem', padding: '4px 6px' }}
           />
 
           {/* Assemble */}
@@ -547,12 +562,14 @@ export default function ServicePage() {
             className="btn-assemble"
             onClick={assemble}
             disabled={loading}
-            style={{ marginLeft: 'auto', fontSize: '0.75rem', padding: '5px 12px' }}
+            style={{ marginLeft: 'auto', fontSize: '0.6875rem', padding: '4px 12px' }}
           >
             {loading ? '…' : t.service.assemble}
           </button>
         </div>
+      </div>
 
+      <div className="mobile-content">
         {/* Mobile Text Column */}
         <div className="mobile-text-column">
           <ServiceContent

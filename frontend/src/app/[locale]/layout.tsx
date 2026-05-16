@@ -91,6 +91,13 @@ export default function LocaleLayout({
                   </Link>
                 ))}
               </div>
+              <button
+                className="settings-toggle"
+                id="mobileSettingsToggle"
+                title="Réglages"
+              >
+                ✦
+              </button>
             </div>
           </header>
 
