@@ -1,43 +1,41 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import { apiPost, apiGet } from './api';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
-
-export interface CurrentUser {
+interface User {
   id: string;
   email: string;
-  display_name: string;
-  role: string;
-  is_active: boolean;
+  role: 'superadmin' | 'admin';
+  created_at: string;
 }
 
 interface AuthContextType {
-  user: CurrentUser | null;
+  user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  refresh: () => Promise<void>;
+  isAuthenticated: boolean;
   isSuperadmin: boolean;
 }
 
-const AuthContext = createContext<AuthContextType | null>(null);
+const AuthContext = createContext<AuthContextType>({
+  user: null,
+  loading: true,
+  login: async () => {},
+  logout: async () => {},
+  isAuthenticated: false,
+  isSuperadmin: false,
+});
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<CurrentUser | null>(null);
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchMe = useCallback(async () => {
+  const fetchUser = useCallback(async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/v1/auth/me`, {
-        credentials: 'include',
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setUser(data);
-      } else {
-        setUser(null);
-      }
+      const data = await apiGet<{ user: User }>('/auth/me');
+      setUser(data.user);
     } catch {
       setUser(null);
     } finally {
@@ -46,46 +44,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    fetchMe();
-  }, [fetchMe]);
+    fetchUser();
+  }, [fetchUser]);
 
   const login = async (email: string, password: string) => {
-    const res = await fetch(`${API_BASE}/api/v1/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ email, password }),
-    });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({ detail: 'Login failed' }));
-      throw new Error(err.detail || 'Login failed');
-    }
-    const data = await res.json();
+    const data = await apiPost<{ user: User }>('/auth/login', { email, password });
     setUser(data.user);
   };
 
   const logout = async () => {
-    await fetch(`${API_BASE}/api/v1/auth/logout`, {
-      method: 'POST',
-      credentials: 'include',
-    });
-    setUser(null);
-  };
-
-  const refresh = async () => {
-    setLoading(true);
-    await fetchMe();
+    try {
+      await apiPost('/auth/logout', {});
+    } finally {
+      setUser(null);
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, refresh, isSuperadmin: user?.role === 'superadmin' }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        login,
+        logout,
+        isAuthenticated: !!user,
+        isSuperadmin: user?.role === 'superadmin',
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 }
 
 export function useAuth() {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error('useAuth must be used within AuthProvider');
-  return ctx;
+  return useContext(AuthContext);
 }
