@@ -12,12 +12,24 @@ class SaintCreate(BaseModel):
     name_csy: str
     name_fr: Optional[str] = None
     name_en: Optional[str] = None
+    name_ru: Optional[str] = None
     life_summary_csy: Optional[str] = None
     life_summary_fr: Optional[str] = None
     life_summary_en: Optional[str] = None
+    life_summary_ru: Optional[str] = None
+    troparion_csy: Optional[str] = None
+    troparion_fr: Optional[str] = None
+    troparion_en: Optional[str] = None
+    troparion_ru: Optional[str] = None
+    troparion_tone: Optional[str] = None
+    kontakion_csy: Optional[str] = None
+    kontakion_fr: Optional[str] = None
+    kontakion_en: Optional[str] = None
+    kontakion_ru: Optional[str] = None
+    kontakion_tone: Optional[str] = None
     icon_url: Optional[str] = None
     icon_thumbnail_url: Optional[str] = None
-    categories: Optional[str] = None
+    categories: Optional[str] = None  # JSON array string
     reposed_year: Optional[int] = None
 
 
@@ -26,9 +38,21 @@ class SaintUpdate(BaseModel):
     name_csy: Optional[str] = None
     name_fr: Optional[str] = None
     name_en: Optional[str] = None
+    name_ru: Optional[str] = None
     life_summary_csy: Optional[str] = None
     life_summary_fr: Optional[str] = None
     life_summary_en: Optional[str] = None
+    life_summary_ru: Optional[str] = None
+    troparion_csy: Optional[str] = None
+    troparion_fr: Optional[str] = None
+    troparion_en: Optional[str] = None
+    troparion_ru: Optional[str] = None
+    troparion_tone: Optional[str] = None
+    kontakion_csy: Optional[str] = None
+    kontakion_fr: Optional[str] = None
+    kontakion_en: Optional[str] = None
+    kontakion_ru: Optional[str] = None
+    kontakion_tone: Optional[str] = None
     icon_url: Optional[str] = None
     icon_thumbnail_url: Optional[str] = None
     categories: Optional[str] = None
@@ -43,9 +67,21 @@ class SaintResponse(BaseModel):
     name_csy: str
     name_fr: Optional[str] = None
     name_en: Optional[str] = None
+    name_ru: Optional[str] = None
     life_summary_csy: Optional[str] = None
     life_summary_fr: Optional[str] = None
     life_summary_en: Optional[str] = None
+    life_summary_ru: Optional[str] = None
+    troparion_csy: Optional[str] = None
+    troparion_fr: Optional[str] = None
+    troparion_en: Optional[str] = None
+    troparion_ru: Optional[str] = None
+    troparion_tone: Optional[str] = None
+    kontakion_csy: Optional[str] = None
+    kontakion_fr: Optional[str] = None
+    kontakion_en: Optional[str] = None
+    kontakion_ru: Optional[str] = None
+    kontakion_tone: Optional[str] = None
     icon_url: Optional[str] = None
     icon_thumbnail_url: Optional[str] = None
     categories: Optional[str] = None

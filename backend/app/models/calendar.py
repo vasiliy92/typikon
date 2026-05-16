@@ -15,7 +15,14 @@ from .enums import DateType, FastingType, FeastRank, ServiceType
 
 class CalendarEntry(Base, TimestampMixin):
     """A liturgical calendar entry — either a fixed feast (month/day) or
-    a movable one (offset from Pascha)."""
+    a movable one (offset from Pascha).
+
+    Each entry records:
+    - What is commemorated (title in CSY/FR/EN/RU)
+    - Optional link to a Saint
+    - Rank (1-5), tone, fasting type
+    - Forefeast / afterfeast durations
+    """
     __tablename__ = "calendar_entries"
     __table_args__ = (
         UniqueConstraint("date_type", "month", "day", "pascha_offset", name="uq_calendar_entry"),
@@ -25,25 +32,41 @@ class CalendarEntry(Base, TimestampMixin):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     date_type: Mapped[DateType] = mapped_column(String(10))
+
+    # Fixed date (for date_type=fixed)
     month: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, default=None)
     day: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, default=None)
+
+    # Movable date (for date_type=movable): offset in days from Pascha
+    # e.g. -48 = Sunday of Publican and Pharisee, +1 = Bright Monday
     pascha_offset: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, default=None)
+
+    # Multilingual titles
     title_csy: Mapped[str] = mapped_column(String(500))
     title_fr: Mapped[Optional[str]] = mapped_column(String(500), nullable=True, default=None)
     title_en: Mapped[Optional[str]] = mapped_column(String(500), nullable=True, default=None)
+    title_ru: Mapped[Optional[str]] = mapped_column(String(500), nullable=True, default=None)
+
+    # Optional saint link
     saint_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey("saints.id", ondelete="SET NULL"),
         nullable=True, default=None,
     )
+
+    # Liturgical properties
     rank: Mapped[str] = mapped_column(String(2), default=FeastRank.DAILY)
     tone: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, default=None)
     fasting: Mapped[FastingType] = mapped_column(String(20), default=FastingType.NONE)
     forefeast_days: Mapped[int] = mapped_column(Integer, default=0)
     afterfeast_days: Mapped[int] = mapped_column(Integer, default=0)
+
+    # Service template override for this specific day
     service_template_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey("service_templates.id", ondelete="SET NULL"),
         nullable=True, default=None,
     )
+
+    # Rubric notes
     rubric: Mapped[Optional[str]] = mapped_column(Text, nullable=True, default=None)
 
 

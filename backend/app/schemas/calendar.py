@@ -8,13 +8,14 @@ from pydantic import BaseModel, ConfigDict, field_validator
 
 
 class CalendarEntryCreate(BaseModel):
-    date_type: str
+    date_type: str  # fixed | movable
     month: Optional[int] = None
     day: Optional[int] = None
     pascha_offset: Optional[int] = None
     title_csy: str
     title_fr: Optional[str] = None
     title_en: Optional[str] = None
+    title_ru: Optional[str] = None
     saint_id: Optional[int] = None
     rank: str = "1"
     tone: Optional[int] = None
@@ -40,6 +41,7 @@ class CalendarEntryUpdate(BaseModel):
     title_csy: Optional[str] = None
     title_fr: Optional[str] = None
     title_en: Optional[str] = None
+    title_ru: Optional[str] = None
     saint_id: Optional[int] = None
     rank: Optional[str] = None
     tone: Optional[int] = None
@@ -61,6 +63,7 @@ class CalendarEntryResponse(BaseModel):
     title_csy: str
     title_fr: Optional[str] = None
     title_en: Optional[str] = None
+    title_ru: Optional[str] = None
     saint_id: Optional[int] = None
     rank: str
     tone: Optional[int] = None
