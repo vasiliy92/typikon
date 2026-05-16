@@ -77,7 +77,8 @@
     "bottom": "Вниз",
     "tone_label": "Глас",
     "troparion_tone": "Тропарь, глас",
-    "kontakion_tone": "Кондак, глас"
+    "kontakion_tone": "Кондак, глас",
+    "mode_label": "Режим"
   },
   "admin": {
     "title": "Управление",
