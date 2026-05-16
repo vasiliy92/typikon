@@ -1,9 +1,18 @@
-export const locales = ['fr', 'csy', 'ru'] as const;
+import en from './messages/en.json';
+import fr from './messages/fr.json';
+import ru from './messages/ru.json';
+
+export const locales = ['fr', 'ru'] as const;
 export type Locale = (typeof locales)[number];
-export const defaultLocale: Locale = 'fr';
 
 export const localeNames: Record<Locale, string> = {
   fr: 'Français',
-  csy: 'Церковнославѧ́нскїй',
   ru: 'Русский',
 };
+
+export const messages: Record<Locale, Record<string, string>> = {
+  fr,
+  ru,
+};
+
+export const defaultLocale: Locale = 'fr';
