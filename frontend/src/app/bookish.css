@@ -22,7 +22,7 @@
 
   /* Layout */
   --sidebar-w: 240px;
-  --topbar-h: 48px;
+  --topbar-h: 64px;
   --controls-h: 44px;
   --content-max-w: 680px;
   --bottombar-h: 56px;
@@ -75,36 +75,40 @@ body {
 
 .topbar-logo {
   font-family: var(--font-heading), Georgia, serif;
-  font-size: 1.25rem;
+  font-size: 2.5rem;
   font-weight: 400;
   letter-spacing: 0.04em;
   color: var(--fg);
   text-decoration: none;
+  line-height: 1;
 }
 
 .topbar-logo em {
   font-style: normal;
-  color: var(--accent);
+  color: var(--accent) !important;
   font-weight: 400;
 }
 
 .topbar-sep {
   color: var(--ornament);
-  font-size: 1rem;
-  margin: 0 10px;
+  font-size: 1.25rem;
+  margin: 0 12px;
+  line-height: 1;
 }
 
 .topbar-title {
   font-family: var(--font-display), Georgia, serif;
-  font-size: 1rem;
+  font-size: 1.25rem;
   color: var(--fg-soft);
   font-weight: 500;
+  line-height: 1;
 }
 
 .topbar-actions {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0;
 }
 
 /* --- Sidebar --- */
@@ -766,6 +770,10 @@ body {
     background: var(--bg);
     border-bottom: 1px solid var(--rule);
     z-index: 100;
+  }
+
+  .mobile-topbar .topbar-logo {
+    font-size: 1.5rem;
   }
 
   .mobile-topbar-actions {
