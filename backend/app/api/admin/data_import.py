@@ -31,20 +31,7 @@ async def import_json(
     file: UploadFile = File(...),
     db: AsyncSession = Depends(get_session),
 ):
-    """Import liturgical data from a JSON file.
-
-    Expected format:
-    {
-      "blocks": [...],
-      "calendar_entries": [...],
-      "saints": [...],
-      "lections": [...],
-      "lection_assignments": [...],
-      "templates": [...],
-      "template_blocks": [...]
-    }
-    Each key is optional. Only present keys will be processed.
-    """
+    """Import liturgical data from a JSON file."""
     content = await file.read()
     data: dict[str, Any] = json.loads(content)
 
@@ -85,10 +72,7 @@ async def import_json(
 async def validate_json(
     file: UploadFile = File(...),
 ):
-    """Validate a JSON import file without actually importing.
-
-    Returns a dry-run summary of what would be imported.
-    """
+    """Validate a JSON import file without actually importing."""
     content = await file.read()
     data: dict[str, Any] = json.loads(content)
 
