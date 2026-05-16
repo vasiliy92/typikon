@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Moon, Sun, Church, ArrowLeft } from 'lucide-react';
+import { Moon, Sun, ArrowLeft } from 'lucide-react';
 import clsx from 'clsx';
 import { Locale, localeNames, locales } from '@/i18n/config';
 import fr from '@/i18n/messages/fr.json';
@@ -23,13 +23,10 @@ export default function AdminLayout({
   const [locale, setLocale] = useState<Locale>('fr');
 
   useEffect(() => {
-    // Restore language preference
     const savedLang = localStorage.getItem(ADMIN_LANG_KEY);
     if (savedLang && locales.includes(savedLang as Locale)) {
       setLocale(savedLang as Locale);
     }
-
-    // Restore theme
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     const savedTheme = localStorage.getItem('typikon-theme');
     if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
@@ -57,68 +54,43 @@ export default function AdminLayout({
   return (
     <I18nProvider value={{ locale, t }}>
       <AuthProvider>
-        <div className="min-h-screen" style={{ background: 'var(--background)' }}>
+        <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
           {/* Header */}
-          <header
-            className="sticky top-0 z-50 backdrop-blur-md border-b"
-            style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
-          >
-            <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <Link
-                  href={`/${locale}`}
-                  className="flex items-center gap-1.5 text-sm transition-colors hover:text-[var(--foreground)]"
-                  style={{ color: 'var(--muted-foreground)' }}
-                >
-                  <ArrowLeft size={16} />
-                  {t.app.title}
-                </Link>
-                <span style={{ color: 'var(--border)' }}>|</span>
-                <span
-                  className="font-display font-semibold text-lg"
-                  style={{ color: 'var(--foreground)' }}
-                >
-                  {t.admin.title}
-                </span>
+          <header className="admin-topbar">
+            <div className="admin-topbar-left">
+              <Link href={`/${locale}`} className="admin-topbar-back">
+                <ArrowLeft size={14} />
+                {t.app.title}
+              </Link>
+              <span className="admin-topbar-sep">·</span>
+              <span className="admin-topbar-title">
+                {t.admin.title}
+              </span>
+            </div>
+
+            <div className="admin-topbar-right">
+              {/* Language switcher — pill-group style */}
+              <div className="pill-group">
+                {locales.map((loc) => (
+                  <button
+                    key={loc}
+                    onClick={() => switchLocale(loc)}
+                    className={clsx('pill', loc === locale && 'active')}
+                  >
+                    {localeNames[loc]}
+                  </button>
+                ))}
               </div>
 
-              <div className="flex items-center gap-2">
-                {/* Language switcher */}
-                <div
-                  className="flex items-center rounded-lg overflow-hidden border"
-                  style={{ borderColor: 'var(--border)' }}
-                >
-                  {locales.map((loc) => (
-                    <button
-                      key={loc}
-                      onClick={() => switchLocale(loc)}
-                      className={clsx(
-                        'px-2.5 py-1 text-xs font-medium transition-all',
-                        loc === locale
-                          ? ''
-                          : 'text-[var(--muted-foreground)] hover:text-[var(--foreground)]',
-                      )}
-                      style={loc === locale ? { background: 'var(--primary)', color: 'var(--primary-foreground)' } : {}}
-                    >
-                      {localeNames[loc]}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Dark mode toggle */}
-                <button
-                  onClick={toggleDark}
-                  className="p-2 rounded-lg transition-all hover:bg-[var(--muted-bg)]"
-                  style={{ color: 'var(--muted-foreground)' }}
-                >
-                  {dark ? <Sun size={18} /> : <Moon size={18} />}
-                </button>
-              </div>
+              {/* Dark mode toggle */}
+              <button onClick={toggleDark} className="admin-icon-btn">
+                {dark ? <Sun size={18} /> : <Moon size={18} />}
+              </button>
             </div>
           </header>
 
           {/* Main content */}
-          <main className="max-w-6xl mx-auto px-4 py-6">{children}</main>
+          <main className="admin-content">{children}</main>
         </div>
       </AuthProvider>
     </I18nProvider>

@@ -19,7 +19,7 @@ export default function AdminPage() {
   if (loading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
-        <span className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
+        <span style={{ color: 'var(--muted)', fontFamily: 'var(--font-ui), sans-serif', fontSize: '0.8125rem' }}>
           {t.common.loading}
         </span>
       </div>
@@ -40,54 +40,32 @@ export default function AdminPage() {
   ];
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--background)' }}>
-      <div
-        className="rounded-xl border p-4 mb-6"
-        style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
-      >
-        <div className="flex items-center justify-between">
-          <h1
-            className="font-display text-xl font-semibold"
-            style={{ color: 'var(--foreground)' }}
-          >
-            {t.admin.title}
-          </h1>
-          <div className="flex items-center gap-4">
-            <span className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
-              {user?.email}
-            </span>
-            <button
-              onClick={logout}
-              className="text-sm font-medium transition-colors"
-              style={{ color: 'var(--destructive)' }}
-            >
-              {t.admin.logout}
-            </button>
-          </div>
+    <div>
+      {/* User info bar */}
+      <div className="admin-section-header" style={{ marginBottom: 20 }}>
+        <div className="admin-user-info">
+          <span className="admin-user-email">{user?.email}</span>
         </div>
+        <button onClick={logout} className="admin-logout-btn">
+          {t.admin.logout}
+        </button>
       </div>
 
-      <div className="flex gap-2 mb-6 flex-wrap">
+      {/* Tab bar */}
+      <div className="admin-tabs">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className="px-4 py-2 rounded-lg text-sm font-medium transition-all"
-            style={
-              activeTab === tab.id
-                ? { background: 'var(--primary)', color: 'var(--primary-foreground)' }
-                : { background: 'var(--muted-bg)', color: 'var(--muted-foreground)' }
-            }
+            className={`admin-tab ${activeTab === tab.id ? 'active' : ''}`}
           >
             {tab.label}
           </button>
         ))}
       </div>
 
-      <div
-        className="rounded-xl border p-6"
-        style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
-      >
+      {/* Content card */}
+      <div className="admin-card">
         {activeTab === 'calendar' && <AdminCalendar />}
         {activeTab === 'saints' && <AdminSaints />}
         {activeTab === 'templates' && <AdminTemplates />}
