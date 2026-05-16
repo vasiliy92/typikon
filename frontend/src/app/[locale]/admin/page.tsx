@@ -1,70 +1,118 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useI18n } from '@/lib/i18n';
-import { BookOpen, Calendar, Users, FileText, Upload } from 'lucide-react';
-import clsx from 'clsx';
-import AdminBlocks from '@/components/AdminBlocks';
-import AdminCalendar from '@/components/AdminCalendar';
-import AdminSaints from '@/components/AdminSaints';
-import AdminTemplates from '@/components/AdminTemplates';
-import AdminImport from '@/components/AdminImport';
+import React from "react";
+import { useAuth } from "@/lib/auth";
+import { useI18n } from "@/lib/i18n";
+import LoginForm from "@/components/LoginForm";
+import AdminUsers from "@/components/AdminUsers";
+import { apiGet, apiPost } from "@/lib/api";
 
-type Tab = 'blocks' | 'calendar' | 'saints' | 'templates' | 'import';
+/* ── Admin sub-pages ── */
+
+function CalendarTab() {
+  const t = useI18n();
+  return <div className="space-y-4">
+    <h2 className="text-xl font-bold">{t("admin.calendar")}</h2>
+    <p className="text-muted">{t("admin.calendarDesc")}</p>
+  </div>;
+}
+
+function SaintsTab() {
+  const t = useI18n();
+  return <div className="space-y-4">
+    <h2 className="text-xl font-bold">{t("admin.saints")}</h2>
+    <p className="text-muted">{t("admin.saintsDesc")}</p>
+  </div>;
+}
+
+function TemplatesTab() {
+  const t = useI18n();
+  return <div className="space-y-4">
+    <h2 className="text-xl font-bold">{t("admin.templates")}</h2>
+    <p className="text-muted">{t("admin.templatesDesc")}</p>
+  </div>;
+}
+
+function BlocksTab() {
+  const t = useI18n();
+  return <div className="space-y-4">
+    <h2 className="text-xl font-bold">{t("admin.blocks")}</h2>
+    <p className="text-muted">{t("admin.blocksDesc")}</p>
+  </div>;
+}
+
+function ImportTab() {
+  const t = useI18n();
+  return <div className="space-y-4">
+    <h2 className="text-xl font-bold">{t("admin.import")}</h2>
+    <p className="text-muted">{t("admin.importDesc")}</p>
+  </div>;
+}
+
+/* ── Main admin page ── */
+
+const TABS = ["calendar", "saints", "templates", "blocks", "import", "users"] as const;
+type Tab = typeof TABS[number];
 
 export default function AdminPage() {
-  const { t } = useI18n();
-  const [activeTab, setActiveTab] = useState<Tab>('blocks');
+  const { user, loading, logout, isSuperadmin } = useAuth();
+  const t = useI18n();
+  const [activeTab, setActiveTab] = React.useState<Tab>("calendar");
 
-  const tabs: { key: Tab; label: string; icon: typeof BookOpen }[] = [
-    { key: 'blocks', label: t.admin.blocks, icon: BookOpen },
-    { key: 'calendar', label: t.admin.calendar_entries, icon: Calendar },
-    { key: 'saints', label: t.admin.saints, icon: Users },
-    { key: 'templates', label: t.admin.templates, icon: FileText },
-    { key: 'import', label: t.admin.import_data, icon: Upload },
-  ];
+  // Show login form if not authenticated
+  if (loading) {
+    return <div className="flex items-center justify-center min-h-[60vh]"><p>...</p></div>;
+  }
+
+  if (!user) {
+    return <LoginForm />;
+  }
+
+  // Regular admins don't see the Users tab
+  const visibleTabs = isSuperadmin ? TABS : TABS.filter((t) => t !== "users");
 
   return (
     <div className="space-y-6">
-      <div className="animate-fade-slide-up">
-        <h1 className="font-display text-2xl font-bold" style={{ color: 'var(--foreground)' }}>
-          {t.admin.title}
-        </h1>
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">{t("admin.title")}</h1>
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-muted">{user.display_name} ({user.role})</span>
+          <button
+            onClick={logout}
+            className="rounded-lg border border-foreground/20 px-3 py-1.5 text-sm hover:bg-foreground/5 transition-colors"
+          >
+            {t("auth.logout")}
+          </button>
+        </div>
       </div>
 
-      {/* Tab bar */}
-      <div className="animate-fade-slide-up animate-delay-1 flex gap-1 overflow-x-auto pb-1">
-        {tabs.map((tab) => {
-          const Icon = tab.icon;
-          return (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={clsx(
-                'flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all',
-                activeTab === tab.key
-                  ? 'text-white'
-                  : 'text-[var(--muted-foreground)] hover:text-[var(--foreground)]',
-              )}
-              style={activeTab === tab.key ? { background: 'var(--primary)' } : { background: 'var(--muted)' }}
-            >
-              <Icon size={16} />
-              {tab.label}
-            </button>
-          );
-        })}
+      {/* Tabs */}
+      <div className="flex gap-1 overflow-x-auto rounded-lg border border-foreground/10 p-1">
+        {visibleTabs.map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+              activeTab === tab
+                ? "bg-accent text-accent-foreground"
+                : "text-muted hover:text-foreground hover:bg-foreground/5"
+            }`}
+          >
+            {t(`admin.${tab}`)}
+          </button>
+        ))}
       </div>
 
       {/* Tab content */}
-      <div className="animate-fade-slide-up animate-delay-2">
-        {activeTab === 'blocks' && <AdminBlocks />}
-        {activeTab === 'calendar' && <AdminCalendar />}
-        {activeTab === 'saints' && <AdminSaints />}
-        {activeTab === 'templates' && <AdminTemplates />}
-        {activeTab === 'import' && <AdminImport />}
+      <div className="rounded-xl border border-foreground/10 bg-surface p-6">
+        {activeTab === "calendar" && <CalendarTab />}
+        {activeTab === "saints" && <SaintsTab />}
+        {activeTab === "templates" && <TemplatesTab />}
+        {activeTab === "blocks" && <BlocksTab />}
+        {activeTab === "import" && <ImportTab />}
+        {activeTab === "users" && <AdminUsers />}
       </div>
-
-      <div className="h-16 md:hidden" />
     </div>
   );
 }
