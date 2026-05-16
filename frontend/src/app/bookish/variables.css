@@ -1,0 +1,39 @@
+/* ============================================
+   Typikon Bookish Design System — Variables
+   ============================================ */
+
+:root {
+  /* Colors */
+  --bg: #faf7f0;
+  --fg: #1a1714;
+  --fg-soft: #3d3832;
+  --muted: #8a8278;
+  --accent: #9b3b2e;
+  --ornament: #c4b89a;
+  --rule: rgba(28, 25, 23, 0.12);
+  --rule-light: rgba(28, 25, 23, 0.06);
+  --pill-bg: rgba(28, 25, 23, 0.04);
+  --pill-active: rgba(155, 59, 46, 0.08);
+  --muted-bg: rgba(28, 25, 23, 0.06);
+  --card: #ffffff;
+  --destructive: #dc2626;
+
+  /* Typography — display and ui set by next/font/google via body class */
+  --font-heading: var(--font-display);
+
+  /* Layout */
+  --sidebar-w: 240px;
+  --topbar-h: 64px;
+  --controls-h: 44px;
+  --content-max-w: 680px;
+  --bottombar-h: 56px;
+
+  /* Scaling */
+  --font-scale: 1;
+  --reading-scale: 1.5;
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-med: 250ms ease;
+  --transition-slow: 400ms ease;
+}
