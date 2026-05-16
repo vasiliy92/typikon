@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useI18n } from '@/lib/i18n';
 import { useAuth } from '@/lib/auth';
 import { apiGet, apiPost, apiDelete } from '@/lib/api';
@@ -26,7 +26,7 @@ export function AdminUsers() {
   const [newDisplayName, setNewDisplayName] = useState('');
   const [newRole, setNewRole] = useState<'admin'>('admin');
 
-  if (!isSuperadmin) return null;
+  const f = t.admin.fields;
 
   const loadUsers = async () => {
     setLoading(true);
@@ -39,6 +39,14 @@ export function AdminUsers() {
       setLoading(false);
     }
   };
+
+  // Auto-load users on mount
+  useEffect(() => {
+    loadUsers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  if (!isSuperadmin) return null;
 
   const createUser = async () => {
     try {
@@ -93,7 +101,7 @@ export function AdminUsers() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <input
               type="email"
-              placeholder={t.admin.email}
+              placeholder={f.email}
               value={newEmail}
               onChange={(e) => setNewEmail(e.target.value)}
               className="px-3 py-2 border rounded-lg text-sm"
@@ -101,7 +109,7 @@ export function AdminUsers() {
             />
             <input
               type="text"
-              placeholder={t.admin.display_name}
+              placeholder={f.display_name}
               value={newDisplayName}
               onChange={(e) => setNewDisplayName(e.target.value)}
               className="px-3 py-2 border rounded-lg text-sm"
@@ -109,7 +117,7 @@ export function AdminUsers() {
             />
             <input
               type="password"
-              placeholder={t.admin.password}
+              placeholder={f.password}
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               className="px-3 py-2 border rounded-lg text-sm"
@@ -147,9 +155,9 @@ export function AdminUsers() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b" style={{ borderColor: 'var(--border)' }}>
-              <th className="text-left py-2" style={{ color: 'var(--muted-foreground)' }}>{t.admin.email}</th>
-              <th className="text-left py-2" style={{ color: 'var(--muted-foreground)' }}>{t.admin.display_name}</th>
-              <th className="text-left py-2" style={{ color: 'var(--muted-foreground)' }}>Role</th>
+              <th className="text-left py-2" style={{ color: 'var(--muted-foreground)' }}>{f.email}</th>
+              <th className="text-left py-2" style={{ color: 'var(--muted-foreground)' }}>{f.display_name}</th>
+              <th className="text-left py-2" style={{ color: 'var(--muted-foreground)' }}>{f.role}</th>
               <th className="text-right py-2"></th>
             </tr>
           </thead>
