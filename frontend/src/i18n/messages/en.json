@@ -10,7 +10,7 @@
   },
   "app": {
     "title": "Typikon",
-    "subtitle": "Assemble complete divine service texts according to the Typikon",
+    "subtitle": "Assemble complete texts of divine services according to the Typikon",
     "error": "An error occurred",
     "loading": "Loading…",
     "create": "Create",
@@ -38,15 +38,10 @@
     "yes": "Yes",
     "no": "No"
   },
-  "languages": {
-    "fr": "Français",
-    "ru": "Русский",
-    "en": "English"
-  },
   "home": {
     "title": "Typikon",
     "subtitle": "Orthodox Liturgical Service Generator",
-    "description": "Assemble complete divine service texts according to the Typikon of the Russian Orthodox Church.",
+    "description": "Assemble complete texts of divine services according to the Typikon of the Russian Orthodox Church.",
     "selectDate": "Select a date",
     "selectService": "Service type",
     "generate": "Generate service"
@@ -60,6 +55,7 @@
     "old_calendar": "Old (Julian)",
     "mode_full": "Full text",
     "mode_ustav": "Ustav only",
+    "mode_label": "Mode",
     "assemble": "Assemble service",
     "patron_troparia": "Patron troparion",
     "blocks": "Service blocks",
@@ -77,7 +73,7 @@
     "sections": "sections",
     "assemble_prompt": "Assemble a service to see the table of contents",
     "daily_cycle": "Daily cycle",
-    "toc": "Contents",
+    "toc": "Table of contents",
     "top": "Top",
     "bottom": "Bottom",
     "tone_label": "Tone",
@@ -85,7 +81,7 @@
     "kontakion_tone": "Kontakion, tone"
   },
   "admin": {
-    "title": "Administration",
+    "title": "Administration Panel",
     "calendar": "Calendar",
     "calendarDesc": "Manage liturgical calendar entries",
     "saints": "Saints",
@@ -107,9 +103,9 @@
     "logout": "Logout",
     "email": "Email",
     "password": "Password",
-    "login_button": "Sign in",
+    "login_button": "Log in",
     "login_error": "Incorrect email or password",
-    "role_superadmin": "Super Admin",
+    "role_superadmin": "Super-admin",
     "role_admin": "Admin",
     "create_user": "Create user",
     "add": "Add",
@@ -118,6 +114,7 @@
     "save": "Save",
     "cancel": "Cancel",
     "search": "Search",
+    "display_name": "Display name",
     "fields": {
       "date_type": "Date type",
       "month": "Month",
@@ -175,15 +172,14 @@
     "import_error": "Import error",
     "special": "Special",
     "regular": "Regular",
-    "blocks_count": "blocks",
-    "display_name": "Display name"
+    "blocks_count": "blocks"
   },
   "auth": {
     "login": "Login",
     "logout": "Logout",
     "password": "Password",
     "loginFailed": "Incorrect email or password",
-    "noPermission": "Insufficient permissions",
+    "noPermission": "Insufficient permission",
     "users": "Users",
     "displayName": "Display name",
     "createUser": "Create user",
@@ -195,7 +191,7 @@
     "2": "Polyeleos",
     "3": "Vigil",
     "4": "Patriarchal",
-    "5": "Dominical"
+    "5": "Lordly"
   },
   "fasting_types": {
     "none": "No fasting",
@@ -204,7 +200,7 @@
     "nativity_fast": "Nativity Fast",
     "apostles_fast": "Apostles' Fast",
     "dormition_fast": "Dormition Fast",
-    "cheesefare": "Cheesefare Week",
+    "cheesefare": "Cheesefare week",
     "strict": "Strict fast"
   },
   "days_of_week": {
@@ -224,12 +220,12 @@
     "pascha": "Pascha",
     "bright_week": "Bright Week",
     "afterfeast_pascha": "Afterfeast of Pascha",
-    "ordinary": "Ordinary time"
+    "ordinary": "Ordinary Time"
   },
   "service_types": {
     "vespers": "Vespers",
     "matins": "Matins",
-    "vigil": "All-Night Vigil",
+    "vigil": "Vigil",
     "hours": "Hours",
     "liturgy": "Divine Liturgy",
     "compline": "Compline",
@@ -255,6 +251,11 @@
     "hieraticon": "Hieraticon",
     "prologue": "Prologue",
     "troparion": "Troparion"
+  },
+  "languages": {
+    "fr": "Français",
+    "ru": "Русский",
+    "en": "English"
   },
   "font_scale": {
     "small": "Small",
