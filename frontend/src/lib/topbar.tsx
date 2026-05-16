@@ -2,16 +2,14 @@
 
 import { createContext, useContext } from 'react';
 
-interface TopbarTitleContextValue {
+/* ─── Topbar Title Context ─── */
+const TopbarTitleContext = createContext<{
   title: string;
-  setTitle: (title: string) => void;
-}
-
-export const TopbarTitleContext = createContext<TopbarTitleContextValue>({
-  title: '',
-  setTitle: () => {},
-});
+  setTitle: (t: string) => void;
+}>({ title: '', setTitle: () => {} });
 
 export function useTopbarTitle() {
   return useContext(TopbarTitleContext);
 }
+
+export { TopbarTitleContext };
