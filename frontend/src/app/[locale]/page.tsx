@@ -546,7 +546,7 @@ export default function ServicePage() {
 
         {/* Calendar */}
         <div className="settings-group">
-          <div className="settings-label">{t.service.calendar_style}</div>
+          <div className="settings-label">{t.service.new_calendar}/{t.service.old_calendar}</div>
           <div className="pill-group">
             <button
               className={`pill ${calendarStyle === 'new' ? 'active' : ''}`}
@@ -565,7 +565,7 @@ export default function ServicePage() {
 
         {/* Mode */}
         <div className="settings-group">
-          <div className="settings-label">{t.service.mode_label}</div>
+          <div className="settings-label">{t.service.mode_full}/{t.service.mode_ustav}</div>
           <div className="pill-group">
             <button
               className={`pill ${mode === 'full' ? 'active' : ''}`}
