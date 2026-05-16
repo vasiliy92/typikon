@@ -77,7 +77,8 @@
     "bottom": "Bas",
     "tone_label": "Tone",
     "troparion_tone": "Tropaire, ton",
-    "kontakion_tone": "Kondakion, ton"
+    "kontakion_tone": "Kondakion, ton",
+    "mode_label": "Mode"
   },
   "admin": {
     "title": "Panneau d'administration",
