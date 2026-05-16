@@ -161,15 +161,27 @@ function ServiceContent({ assembled, dayInfo, error, serviceType, t, locale }: {
 
           {/* Lection */}
           {block.block_type === 'LECTION' && lections[block.slot_key] && (
-            <div className="lection">
-              <div className="lection-ref">{lections[block.slot_key].reference}</div>
-              <div className="lit-text">
-                <p>
-                  <strong className="incipit">{lections[block.slot_key].first_verse}</strong>
-                  {' '}{lections[block.slot_key].text}
-                </p>
+            lections[block.slot_key].map((lec, li) => (
+              <div key={`lec-${block.slot_key}-${li}`} className="lection">
+                <div className="lection-ref">
+                  {(t.books as Record<string, string>)[block.slot_key] || block.slot_key}
+                  {' · '}
+                  {lec.short_ref}
+                  <span className="zachalo">Zachalo {lec.zachalo}</span>
+                  {lec.is_paremia && <span className="paremia-label">Paremia</span>}
+                </div>
+                <div className="lit-text">
+                  {lec.content ? (
+                    <p className={li === 0 ? 'red-init' : ''}>
+                      <strong className="incipit">{lec.title}</strong>{' '}
+                      {lec.content}
+                    </p>
+                  ) : (
+                    <p><strong className="incipit">{lec.title}</strong></p>
+                  )}
+                </div>
               </div>
-            </div>
+            ))
           )}
 
           {/* Generic content */}
@@ -193,27 +205,10 @@ export default function ServicePage() {
   const [calendarStyle, setCalendarStyle] = useState<'new' | 'old'>('new');
   const [mode, setMode] = useState<'full' | 'ustav'>('full');
   const [templeId] = useState(1);
+  const [fontScale, setFontScale] = useFontScale();
   const [assembled, setAssembled] = useState<AssembledServiceResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  /* Update topbar breadcrumb with service name */
-  useEffect(() => {
-    if (assembled) {
-      const serviceName = (t.service_types as Record<string, string>)[serviceType] || serviceType;
-      setTopbarTitle(serviceName);
-    } else {
-      setTopbarTitle('');
-    }
-  }, [assembled, serviceType, t, setTopbarTitle]);
-
-  const [fontScale, setFontScale] = useFontScale();
-  const [showFontMenu, setShowFontMenu] = useState(false);
-  const [showServicePicker, setShowServicePicker] = useState(false);
-  const [activeSection, setActiveSection] = useState<string | null>(null);
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const [showBackToTop, setShowBackToTop] = useState(false);
-  const [showRunningHeader, setShowRunningHeader] = useState(false);
 
   // Mobile
   const [showTocSheet, setShowTocSheet] = useState(false);
@@ -223,50 +218,66 @@ export default function ServicePage() {
   const contentRef = useRef<HTMLDivElement>(null);
 
   const { data: litDay } = useApi<LiturgicalDay>(
-    `/calendar/date/${date}?style=${calendarStyle}`
+    `/api/liturgical-day/${date}?calendar=${calendarStyle}`
   );
 
+  const dayInfo = litDay ?? null;
+
+  /* ─── Assemble ─── */
   const assemble = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      // UI locale → service language (backend only supports fr/ru for now)
-      const lang = locale === 'ru' ? 'ru' : 'fr';
-      const result = await apiPost<AssembledServiceResponse>(
-        `/service/assemble?target_date=${date}&service_type=${serviceType}&temple_id=${templeId}&language=${lang}&calendar_style=${calendarStyle}&mode=${mode}`,
-        {}
-      );
-      setAssembled(result);
-    } catch (err: any) {
-      setError(err.message || t.app.error);
-      setAssembled(null);
+      const res = await apiPost<AssembledServiceResponse>('/api/assemble', {
+        date,
+        service_type: serviceType,
+        calendar_style: calendarStyle,
+        temple_id: templeId,
+        mode,
+      });
+      setAssembled(res);
+    } catch (e: any) {
+      setError(e.message || 'Assembly failed');
     } finally {
       setLoading(false);
     }
-  }, [date, serviceType, templeId, locale, calendarStyle, mode, t]);
+  }, [date, serviceType, calendarStyle, templeId, mode]);
 
-  /* ─── Scroll Observer ─── */
+  /* ─── Set topbar title ─── */
+  useEffect(() => {
+    const serviceName = (t.service_types as Record<string, string>)[serviceType] || serviceType;
+    setTopbarTitle(assembled ? serviceName : '');
+  }, [assembled, serviceType, t, setTopbarTitle]);
+
+  /* ─── Scroll spy ─── */
+  const [activeSection, setActiveSection] = useState('');
+  const [showRunningHeader, setShowRunningHeader] = useState(false);
+  const [showBackToTop, setShowBackToTop] = useState(false);
+
   useEffect(() => {
     const handleScroll = () => {
-      const scrollY = window.scrollY;
-      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-      setScrollProgress(docHeight > 0 ? scrollY / docHeight : 0);
-      setShowRunningHeader(scrollY > 400);
-      setShowBackToTop(scrollY > 600);
+      setShowRunningHeader(window.scrollY > 200);
+      setShowBackToTop(window.scrollY > 600);
 
       const sections = document.querySelectorAll('[data-nav-title]');
-      for (let i = sections.length - 1; i >= 0; i--) {
-        if ((sections[i] as HTMLElement).offsetTop - 120 <= scrollY) {
-          setActiveSection(sections[i].id);
-          break;
+      let current = '';
+      sections.forEach((sec) => {
+        const el = sec as HTMLElement;
+        if (el.getBoundingClientRect().top <= 120) {
+          current = el.getAttribute('data-nav-title') || '';
         }
-      }
+      });
+      setActiveSection(current);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  /* ─── Close dropdowns on outside click ─── */
+  /* Close dropdowns on outside click */
+  const stopProp = (e: React.MouseEvent) => e.stopPropagation();
+  const [showFontMenu, setShowFontMenu] = useState(false);
+  const [showServicePicker, setShowServicePicker] = useState(false);
+
   useEffect(() => {
     const handleClick = () => {
       setShowFontMenu(false);
@@ -282,91 +293,86 @@ export default function ServicePage() {
   const sections = assembled?.blocks?.map((block, i) => ({
     id: `section-${i}`,
     title: block.title || block.slot_key,
-    type: block.block_type,
-  })) || [];
+  })) ?? [];
 
-  const dayInfo = litDay || assembled?.liturgical_day;
-
-  const scrollToSection = (id: string) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
-
-  const stopProp = (e: React.MouseEvent) => e.stopPropagation();
+  /* ─── Scroll to section ─── */
+  const scrollToSection = useCallback((id: string) => {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, []);
 
   return (
     <>
-      {/* ─── Progress Bar ─── */}
-      <div className="progress-bar" style={{ width: `${scrollProgress * 100}%` }} />
-
       {/* ═══════════════════════════════════════
-          DESKTOP: Sidebar
+          DESKTOP: Sidebar + Content
           ═══════════════════════════════════════ */}
-      <aside className="sidebar">
-        {assembled && sections.length > 0 ? (
-          <>
-            <div className="sidebar-label">{t.service.service_order}</div>
-            {sections.map((sec, i) => (
-              <a
-                key={sec.id}
-                className={`sidebar-item ${activeSection === sec.id ? 'active' : ''}`}
-                onClick={() => scrollToSection(sec.id)}
-              >
-                <span className="sidebar-item-num">{i + 1}</span>
-                <span className="sidebar-item-text">{sec.title}</span>
-              </a>
-            ))}
-            <div className="sidebar-divider" />
-            <div className="sidebar-stats">
-              <span className="sidebar-stat">📄 {sections.length} {t.service.sections}</span>
+      <div className="desktop-layout">
+        {/* Sidebar */}
+        <div className="sidebar">
+          <div className="sidebar-label">{t.service.service_order}</div>
+          {sections.map((sec) => (
+            <div
+              key={sec.id}
+              className={`sidebar-item ${activeSection === sec.title ? 'active' : ''}`}
+              onClick={() => scrollToSection(sec.id)}
+            >
+              {sec.title}
             </div>
-          </>
-        ) : (
-          <div style={{ padding: '0 20px', color: 'var(--muted)', fontFamily: 'var(--font-ui)', fontSize: '0.75rem' }}>
-            {t.service.assemble_prompt}
-          </div>
-        )}
-      </aside>
+          ))}
+          {sections.length === 0 && (
+            <div style={{ color: 'var(--muted)', fontSize: '0.75rem', padding: '12px 24px' }}>
+              {t.service.assemble_prompt}
+            </div>
+          )}
 
-      {/* ═══════════════════════════════════════
-          DESKTOP: Content Area
-          ═══════════════════════════════════════ */}
-      <div className="content-area">
-        {/* Controls Bar */}
-        <div className="controls-bar">
+          {/* Sidebar Stats */}
+          <div className="sidebar-stats">
+            {assembled && (
+              <>
+                <span className="sidebar-stat">📄 {sections.length} {t.service.sections}</span>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Controls Strip */}
+        <div className="controls-strip">
           {/* Service Picker */}
-          <div className="service-picker" onClick={stopProp}>
+          <div className="chip-wrapper" onClick={stopProp}>
             <button
-              className={`service-picker-trigger ${showServicePicker ? 'open' : ''}`}
+              className="chip"
               onClick={() => setShowServicePicker(!showServicePicker)}
             >
+              <BookIcon size={12} />
               {(t.service_types as Record<string, string>)[serviceType] || serviceType}
-              <span className="arrow">▾</span>
             </button>
             {showServicePicker && (
-              <div className="service-picker-dropdown open">
-                <div className="service-picker-group-label">{t.service.daily_cycle}</div>
+              <div className="chip-dropdown open">
                 {SERVICE_TYPES.map((st) => (
-                  <div
+                  <button
                     key={st}
-                    className={`service-picker-item ${st === serviceType ? 'active' : ''}`}
+                    className={`chip-dropdown-item ${st === serviceType ? 'active' : ''}`}
                     onClick={() => { setServiceType(st); setShowServicePicker(false); }}
                   >
                     {(t.service_types as Record<string, string>)[st] || st}
-                  </div>
+                  </button>
                 ))}
               </div>
             )}
           </div>
 
-          {/* Date Input */}
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className="date-input"
-          />
+          {/* Calendar */}
+          <div className="chip-wrapper" onClick={stopProp}>
+            <button
+              className={`chip ${showFontMenu ? '' : ''}`}
+              onClick={() => {}}
+            >
+              <CalendarIcon size={12} />
+              {calendarStyle === 'new' ? t.service.new_calendar : t.service.old_calendar}
+            </button>
+          </div>
 
-          {/* Calendar Pill Group */}
+          {/* Calendar Toggle */}
           <div className="pill-group">
             <button
               className={`pill ${calendarStyle === 'new' ? 'active' : ''}`}
@@ -382,7 +388,7 @@ export default function ServicePage() {
             </button>
           </div>
 
-          {/* Mode Pill Group */}
+          {/* Mode Toggle */}
           <div className="pill-group">
             <button
               className={`pill ${mode === 'full' ? 'active' : ''}`}
