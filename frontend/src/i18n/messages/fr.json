@@ -34,14 +34,7 @@
     "close": "Fermer",
     "back": "Retour",
     "next": "Suivant",
-    "previous": "Précédent",
-    "yes": "Oui",
-    "no": "Non"
-  },
-  "languages": {
-    "fr": "Français",
-    "ru": "Русский",
-    "en": "English"
+    "previous": "Précédent"
   },
   "home": {
     "title": "Typikon",
@@ -72,17 +65,7 @@
     "ninthHour": "Heure neuvième",
     "compline": "Complies",
     "midnight": "Office de minuit",
-    "feast_rank": "Rang de fête",
-    "service_order": "Ordre du service",
-    "sections": "sections",
-    "assemble_prompt": "Assemblez un service pour voir le sommaire",
-    "daily_cycle": "Cycle quotidien",
-    "toc": "Sommaire",
-    "top": "Haut",
-    "bottom": "Bas",
-    "tone_label": "Ton",
-    "troparion_tone": "Tropaire, ton",
-    "kontakion_tone": "Kondakion, ton"
+    "feast_rank": "Rang de fête"
   },
   "admin": {
     "title": "Panneau d'administration",
@@ -118,64 +101,7 @@
     "save": "Enregistrer",
     "cancel": "Annuler",
     "search": "Rechercher",
-    "fields": {
-      "date_type": "Type de date",
-      "month": "Mois",
-      "day": "Jour",
-      "pascha_offset": "Décalage pascal",
-      "title_ru": "Titre (russe)",
-      "title_fr": "Titre (français)",
-      "rubric": "Rubrique",
-      "rank": "Rang",
-      "fasting": "Jeûne",
-      "name_ru": "Nom (russe)",
-      "name_fr": "Nom (français)",
-      "categories": "Catégories (séparées par des virgules)",
-      "feast_month": "Mois de fête",
-      "feast_day": "Jour de fête",
-      "troparion": "Tropaire",
-      "troparion_ru": "Tropaire (russe)",
-      "troparion_fr": "Tropaire (français)",
-      "troparion_tone": "Tone du tropaire",
-      "kontakion": "Kondakion",
-      "kontakion_ru": "Kondakion (russe)",
-      "kontakion_fr": "Kondakion (français)",
-      "kontakion_tone": "Tone du kondakion",
-      "name": "Nom",
-      "service_type": "Type de service",
-      "sub_type": "Sous-type",
-      "is_special": "Spécial",
-      "description": "Description",
-      "book_code": "Livre",
-      "language": "Langue",
-      "tone": "Tone",
-      "location_key": "Clé de localisation",
-      "slot": "Emplacement",
-      "slot_order": "Ordre",
-      "title": "Titre",
-      "content": "Contenu",
-      "source_ref": "Référence source",
-      "is_doxastikon": "Doxastikon",
-      "is_theotokion": "Théotokion",
-      "is_irmos": "Irmos",
-      "is_katabasia": "Katabasia",
-      "display_name": "Nom d'affichage",
-      "email": "Email",
-      "password": "Mot de passe",
-      "role": "Rôle",
-      "is_active": "Actif"
-    },
-    "date_types": {
-      "fixed": "Fixe",
-      "movable": "Mobile"
-    },
-    "preview": "Aperçu",
-    "invalid_json": "Fichier JSON invalide",
-    "import_success": "Importé avec succès",
-    "import_error": "Erreur d'importation",
-    "special": "Spécial",
-    "regular": "Ordinaire",
-    "blocks_count": "blocs"
+    "display_name": "Nom affiché"
   },
   "auth": {
     "login": "Connexion",
@@ -185,9 +111,7 @@
     "noPermission": "Permission insuffisante",
     "users": "Utilisateurs",
     "displayName": "Nom d'affichage",
-    "createUser": "Créer un utilisateur",
-    "show_password": "Afficher le mot de passe",
-    "hide_password": "Masquer le mot de passe"
+    "createUser": "Créer un utilisateur"
   },
   "feast_ranks": {
     "1": "Quotidien",
@@ -254,12 +178,5 @@
     "hieraticon": "Hiératikon",
     "prologue": "Prologue",
     "troparion": "Tropaire"
-  },
-  "font_scale": {
-    "small": "Petit",
-    "normal": "Normal",
-    "large": "Grand",
-    "very_large": "Très grand",
-    "maximum": "Maximum"
   }
 }
