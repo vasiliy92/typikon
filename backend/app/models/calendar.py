@@ -25,39 +25,25 @@ class CalendarEntry(Base, TimestampMixin):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     date_type: Mapped[DateType] = mapped_column(String(10))
-
-    # Fixed date
     month: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, default=None)
     day: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, default=None)
-
-    # Movable date: offset in days from Pascha
     pascha_offset: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, default=None)
-
-    # Multilingual titles
     title_csy: Mapped[str] = mapped_column(String(500))
     title_fr: Mapped[Optional[str]] = mapped_column(String(500), nullable=True, default=None)
     title_en: Mapped[Optional[str]] = mapped_column(String(500), nullable=True, default=None)
-
-    # Optional saint link
     saint_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey("saints.id", ondelete="SET NULL"),
         nullable=True, default=None,
     )
-
-    # Liturgical properties
     rank: Mapped[str] = mapped_column(String(2), default=FeastRank.DAILY)
     tone: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, default=None)
     fasting: Mapped[FastingType] = mapped_column(String(20), default=FastingType.NONE)
     forefeast_days: Mapped[int] = mapped_column(Integer, default=0)
     afterfeast_days: Mapped[int] = mapped_column(Integer, default=0)
-
-    # Service template override
     service_template_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey("service_templates.id", ondelete="SET NULL"),
         nullable=True, default=None,
     )
-
-    # Rubric notes
     rubric: Mapped[Optional[str]] = mapped_column(Text, nullable=True, default=None)
 
 

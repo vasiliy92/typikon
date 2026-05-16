@@ -14,11 +14,9 @@ from .base import Base, TimestampMixin
 from .enums import BlockType, BookCode, Language, ServiceType
 
 
-# ── Layer 1: Service Blocks (atomic text units) ───────────────────────
-
 class ServiceBlock(Base, TimestampMixin):
     """Every piece of liturgical text stored as the smallest unit that fills
-    one slot in one service.  A Menaion feast day produces 20-30 blocks."""
+    one slot in one service."""
     __tablename__ = "service_blocks"
     __table_args__ = (
         UniqueConstraint(
@@ -35,12 +33,9 @@ class ServiceBlock(Base, TimestampMixin):
     slot: Mapped[str] = mapped_column(String(80))
     slot_order: Mapped[int] = mapped_column(Integer, default=1)
     language: Mapped[Language] = mapped_column(String(5))
-
-    # Translation group — links CSY/FR/EN versions of the same text
     translation_group_id: Mapped[Optional[str]] = mapped_column(
         String(36), nullable=True, default=None, index=True,
     )
-
     title: Mapped[Optional[str]] = mapped_column(String(500), nullable=True, default=None)
     content: Mapped[str] = mapped_column(Text)
     tone: Mapped[Optional[str]] = mapped_column(String(2), nullable=True, default=None)
@@ -52,8 +47,6 @@ class ServiceBlock(Base, TimestampMixin):
     source_ref: Mapped[Optional[str]] = mapped_column(String(200), nullable=True, default=None)
     rubric: Mapped[Optional[str]] = mapped_column(Text, nullable=True, default=None)
 
-
-# ── Layer 2: Service Templates (assembly instructions) ────────────────
 
 class ServiceTemplate(Base, TimestampMixin):
     """Defines the order and slots of a service type."""
@@ -94,8 +87,6 @@ class ServiceTemplateBlock(Base, TimestampMixin):
     template: Mapped["ServiceTemplate"] = relationship(back_populates="blocks")
 
 
-# ── Layer 3: Special Service Content ──────────────────────────────────
-
 class SpecialServiceContent(Base, TimestampMixin):
     """Complete text blocks for special service orders."""
     __tablename__ = "special_service_content"
@@ -113,8 +104,6 @@ class SpecialServiceContent(Base, TimestampMixin):
     language: Mapped[Language] = mapped_column(String(5))
     variable_slots: Mapped[Optional[list]] = mapped_column(JSON, nullable=True, default=None)
 
-
-# ── Lectionary ────────────────────────────────────────────────────────
 
 class Lection(Base, TimestampMixin):
     """Scripture readings: Gospel, Apostol, OT paremia."""
@@ -150,8 +139,6 @@ class LectionAssignment(Base, TimestampMixin):
     is_paremia: Mapped[bool] = mapped_column(Boolean, default=False)
     language: Mapped[Language] = mapped_column(String(5))
 
-
-# ── Assembled Service (cache) ─────────────────────────────────────────
 
 class AssembledService(Base, TimestampMixin):
     """Pre-computed assembled service for a given day/temple/language."""
