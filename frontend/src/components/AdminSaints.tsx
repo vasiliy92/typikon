@@ -181,11 +181,25 @@ function SaintForm({
         </div>
         <div className="admin-field">
           <label>{f.feast_month}</label>
-          <input type="number" min="1" max="12" value={form.feast_month} onChange={(e) => update('feast_month', e.target.value)} />
+          <AdminSelect
+            value={form.feast_month}
+            onChange={(v) => update('feast_month', v)}
+            options={[
+              { value: '', label: '\u2014' },
+              ...t.months.map((m: string, i: number) => ({ value: String(i + 1), label: m })),
+            ]}
+          />
         </div>
         <div className="admin-field">
           <label>{f.feast_day}</label>
-          <input type="number" min="1" max="31" value={form.feast_day} onChange={(e) => update('feast_day', e.target.value)} />
+          <AdminSelect
+            value={form.feast_day}
+            onChange={(v) => update('feast_day', v)}
+            options={[
+              { value: '', label: '\u2014' },
+              ...Array.from({ length: 31 }, (_, i) => ({ value: String(i + 1), label: String(i + 1) })),
+            ]}
+          />
         </div>
       </div>
 
